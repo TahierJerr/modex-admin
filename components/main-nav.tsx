@@ -122,7 +122,7 @@ export function MainNav({
         <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
             {routes.map((route) => (
                 route.items ? (
-                    <DropdownMenu>
+                    <DropdownMenu key={route.label}>
                         <DropdownMenuTrigger className="flex items-center text-muted-foreground">
                             {route.label} <ChevronDown className="h-4 w-4 ml-1" />
                         </DropdownMenuTrigger>
