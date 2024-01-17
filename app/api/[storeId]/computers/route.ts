@@ -138,13 +138,12 @@ export async function GET(
 ) {
     try {
         const { searchParams } = new URL(req.url);
-        const categoryId = searchParams.get('categoryId') || undefined;
-        const processorId = searchParams.get('processorId') || undefined;
-        const memoryId = searchParams.get('memoryId') || undefined;
-        const graphicsId = searchParams.get('graphicsId') || undefined;
-        const pccaseId = searchParams.get('pccaseId') || undefined;
-        const isFeatured = searchParams.get('isFeatured');
-        const deliveryTime = searchParams.get('deliveryTime') || undefined;
+        const searchParamsKeys = ['categoryId', 'processorId', 'memoryId', 'graphicsId', 'pccaseId', 'isFeatured', 'deliveryTime'];
+        let queryParams: any = {};
+        searchParamsKeys.forEach(key => {
+            const value = searchParams.get(key);
+            queryParams[key] = value || undefined;
+        });
 
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
@@ -153,13 +152,7 @@ export async function GET(
         const computers = await prismadb.computer.findMany({
             where: {
                 storeId: params.storeId,
-                categoryId,
-                processorId,
-                memoryId,
-                graphicsId,
-                pccaseId,
-                deliveryTime,
-                isFeatured: isFeatured ? true : undefined,
+                ...queryParams,
                 isArchived: false
             },
             include: {
@@ -178,6 +171,6 @@ export async function GET(
         return NextResponse.json(computers);
     } catch (error) {
         console.log('[COMPUTERS_GET]', error);
-        return new NextResponse("Internal error", { status: 500 });
+        return new NextResponse(`Internal error`, { status: 500 });
     }
 };
