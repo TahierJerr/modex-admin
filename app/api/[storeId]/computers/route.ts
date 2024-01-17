@@ -169,6 +169,9 @@ export async function GET(
                 memory: true,
                 graphics: true,
                 pccase: true,
+                power: true,
+                motherboard: true,
+                storage: true,
             },
             orderBy: {
                 createdAt: 'desc'
