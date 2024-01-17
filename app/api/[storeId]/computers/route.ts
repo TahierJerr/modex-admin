@@ -84,14 +84,12 @@ export async function POST(
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
-        console.log(Date.now())
         const storeByUserId = await prismadb.store.findFirst({
             where : {
                 id: params.storeId,
                 userId
             }
         });
-        console.log(Date.now())
 
         if (!storeByUserId) {
             return new NextResponse("Unauthorized", { status: 403 });
@@ -144,14 +142,7 @@ export async function GET(
         const processorId = searchParams.get('processorId') || undefined;
         const memoryId = searchParams.get('memoryId') || undefined;
         const graphicsId = searchParams.get('graphicsId') || undefined;
-        const motherboardId = searchParams.get('motherboardId') || undefined;
-        const storageId = searchParams.get('storageId') || undefined;
         const pccaseId = searchParams.get('pccaseId') || undefined;
-        const coolerId = searchParams.get('coolerId') || undefined;
-        const powerId = searchParams.get('powerId') || undefined;
-        const colorId = searchParams.get('colorId') || undefined;
-        const softwareId = searchParams.get('softwareId') || undefined;
-        const warrantyId = searchParams.get('warrantyId') || undefined;
         const isFeatured = searchParams.get('isFeatured');
         const deliveryTime = searchParams.get('deliveryTime') || undefined;
 
@@ -166,15 +157,8 @@ export async function GET(
                 processorId,
                 memoryId,
                 graphicsId,
-                motherboardId,
-                storageId,
                 pccaseId,
                 deliveryTime,
-                coolerId,
-                powerId,
-                colorId,
-                softwareId,
-                warrantyId,
                 isFeatured: isFeatured ? true : undefined,
                 isArchived: false
             },
