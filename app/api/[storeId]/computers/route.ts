@@ -84,13 +84,14 @@ export async function POST(
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
-
+        console.log(Date.now())
         const storeByUserId = await prismadb.store.findFirst({
             where : {
                 id: params.storeId,
                 userId
             }
         });
+        console.log(Date.now())
 
         if (!storeByUserId) {
             return new NextResponse("Unauthorized", { status: 403 });
@@ -183,14 +184,7 @@ export async function GET(
                 processor: true,
                 memory: true,
                 graphics: true,
-                motherboard: true,
-                storage: true,
                 pccase: true,
-                cooler: true,
-                power: true,
-                color: true,
-                software: true,
-                warranty: true,
             },
             orderBy: {
                 createdAt: 'desc'
