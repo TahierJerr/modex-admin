@@ -134,23 +134,33 @@ export async function POST(
 
 export async function GET(
     req: Request,
-    { params: { storeId } }: { params: { storeId: string } }
+    { params }: { params: { storeId: string } }
 ) {
-    if (!storeId) {
-        return new NextResponse("Store ID is required", { status: 400 });
-    }
-
     try {
         const { searchParams } = new URL(req.url);
-        const searchKeys = ['categoryId', 'processorId', 'memoryId', 'graphicsId', 'pccaseId', 'isFeatured', 'deliveryTime'];
-        const searchParamsObj: { [key: string]: string | null } = searchKeys.reduce((obj, key) => ({ ...obj, [key]: searchParams.get(key) }), {});
+        const categoryId = searchParams.get('categoryId') || undefined;
+        const processorId = searchParams.get('processorId') || undefined;
+        const memoryId = searchParams.get('memoryId') || undefined;
+        const graphicsId = searchParams.get('graphicsId') || undefined;
+        const pccaseId = searchParams.get('pccaseId') || undefined;
+        const isFeatured = searchParams.get('isFeatured');
+        const deliveryTime = searchParams.get('deliveryTime') || undefined;
+
+        if (!params.storeId) {
+            return new NextResponse("Store ID is required", { status: 400 });
+        }
 
         const computers = await prismadb.computer.findMany({
             where: {
-                storeId,
-                isArchived: false,
-                ...searchParamsObj,
-                isFeatured: searchParamsObj.isFeatured ? true : undefined,
+                storeId: params.storeId,
+                categoryId,
+                processorId,
+                memoryId,
+                graphicsId,
+                pccaseId,
+                deliveryTime,
+                isFeatured: isFeatured ? true : undefined,
+                isArchived: false
             },
             include: {
                 images: true,
