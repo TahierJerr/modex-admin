@@ -43,13 +43,21 @@ export const OrderClient: React.FC<OrderClientProps> = ({
     
     return (
         <>
-        <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading}/>
+        <AlertModal 
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            onConfirm={onDelete}
+            loading={loading}
+        />
         <div className="flex items-center justify-between">
             <Heading 
             title={`Orders (${data.length})`}
             description="Manage orders for your store"
             />
-            <Button disabled={loading} variant="destructive" onClick={() => router.push(`/${params.storeId}/orders`)}>
+            <Button disabled={loading}
+            variant="destructive"
+            onClick={() => setOpen(true)}>
+
                 <Trash className="mr-2 h-4 w-4" />
                 Delete unpaid orders
             </Button>
