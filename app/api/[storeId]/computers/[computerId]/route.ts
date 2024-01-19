@@ -199,7 +199,6 @@ export async function DELETE (
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-
         if (!params.computerId) {
             return new NextResponse("Computer ID is required", { status: 400 });
         }
@@ -215,7 +214,7 @@ export async function DELETE (
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
-        const computer = await prismadb.computer.deleteMany({
+        const computer = await prismadb.computer.delete({
             where: {
                 id: params.computerId,
             }
