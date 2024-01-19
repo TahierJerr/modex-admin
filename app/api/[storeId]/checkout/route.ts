@@ -18,7 +18,7 @@ export async function POST(
     req: Request,
     { params }: { params: { storeId: string } }
 ) {
-    const { computerIds } = await req.json();
+    const { computerIds, isPaid } = await req.json();
 
     if (!computerIds || computerIds.length === 0) {
         return new NextResponse("Product IDs are required", { status: 400 });
@@ -52,8 +52,8 @@ export async function POST(
     const order = await prismadb.order.create({
         data: {
             storeId: params.storeId,
-            isPaid: false,
-            orderItems: {
+            isPaid: isPaid,
+            orderItems: isPaid ? {
                 create: computerIds.map((computerId: string) => ({
                     computer: {
                         connect: {
@@ -61,7 +61,7 @@ export async function POST(
                         }
                     }
                 }))
-            }
+            } : undefined
         }
     })
 
@@ -79,25 +79,12 @@ export async function POST(
             enabled: true
         },
         customer_creation: "always",
-        invoice_creation: {
-            enabled: true,
-            invoice_data: {
-                description: "Uw bestelling bij MODEX",
-                metadata: {
-                    orderId: order.id
-                },
-                footer: "Bedankt voor uw bestelling bij MODEX!"
-            }
-        },
         success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,
         cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
         metadata: {
             orderId: order.id
         }
     });
-
-
-
 
     return NextResponse.json({ url: session.url }, {
         headers: corsHeaders

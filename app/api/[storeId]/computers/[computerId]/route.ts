@@ -14,7 +14,7 @@ export async function GET (
         const computer = await prismadb.computer.findUnique({
             where: {
                 id: params.computerId,
-                isArchived: false 
+                isArchived: false
             },
             include: {
                 images: true,
