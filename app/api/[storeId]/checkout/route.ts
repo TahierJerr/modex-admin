@@ -49,20 +49,6 @@ export async function POST(
         })
     });
 
-    const existingOrders = await prismadb.order.findMany({
-        where: {
-            isPaid: false
-        }
-    });
-
-    for (const existingOrder of existingOrders) {
-        await prismadb.order.delete({
-            where: {
-                id: existingOrder.id
-            }
-        });
-    }
-
     const order = await prismadb.order.create({
         data: {
             storeId: params.storeId,
@@ -71,7 +57,7 @@ export async function POST(
                 create: computerIds.map((computerId: string) => ({
                     computer: {
                         connect: {
-                            id: computerId || "[DELETED]"
+                            id: computerId
                         }
                     }
                 }))
@@ -99,6 +85,9 @@ export async function POST(
             orderId: order.id
         }
     });
+
+
+
 
     return NextResponse.json({ url: session.url }, {
         headers: corsHeaders
