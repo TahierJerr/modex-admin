@@ -141,6 +141,7 @@ export async function GET(
         const categoryId = searchParams.get('categoryId') || undefined;
         const processorId = searchParams.get('processorId') || undefined;
         const memoryId = searchParams.get('memoryId') || undefined;
+        const coolerId = searchParams.get('coolerId') || undefined;
         const graphicsId = searchParams.get('graphicsId') || undefined;
         const pccaseId = searchParams.get('pccaseId') || undefined;
         const isFeatured = searchParams.get('isFeatured');
@@ -157,6 +158,7 @@ export async function GET(
                 processorId,
                 memoryId,
                 graphicsId,
+                coolerId,
                 pccaseId,
                 deliveryTime,
                 isFeatured: isFeatured ? true : undefined,
@@ -167,6 +169,7 @@ export async function GET(
                 category: true,
                 processor: true,
                 memory: true,
+                cooler: true,
                 graphics: true,
                 pccase: true,
                 power: true,
