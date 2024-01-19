@@ -85,6 +85,11 @@ export async function PATCH (
             },
             data: {
                 name,
+                brand,
+                model,
+                memory,
+                memoryType,
+                maxClock,
             }
         })
 
