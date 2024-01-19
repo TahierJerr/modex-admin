@@ -25,6 +25,21 @@ export async function DELETE (
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
+        const unpaidOrders = await prismadb.order.findMany({
+            where: {
+                storeId: params.storeId,
+                isPaid: false
+            }
+        });
+
+        for (const order of unpaidOrders) {
+            await prismadb.orderItem.deleteMany({
+                where: {
+                    orderId: order.id
+                }
+            });
+        }
+
         const orders = await prismadb.order.deleteMany({
             where: {
                 storeId: params.storeId,
