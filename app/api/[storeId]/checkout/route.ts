@@ -18,7 +18,7 @@ export async function POST(
     req: Request,
     { params }: { params: { storeId: string } }
 ) {
-    const { computerIds, isPaid } = await req.json();
+    const { computerIds } = await req.json();
 
     if (!computerIds || computerIds.length === 0) {
         return new NextResponse("Product IDs are required", { status: 400 });
@@ -49,38 +49,21 @@ export async function POST(
         })
     });
 
-    let order = null;
-
-    if (isPaid) {
-        order = await prismadb.order.create({
-            data: {
-                storeId: params.storeId,
-                isPaid: isPaid,
-                orderItems: computerIds.map((computerId: string) => ({
+    const order = await prismadb.order.create({
+        data: {
+            storeId: params.storeId,
+            isPaid: false,
+            orderItems: {
+                create: computerIds.map((computerId: string) => ({
                     computer: {
                         connect: {
-                            id: computerId
+                            id: computerId || "[DELETED]"
                         }
                     }
                 }))
             }
-        });
-    } else {
-        const existingOrder = await prismadb.order.findFirst({
-            where: {
-                storeId: params.storeId,
-                isPaid: false
-            }
-        });
-
-        if (existingOrder) {
-            await prismadb.order.delete({
-                where: {
-                    id: existingOrder.id
-                }
-            });
         }
-    }
+    })
 
     const session = await stripe.checkout.sessions.create({
         line_items,
@@ -99,9 +82,12 @@ export async function POST(
         success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,
         cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
         metadata: {
-            orderId: order ? order.id : null
+            orderId: order.id
         }
     });
+
+
+
 
     return NextResponse.json({ url: session.url }, {
         headers: corsHeaders
