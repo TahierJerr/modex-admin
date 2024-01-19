@@ -6,6 +6,10 @@ import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
+import { toast } from "react-hot-toast";
+import axios from "axios";
+import { useState } from "react";
+import { AlertModal } from "@/components/modals/alert-modal";
 
 import { OrderColumn, columns } from "./columns";
 
@@ -18,15 +22,34 @@ export const OrderClient: React.FC<OrderClientProps> = ({
 }) => {
     const router = useRouter();
     const params = useParams();
+
+    const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    const onDelete = async () => {
+        try {
+            setLoading(true);
+            await axios.delete(`/api/${params.storeId}/orders`);
+            router.refresh();
+            router.push(`/${params.storeId}/orders`);
+            toast.success("Unpaid orders deleted.");
+        } catch (error) {
+            toast.error("Something went wrong.")
+        } finally {
+            setLoading(false);
+            setOpen(false);
+        }
+    }
     
     return (
         <>
+        <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading}/>
         <div className="flex items-center justify-between">
             <Heading 
             title={`Orders (${data.length})`}
             description="Manage orders for your store"
             />
-            <Button className="hidden" onClick={() => router.push(``)}>
+            <Button disabled={loading} variant="destructive" onClick={() => router.push(`/${params.storeId}/orders`)}>
                 <Trash className="mr-2 h-4 w-4" />
                 Delete unpaid orders
             </Button>
