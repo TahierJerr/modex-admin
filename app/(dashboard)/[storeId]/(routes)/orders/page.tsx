@@ -13,8 +13,7 @@ const OrdersPage = async ({
 }) => {
     const orders = await prismadb.order.findMany({
         where: {
-            storeId: params.storeId,
-            isPaid: false
+            storeId: params.storeId
         },
         include: {
             orderItems: {
@@ -39,16 +38,6 @@ const OrdersPage = async ({
         isPaid: item.isPaid,
         createdAt: format(item.createdAt, "MMMM do, yyyy")
     }));
-
-    orders.forEach(async (order) => {
-        if (!order.isPaid) {
-            await prismadb.order.delete({
-                where: {
-                    id: order.id
-                }
-            });
-        }
-    });
 
     return (
         <div className="flex-col">
