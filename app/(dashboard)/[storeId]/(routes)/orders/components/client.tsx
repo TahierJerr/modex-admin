@@ -54,13 +54,14 @@ export const OrderClient: React.FC<OrderClientProps> = ({
             title={`Orders (${data.length})`}
             description="Manage orders for your store"
             />
-            <Button disabled={loading}
-            variant="destructive"
-            onClick={() => setOpen(true)}>
-
-                <Trash className="mr-2 h-4 w-4" />
-                Delete unpaid orders
-            </Button>
+            {data.length > 0 && (
+                <Button disabled={loading}
+                variant="destructive"
+                onClick={() => setOpen(true)}>
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete unpaid orders
+                </Button>
+            )}
         </div>
         <Separator />
         <DataTable searchKey="label" columns={columns} data={data}/>
