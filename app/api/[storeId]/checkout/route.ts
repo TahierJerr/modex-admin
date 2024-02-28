@@ -73,7 +73,7 @@ export async function POST(
             terms_of_service: 'required',
         },
         shipping_address_collection: {
-            allowed_countries: ['NL', 'BE'],
+            allowed_countries: ['BE'],
         },
         phone_number_collection: {
             enabled: true
