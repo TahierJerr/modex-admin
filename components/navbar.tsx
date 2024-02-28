@@ -7,7 +7,7 @@ import StoreSwitcher from "@/components/store-switcher";
 import prismadb from "@/lib/prismadb";
 import { ModeToggle } from "./theme-toggle";
 
-const Navbar = async () => {
+const   Navbar = async () => {
     const { userId } = auth();
 
     if (!userId) {
