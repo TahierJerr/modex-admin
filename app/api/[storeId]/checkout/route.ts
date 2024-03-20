@@ -63,7 +63,7 @@ export async function POST(
                 }))
             }
         }
-    })
+    });
 
     const session = await stripe.checkout.sessions.create({
         line_items,
