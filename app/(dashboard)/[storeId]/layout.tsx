@@ -15,9 +15,7 @@ export default async function DashboardLayout({
 
     if (!userId) {
         redirect("/sign-in");
-    } else if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission();
-    }
+    } 
 
     const store = await prismadb.store.findFirst({
         where: {
