@@ -37,7 +37,10 @@ export async function POST(req: Request) {
             data: {
                 isPaid: true,
                 address: addressString,
-                phone: session?.customer_details?.phone || ''
+                phone: session?.customer_details?.phone || '',
+                name: session?.customer_details?.name || '',
+                email: session?.customer_details?.email || '',
+                country: address?.country || '',
             },
             include: {
                 orderItems: true
