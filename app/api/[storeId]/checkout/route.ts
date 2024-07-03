@@ -44,7 +44,6 @@ export async function POST(
                 },
                 unit_amount: computer.price.toNumber() * 100,
                 tax_behavior: 'inclusive',
-                
             }
         })
     });

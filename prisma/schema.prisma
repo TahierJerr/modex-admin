@@ -313,7 +313,10 @@ model Order {
   phone String @default("")
   address String @default("")
   country String @default("")
+  city String @default("")
+  postalCode String @default("")
   email String @default("")
+  total Decimal @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
