@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
 import prismadb from '@/lib/prismadb';
+import { z } from 'zod';
+
+const powerSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    model: z.string().min(1, { message: "PSU model is required" }),
+    wattage: z.string().min(1, { message: "PSU wattage is required" }),
+    rating: z.string().min(1, { message: "PSU rating is required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,33 +16,24 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, model, wattage, rating } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!model) {
-            return new NextResponse("PSU model is required", { status: 400 });
-        }
-
-        if (!wattage) {
-            return new NextResponse("PSU wattage is required", { status: 400 });
-        }
-
-        if (!rating) {
-            return new NextResponse("PSU rating is required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = powerSchema.safeParse(body);
+        
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, model, wattage, rating } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

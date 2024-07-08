@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
 import prismadb from '@/lib/prismadb';
+import { z } from 'zod';
+
+const answerSchema = z.object({
+    question: z.string().min(1, { message: "Question is required" }),
+    answers: z.string().min(1, { message: "Answers is required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,25 +14,24 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { question, answers } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!question) {
-            return new NextResponse("Question is required", { status: 400 });
-        }
-
-        if (!answers) {
-            return new NextResponse("Answer is required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = answerSchema.safeParse(body);
+
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { question, answers } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
 import prismadb from '@/lib/prismadb';
+import { z } from 'zod';
+
+const pccaseSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    model: z.string().min(1, { message: "Case model is required" }),
+    color: z.string().min(1, { message: "Case color is required" }),
+    motherboardSupport: z.string().min(1, { message: "Case motherboard support is required" }),
+    ports: z.string().min(1, { message: "Case ports are required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,37 +17,24 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, model, color, motherboardSupport, ports } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!model) {
-            return new NextResponse("Case model is required", { status: 400 });
-        }
-
-        if (!color) {
-            return new NextResponse("Case color is required", { status: 400 });
-        }
-
-        if (!motherboardSupport) {
-            return new NextResponse("Case motherboard support is required", { status: 400 });
-        }
-
-        if (!ports) {
-            return new NextResponse("Case ports are required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = pccaseSchema.safeParse(body);
+
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, model, color, motherboardSupport, ports } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

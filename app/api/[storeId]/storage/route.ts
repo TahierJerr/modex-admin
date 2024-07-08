@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
 import prismadb from '@/lib/prismadb';
+import { z } from 'zod';
+
+const storageSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    model: z.string().min(1, { message: "Storage model is required" }),
+    type: z.string().min(1, { message: "Storage type is required" }),
+    capacity: z.string().min(1, { message: "Storage capacity is required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,33 +16,24 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, model, type, capacity, } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!model) {
-            return new NextResponse("Storage model is required", { status: 400 });
-        }
-
-        if (!type) {
-            return new NextResponse("Storage type is required", { status: 400 });
-        }
-
-        if (!capacity) {
-            return new NextResponse("Storage capacity is required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = storageSchema.safeParse(body);
+        
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, model, type, capacity } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

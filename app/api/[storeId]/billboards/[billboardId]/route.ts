@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { z } from "zod";
 
 export async function GET (
     req: Request,
@@ -25,27 +26,36 @@ export async function GET (
     }
 };
 
+const billboardSchema = z.object({
+    label: z.string().min(1, { message: "Label is required" }),
+    description: z.string().min(1, { message: "Description is required" }),
+    imageUrl: z.string().min(1, { message: "Image URL is required" }),
+});
+
 export async function PATCH (
     req: Request,
     { params }: { params: { storeId: string, billboardId: string}}
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { label, description, imageUrl } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!imageUrl) {
-            return new NextResponse("Image URL is required", { status: 400 });
-        }
-
         if (!params.billboardId) {
             return new NextResponse("Billboard ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = billboardSchema.safeParse(body);
+
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { label, description, imageUrl } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

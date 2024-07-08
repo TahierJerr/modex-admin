@@ -1,7 +1,28 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
 import prismadb from '@/lib/prismadb';
+import { z } from 'zod';
+
+const computerSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    price: z.number().min(1, { message: "Price is required" }),
+    categoryId: z.string().min(1, { message: "Category is required" }),
+    processorId: z.string().min(1, { message: "Processor is required" }),
+    memoryId: z.string().min(1, { message: "Memory is required" }),
+    graphicsId: z.string().min(1, { message: "Graphics card is required" }),
+    motherboardId: z.string().min(1, { message: "Motherboard is required" }),
+    storageId: z.string().min(1, { message: "Storage is required" }),
+    pccaseId: z.string().min(1, { message: "PC Case is required" }),
+    coolerId: z.string().min(1, { message: "CPU Cooler is required" }),
+    powerId: z.string().min(1, { message: "PSU is required" }),
+    colorId: z.string().min(1, { message: "Color is required" }),
+    softwareId: z.string().min(1, { message: "Software is required" }),
+    warrantyId: z.string().min(1, { message: "Warranty is required" }),
+    images: z.array(z.object({ url: z.string().min(1) })).min(1, { message: "Images are required" }),
+    isFeatured: z.boolean().optional(),
+    isArchived: z.boolean().optional(),
+    deliveryTime: z.string().min(1, { message: "Delivery days is required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,81 +30,25 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, price, categoryId, processorId, memoryId, graphicsId, motherboardId, storageId, pccaseId, coolerId, powerId, colorId, softwareId, warrantyId, images, isFeatured, isArchived, deliveryTime } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!price) {
-            return new NextResponse("Price is required", { status: 400 });
-        }
-
-        if (!categoryId) {
-            return new NextResponse("Category is required", { status: 400 });
-        }
-
-        if (!processorId) {
-            return new NextResponse("Processor is required", { status: 400 });
-        }
-
-        if (!memoryId) {
-            return new NextResponse("Memory is required", { status: 400 });
-        }
-
-        if (!graphicsId) {
-            return new NextResponse("Graphics card is required", { status: 400 });
-        }
-
-        if (!motherboardId) {
-            return new NextResponse("Motherboard is required", { status: 400 });
-        }
-
-        if (!storageId) {
-            return new NextResponse("Storage is required", { status: 400 });
-        }
-
-        if (!pccaseId) {
-            return new NextResponse("PC Case is required", { status: 400 });
-        }
-
-        if (!coolerId) {
-            return new NextResponse("CPU Cooler is required", { status: 400 });
-        }
-
-        if (!powerId) {
-            return new NextResponse("PSU is required", { status: 400 });
-        }
-
-        if (!colorId) {
-            return new NextResponse("Color is required", { status: 400 });
-        }
-
-        if (!softwareId) {
-            return new NextResponse("Software is required", { status: 400 });
-        }
-
-        if (!warrantyId) {
-            return new NextResponse("Warranty is required", { status: 400 });
-        }
-
-        if (!images || !images.length) {
-            return new NextResponse("Images are required", { status: 400 });
-        }
-
-        if (!deliveryTime) {
-            return new NextResponse("Delivery days is required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = computerSchema.safeParse(body);
+
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, price, categoryId, processorId, memoryId, graphicsId, motherboardId, storageId, pccaseId, coolerId, powerId, colorId, softwareId, warrantyId, images, isFeatured, isArchived, deliveryTime } = validation.data;
+        
         const storeByUserId = await prismadb.store.findFirst({
             where : {
                 id: params.storeId,

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { z } from "zod";
 
 export async function GET (
     req: Request,
@@ -25,27 +26,34 @@ export async function GET (
     }
 };
 
+const softwareSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+});
+
 export async function PATCH (
     req: Request,
     { params }: { params: { storeId: string, softwareId: string}}
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
         if (!params.softwareId) {
             return new NextResponse("Software ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = softwareSchema.safeParse(body);
+        
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

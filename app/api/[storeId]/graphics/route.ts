@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
+import { z } from 'zod';
 import prismadb from '@/lib/prismadb';
+
+const graphicsSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    brand: z.string().min(1, { message: "Brand is required" }),
+    model: z.string().min(1, { message: "GPU model is required" }),
+    memory: z.string().min(1, { message: "GPU memory is required" }),
+    memoryType: z.string().min(1, { message: "GPU memory type is required" }),
+    maxClock: z.string().min(1, { message: "GPU max clock is required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,41 +18,24 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, brand, model, memory, memoryType, maxClock} = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!brand) {
-            return new NextResponse("Brand is required", { status: 400 });
-        }
-
-        if (!model) {
-            return new NextResponse("GPU model is required", { status: 400 });
-        }
-
-        if (!memory) {
-            return new NextResponse("GPU memory is required", { status: 400 });
-        }
-
-        if (!memoryType) {
-            return new NextResponse("GPU memory type is required", { status: 400 });
-        }
-
-        if (!maxClock) {
-            return new NextResponse("GPU max clock is required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = graphicsSchema.safeParse(body);
+
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, brand, model, memory, memoryType, maxClock } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { z } from "zod";
 
 export async function GET (
     req: Request,
@@ -25,43 +26,38 @@ export async function GET (
     }
 };
 
+const processorSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    brand: z.string().min(1, { message: "Brand is required" }),
+    series: z.string().min(1, { message: "Processor series is required" }),
+    baseSpeed: z.string().min(1, { message: "Processor base speed is required" }),
+    cores: z.string().min(1, { message: "Processor cores is required" }),
+});
+
 export async function PATCH (
     req: Request,
     { params }: { params: { storeId: string, processorId: string}}
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, brand, series, baseSpeed, cores } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!brand) {
-            return new NextResponse("Brand is required", { status: 400 });
-        }
-
-        if (!series) {
-            return new NextResponse("Processor series is required", { status: 400 });
-        }
-
-        if (!baseSpeed) {
-            return new NextResponse("Processor base speed is required", { status: 400 });
-        }
-
-        if (!cores) {
-            return new NextResponse("Processor cores is required", { status: 400 });
-        }
-
         if (!params.processorId) {
             return new NextResponse("Processor ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = processorSchema.safeParse(body);
+        
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, brand, series, baseSpeed, cores } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {

@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@clerk/nextjs/server";
-
 import prismadb from '@/lib/prismadb';
+import { z } from 'zod';
+
+const motherboardSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    model: z.string().min(1, { message: "Motherboard model is required" }),
+    formFactor: z.string().min(1, { message: "Motherboard form factor is required" }),
+    wifi: z.string().min(1, { message: "Motherboard wifi is required" }),
+});
 
 export async function POST(
     req: Request,
@@ -9,33 +16,24 @@ export async function POST(
 ) {
     try {
         const { userId } = auth();
-        const body = await req.json();
-
-        const { name, model, formFactor, wifi } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });
         }
 
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!model) {
-            return new NextResponse("Motherboard model is required", { status: 400 });
-        }
-
-        if (!formFactor) {
-            return new NextResponse("Motherboard form factor is required", { status: 400 });
-        }
-
-        if (!wifi) {
-            return new NextResponse("Motherboard wifi is required", { status: 400 });
-        }
-
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
+
+        const body = await req.json();
+
+        const validation = motherboardSchema.safeParse(body);
+
+        if (!validation.success) {
+            return new NextResponse(validation.error.message, { status: 400 });
+        }
+
+        const { name, model, formFactor, wifi } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {
