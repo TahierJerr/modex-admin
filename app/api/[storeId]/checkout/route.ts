@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
+import { headers } from "next/headers";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -65,7 +66,7 @@ export async function POST(
         }
     });
 
-    const referer = req.headers.get("referer");
+    const referer = headers().get("referer");
 
     const success_url = () => {
 
