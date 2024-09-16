@@ -65,7 +65,7 @@ export async function POST(
         }
     });
 
-    const referer = req.headers.get("referer");
+    const referer = req.headers.get("Referer");
 
 const success_url = referer?.includes(".nl")
     ? `${process.env.FRONTEND_STORE1_URL}/cart?success=1`
