@@ -65,6 +65,29 @@ export async function POST(
         }
     });
 
+    const referer = req.headers.get("Referer");
+
+    const success_url = () => {
+
+        if (referer) {
+            if (referer.includes(".nl")) {
+                return `${process.env.FRONTEND_STORE1_URL}/cart?success=1`;
+            } else if (referer.includes(".com")) {
+                return `${process.env.FRONTEND_STORE2_URL}/cart?success=1`;
+            }
+        }
+    }
+
+    const cancel_url = () => {
+            if (referer) {
+                if (referer.includes(".nl")) {
+                    return `${process.env.FRONTEND_STORE1_URL}/cart?canceled=1`;
+                } else if (referer.includes(".com")) {
+                    return `${process.env.FRONTEND_STORE2_URL}/cart?canceled=1`;
+                }
+            }
+    }
+
     const session = await stripe.checkout.sessions.create({
         line_items,
         mode: 'payment',
@@ -79,13 +102,16 @@ export async function POST(
             enabled: true
         },
         customer_creation: "always",
-        success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,
-        cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
+        success_url: `${success_url()}`,
+        cancel_url: `${cancel_url()}`,
         metadata: {
             orderId: order.id
         }
     });
+    
+    
 
+    
 
 
 
