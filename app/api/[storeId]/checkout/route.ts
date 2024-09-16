@@ -65,20 +65,15 @@ export async function POST(
         }
     });
 
-    // const headers = new Headers();
+    const origin = req.headers.get("origin");
 
-    // const referer = headers.get("Origin");
+    if (!origin) {
+        console.log(origin);
+        return new NextResponse("Origin header is required", { status: 400 });
+    }
 
-// const success_url = referer?.includes(".nl")
-//     ? `${process.env.FRONTEND_STORE1_URL}/cart?success=1`
-//     : `${process.env.FRONTEND_STORE2_URL}/cart?success=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?success=1`;
-
-// const cancel_url = referer?.includes(".nl")
-//     ? `${process.env.FRONTEND_STORE1_URL}/cart?canceled=1`
-//     : `${process.env.FRONTEND_STORE2_URL}/cart?canceled=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?canceled=1`;
-
-
-    // console.log(referer);
+    const success_url = `${origin}/cart?success=1`;
+    const cancel_url = `${origin}/cart?canceled=1`;
 
     
     const session = await stripe.checkout.sessions.create({
@@ -95,8 +90,8 @@ export async function POST(
             enabled: true
         },
         customer_creation: "always",
-        success_url: `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?success=1`,
-        cancel_url: `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?canceled=1`,
+        success_url: `${success_url}`,
+        cancel_url: `${cancel_url}`,
         metadata: {
             orderId: order.id
         }
