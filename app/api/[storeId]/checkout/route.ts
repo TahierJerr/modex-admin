@@ -65,9 +65,9 @@ export async function POST(
         }
     });
 
-    const headers = new Headers();
+    // const headers = new Headers();
 
-    const referer = headers.get("Origin");
+    // const referer = headers.get("Origin");
 
 // const success_url = referer?.includes(".nl")
 //     ? `${process.env.FRONTEND_STORE1_URL}/cart?success=1`
@@ -78,7 +78,7 @@ export async function POST(
 //     : `${process.env.FRONTEND_STORE2_URL}/cart?canceled=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?canceled=1`;
 
 
-    console.log(referer);
+    // console.log(referer);
 
     
     const session = await stripe.checkout.sessions.create({
