@@ -65,7 +65,7 @@ export async function POST(
         }
     });
 
-    const referer = req.headers.get("Referer");
+    const referer = req.headers.get("referer");
 
     const success_url = () => {
 
@@ -108,12 +108,6 @@ export async function POST(
             orderId: order.id
         }
     });
-    
-    
-
-    
-
-
 
     return NextResponse.json({ url: session.url }, {
         headers: corsHeaders
