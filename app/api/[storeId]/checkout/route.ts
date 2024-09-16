@@ -69,13 +69,13 @@ export async function POST(
 
     const referer = headers.get("Origin");
 
-const success_url = referer?.includes(".nl")
-    ? `${process.env.FRONTEND_STORE1_URL}/cart?success=1`
-    : `${process.env.FRONTEND_STORE2_URL}/cart?success=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?success=1`;
+// const success_url = referer?.includes(".nl")
+//     ? `${process.env.FRONTEND_STORE1_URL}/cart?success=1`
+//     : `${process.env.FRONTEND_STORE2_URL}/cart?success=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?success=1`;
 
-const cancel_url = referer?.includes(".nl")
-    ? `${process.env.FRONTEND_STORE1_URL}/cart?canceled=1`
-    : `${process.env.FRONTEND_STORE2_URL}/cart?canceled=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?canceled=1`;
+// const cancel_url = referer?.includes(".nl")
+//     ? `${process.env.FRONTEND_STORE1_URL}/cart?canceled=1`
+//     : `${process.env.FRONTEND_STORE2_URL}/cart?canceled=1` || `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?canceled=1`;
 
 
     console.log(referer);
@@ -95,8 +95,8 @@ const cancel_url = referer?.includes(".nl")
             enabled: true
         },
         customer_creation: "always",
-        success_url: `${success_url}`,
-        cancel_url: `${cancel_url}`,
+        success_url: `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?success=1`,
+        cancel_url: `${process.env.FRONTEND_STORE_DEFAULT_URL}/cart?canceled=1`,
         metadata: {
             orderId: order.id
         }
