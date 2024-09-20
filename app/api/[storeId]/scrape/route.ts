@@ -19,8 +19,8 @@ export async function GET(
         }
 
         const { data } = await axios.get(url);
-
         const $ = cheerio.load(data);
+
         const productName = $('h1').text().trim();
         let productPrice = '';
         
@@ -28,20 +28,25 @@ export async function GET(
         for (const selector of priceSelectors) {
             const priceElement = $(selector).first();
             if (priceElement.length) {
-            productPrice = priceElement.text().trim();
-            break;
+                productPrice = priceElement.text().trim();
+                break;
             }
         }
-
-        productPrice = productPrice.replace(/-/g, '00');
 
         if (!productName || !productPrice) {
             return new NextResponse("Unable to scrape product data", { status: 500 });
         }
 
+        productPrice = productPrice
+            .replace(/€|\s/g, '')
+            .replace(/,/g, '.')
+            .replace(/-/g, '00');
+        
+        const formattedPrice = parseFloat(productPrice).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
+
         return NextResponse.json({
             name: productName,
-            price: productPrice,
+            price: formattedPrice,
             url,
         });
     } catch (error) {
