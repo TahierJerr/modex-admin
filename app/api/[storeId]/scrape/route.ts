@@ -22,7 +22,8 @@ export async function GET(
 
         const $ = cheerio.load(data);
         const productName = $('h1').text().trim();
-        const productPrice = $('.pricecontainer').first().text().trim();
+        let productPrice = $('.pricecontainer').first().text().trim();
+        productPrice = productPrice.replace(/-/g, '00');
 
         if (!productName || !productPrice) {
             return new NextResponse("Unable to scrape product data", { status: 500 });
