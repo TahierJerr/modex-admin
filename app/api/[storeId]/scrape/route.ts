@@ -1,35 +1,40 @@
-// /pages/api/scrape.ts
+import { NextResponse } from 'next/server';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
-import axios from "axios";
-import * as cheerio from "cheerio";
-import { NextApiRequest, NextApiResponse } from "next";
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { url } = req.query; // Extract URL from the query parameter
-    if (!url || typeof url !== "string") {
-        return res.status(400).json({ error: "Missing or invalid URL parameter" });
-    }
-
+export async function GET(
+    req: Request,
+    { params }: { params: { storeId: string } }
+) {
     try {
-        const { data } = await axios.get(url); // Make the request from the server
+        if (!params.storeId) {
+            return new NextResponse("Store ID is required", { status: 400 });
+        }
 
-        // Use cheerio to scrape data from the response
+        const { searchParams } = new URL(req.url);
+        const url = searchParams.get('url');
+
+        if (!url) {
+            return new NextResponse("URL is required", { status: 400 });
+        }
+
+        const { data } = await axios.get(url);
+
         const $ = cheerio.load(data);
         const productName = $('h1').text().trim();
         const productPrice = $('.pricecontainer').text().trim();
 
         if (!productName || !productPrice) {
-            throw new Error("Unable to scrape product data");
+            return new NextResponse("Unable to scrape product data", { status: 500 });
         }
 
-        // Send the scraped data back to the client
-        res.status(200).json({
+        return NextResponse.json({
             name: productName,
             price: productPrice,
-            url: url,
+            url,
         });
     } catch (error) {
-        console.error("Error scraping product:", error);
-        res.status(500).json({ error: "Failed to scrape product data" });
+        console.error('[SCRAPE_GET]', error);
+        return new NextResponse("Failed to scrape product data", { status: 500 });
     }
 }
