@@ -9,7 +9,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 
-
 const formSchema = z.object({
     url: z.string().url({
         message: "Invalid URL",
@@ -30,9 +29,11 @@ const ScrapeForm = () => {
 
     const [loading, setLoading] = useState(false);
     const [productData, setProductData] = useState<{ name: string; price: string; url: string } | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const onSubmit = async (data: ScrapeFormValues) => {
         setLoading(true);
+        setError(null); // Reset error state
         try {
             const response = await fetch(`/api/${params.storeId}/scrape?url=${encodeURIComponent(data.url)}`);
             const scrapedData = await response.json();
@@ -41,15 +42,20 @@ const ScrapeForm = () => {
                 setProductData(scrapedData); // Save the scraped data to state
             } else {
                 console.error("Scraping failed:", scrapedData.error);
+                setError(scrapedData.error || "Scraping failed"); // Set error message
                 setProductData(null); // Reset the state if scraping fails
             }
         } catch (error) {
             console.error("Error during scraping:", error);
+            if (error instanceof Error) {
+                setError("Error during scraping: " + error.message); // Set error message
+            } else {
+                setError("An unknown error occurred during scraping."); // Handle unknown error type
+            }
         } finally {
             setLoading(false);
         }
     };
-    
 
     return (
         <div className="scrape-form">
@@ -73,6 +79,11 @@ const ScrapeForm = () => {
                     </Button>
                 </form>
             </Form>
+            {error && (
+                <div className="error-message mt-4 p-4 border border-red-500 rounded-lg bg-red-100 text-red-700">
+                    <p>{error}</p>
+                </div>
+            )}
             {productData && (
                 <div className="product-data mt-8 p-4 border rounded-lg bg-gray-100">
                     <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
