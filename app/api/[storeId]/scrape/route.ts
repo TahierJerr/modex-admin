@@ -22,7 +22,17 @@ export async function GET(
 
         const $ = cheerio.load(data);
         const productName = $('h1').text().trim();
-        let productPrice = $('.pricecontainer').first().text().trim();
+        let productPrice = '';
+        
+        const priceSelectors = ['.pricecontainer', '.pricediv', '.price'];
+        for (const selector of priceSelectors) {
+            const priceElement = $(selector).first();
+            if (priceElement.length) {
+            productPrice = priceElement.text().trim();
+            break;
+            }
+        }
+
         productPrice = productPrice.replace(/-/g, '00');
 
         if (!productName || !productPrice) {
