@@ -9,6 +9,7 @@ export type GraphicsColumn = {
     name: string
     brand: string
     model: string
+    price: string
     memory: string
     memoryType: string
     maxClock: string
@@ -19,6 +20,10 @@ export const columns: ColumnDef<GraphicsColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "brand",

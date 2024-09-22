@@ -2,29 +2,45 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { fetchPriceFromUrl } from "@/functions/trackprice";
+import isToday from "@/functions/istoday";
 
-export async function GET (
+export async function GET(
     req: Request,
-    { params }: { params: { graphicsId: string}}
+    { params }: { params: { graphicsId: string } }
 ) {
     try {
         if (!params.graphicsId) {
-            return new NextResponse("GPU ID is required", { status: 400 });
+            return new NextResponse("Graphics ID is required", { status: 400 });
         }
 
-        const graphics = await prismadb.graphics.findUnique({
+        const graphic = await prismadb.graphics.findUnique({
             where: {
                 id: params.graphicsId,
             }
         });
 
-        return NextResponse.json(graphics);
+        if (!graphic) {
+            return new NextResponse("Graphics not found", { status: 404 });
+        }
 
+        const updatedAt = graphic.updatedAt;
+
+        if (!isToday(updatedAt) && graphic.priceTrackUrl) {
+            const newPrice = await fetchPriceFromUrl(graphic.priceTrackUrl);
+            await prismadb.graphics.update({
+                where: { id: graphic.id },
+                data: { price: newPrice }
+            });
+        }
+
+        return NextResponse.json(graphic);
     } catch (error) {
-        console.log('[GRAPHICS_GET]', error);
+        console.log('[GRAPHICS_UNIQUE_GET]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
 };
+
 
 const graphicsSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -33,11 +49,12 @@ const graphicsSchema = z.object({
     memory: z.string().min(1, { message: "GPU memory is required" }),
     memoryType: z.string().min(1, { message: "GPU memory type is required" }),
     maxClock: z.string().min(1, { message: "GPU max clock is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
-export async function PATCH (
+export async function PATCH(
     req: Request,
-    { params }: { params: { storeId: string, graphicsId: string}}
+    { params }: { params: { storeId: string; graphicsId: string } }
 ) {
     try {
         const { userId } = auth();
@@ -47,7 +64,7 @@ export async function PATCH (
         }
 
         if (!params.graphicsId) {
-            return new NextResponse("GPU ID is required", { status: 400 });
+            return new NextResponse("Graphics ID is required", { status: 400 });
         }
 
         const body = await req.json();
@@ -58,10 +75,10 @@ export async function PATCH (
             return new NextResponse(validation.error.message, { status: 400 });
         }
 
-        const { name, brand, model, memory, memoryType, maxClock } = validation.data;
-        
+        const { name, brand, model, memory, memoryType, maxClock, priceTrackUrl } = validation.data;
+
         const storeByUserId = await prismadb.store.findFirst({
-            where : {
+            where: {
                 id: params.storeId,
                 userId
             }
@@ -71,10 +88,16 @@ export async function PATCH (
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
-        const graphics = await prismadb.graphics.updateMany({
-            where: {
-                id: params.graphicsId,
-            },
+        const graphic = await prismadb.graphics.findUnique({
+            where: { id: params.graphicsId },
+        });
+
+        if (!graphic) {
+            return new NextResponse("Graphics not found", { status: 404 });
+        }
+
+        const updatedData = await prismadb.graphics.update({
+            where: { id: params.graphicsId },
             data: {
                 name,
                 brand,
@@ -82,16 +105,29 @@ export async function PATCH (
                 memory,
                 memoryType,
                 maxClock,
+                priceTrackUrl,
             }
-        })
+        });
 
-        return NextResponse.json(graphics);
+        if (priceTrackUrl && priceTrackUrl !== graphic.priceTrackUrl) {
+            const updatedAt = updatedData.updatedAt;
 
+            if (!isToday(updatedAt)) {
+                const newPrice = await fetchPriceFromUrl(priceTrackUrl);
+                await prismadb.graphics.update({
+                    where: { id: updatedData.id },
+                    data: { price: newPrice }
+                });
+            }
+        }
+
+        return NextResponse.json(updatedData);
     } catch (error) {
         console.log('[GRAPHICS_PATCH]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
 };
+
 
 export async function DELETE (
     req: Request,

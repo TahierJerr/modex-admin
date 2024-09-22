@@ -24,6 +24,7 @@ const formSchema = z.object({
     memory: z.string().min(1),
     memoryType: z.string().min(1),
     maxClock: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type GraphicsFormValues = z.infer<typeof formSchema>;
@@ -47,17 +48,28 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
     const toastMessage = initialData ? "GPU updated." : "GPU added.";
     const action = initialData ? "Save changes" : "Add";
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        brand: initialData.brand,
+        model: initialData.model,
+        memory: initialData.memory,
+        memoryType: initialData.memoryType,
+        maxClock: initialData.maxClock,
+        priceTrackUrl: initialData.priceTrackUrl || '',
+    } : {
+        name: '',
+        brand: '',
+        model: '',
+        memory: '',
+        memoryType: '',
+        maxClock: '',
+        priceTrackUrl: '',
+    };
+
 
     const form = useForm<GraphicsFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            brand: '',
-            model: '',
-            memory: '',
-            memoryType: '',
-            maxClock: '',
-        }
+        defaultValues,
     });
 
     const onSubmit = async (data: GraphicsFormValues) => {
@@ -194,6 +206,19 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
                             <FormLabel>GPU Max clock speed</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="xxxxMhz" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price tracking URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price tracking URL" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
