@@ -8,7 +8,7 @@ export type MemoryColumn = {
     id: string
     name: string
     model: string
-    price: number
+    price: string
     type: string
     speed: string
     capacity: string

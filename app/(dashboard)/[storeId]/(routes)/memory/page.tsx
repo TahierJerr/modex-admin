@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { MemoryClient } from "./components/client";
 import { MemoryColumn } from "./components/columns";
+import formatPrice from "@/functions/formatprice";
 
 const MemoryPage = async ({
     params
@@ -19,13 +20,15 @@ const MemoryPage = async ({
         }
     });
 
+    
+
     const formattedMemory: MemoryColumn[] = memory.map((item) => ({
         id: item.id,
         name: item.name,
         model: item.model,
         type: item.type,
         speed: item.speed,
-        price: item.price ?? 0,
+        price: formatPrice(item.price ?? 0),
         capacity: item.capacity,
         rgb: item.rgb,
         createdAt: format(item.createdAt, "MMMM do, yyyy")
