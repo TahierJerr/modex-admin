@@ -71,6 +71,8 @@ model Processor {
   series String
   baseSpeed String
   cores String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -83,6 +85,8 @@ model Software {
   storeId String
   store Store @relation("StoreToSoftware", fields: [storeId], references: [id])
   name String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -100,6 +104,8 @@ model Graphics {
   memory String
   memoryType String
   maxClock String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,6 +123,8 @@ model Memory {
   capacity String
   type String
   rgb String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,6 +140,8 @@ model Storage {
   model String
   capacity String
   type String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,6 +157,8 @@ model Power {
   model String
   wattage String
   rating String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -163,6 +175,8 @@ model Pccase {
   color String
   motherboardSupport String
   ports String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -179,6 +193,8 @@ model Cooler {
   type String
   fanModel String
   rgb String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -194,12 +210,24 @@ model Motherboard {
   model String
   formFactor String
   wifi String
+  price Float?  // Optional price
+  priceTrackUrl String? // Optional price tracking URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
 }
+
+model PriceTracking {
+  id String @id @default(uuid())
+  productId String
+  productType String
+  price Float
+  priceTrackUrl String
+  updatedAt DateTime @default(now())
+}
+
 
 model Warranty {
   id String @id @default(uuid())

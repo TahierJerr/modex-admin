@@ -8,6 +8,7 @@ export type MemoryColumn = {
     id: string
     name: string
     model: string
+    price: number
     type: string
     speed: string
     capacity: string
@@ -19,6 +20,10 @@ export const columns: ColumnDef<MemoryColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "model",

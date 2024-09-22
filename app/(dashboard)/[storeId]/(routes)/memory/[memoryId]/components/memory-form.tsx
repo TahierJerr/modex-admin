@@ -23,7 +23,8 @@ const formSchema = z.object({
     type: z.string().min(1),
     speed: z.string().min(1),
     capacity: z.string().min(1),
-    rgb: z.string().min(1)
+    rgb: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type MemoryFormValues = z.infer<typeof formSchema>;
@@ -47,26 +48,37 @@ export const MemoryForm: React.FC<MemoryFormProps> = ({
     const toastMessage = initialData ? "Memory updated." : "Memory added.";
     const action = initialData ? "Save changes" : "Add";
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        model: initialData.model,
+        type: initialData.type,
+        speed: initialData.speed,
+        capacity: initialData.capacity,
+        rgb: initialData.rgb,
+        priceTrackUrl: initialData.priceTrackUrl || '', // Default to an empty string if null
+    } : {
+        name: '',
+        model: '',
+        type: '',
+        speed: '',
+        capacity: '',
+        rgb: '',
+        priceTrackUrl: '', // Add this line
+    };
+
 
     const form = useForm<MemoryFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            model: '',
-            type: '',
-            speed: '',
-            capacity: '',
-            rgb: ''
-        }
+        defaultValues,
     });
 
     const onSubmit = async (data: MemoryFormValues) => {
         try {
             setLoading(true);
             if (initialData) {
-            await axios.patch(`/api/${params.storeId}/memory/${params.memoryId}`, data);
+                await axios.patch(`/api/${params.storeId}/memory/${params.memoryId}`, data);
             } else {
-            await axios.post(`/api/${params.storeId}/memory`, data);
+                await axios.post(`/api/${params.storeId}/memory`, data);
             }
             router.refresh();
             router.push(`/${params.storeId}/memory`);
@@ -194,6 +206,19 @@ export const MemoryForm: React.FC<MemoryFormProps> = ({
                             <FormLabel>Memory RGB</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="Yes or No" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price track URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="https://example.com/product" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

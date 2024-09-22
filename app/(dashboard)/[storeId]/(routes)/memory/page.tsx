@@ -25,6 +25,7 @@ const MemoryPage = async ({
         model: item.model,
         type: item.type,
         speed: item.speed,
+        price: item.price ?? 0,
         capacity: item.capacity,
         rgb: item.rgb,
         createdAt: format(item.createdAt, "MMMM do, yyyy")
