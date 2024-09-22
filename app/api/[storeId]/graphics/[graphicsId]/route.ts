@@ -24,14 +24,41 @@ export async function GET(
             return new NextResponse("Graphics not found", { status: 404 });
         }
 
-        const updatedAt = graphic.updatedAt;
+        if (!graphic.priceTrackUrl) {
+            return NextResponse.json(graphic);
+        }
 
-        if (!isToday(updatedAt) && graphic.priceTrackUrl) {
-            const newPrice = await fetchPriceFromUrl(graphic.priceTrackUrl);
-            await prismadb.graphics.update({
-                where: { id: graphic.id },
-                data: { price: newPrice }
-            });
+        if (!isToday(graphic.updatedAt)) {
+            try {
+                const newPrice = await fetchPriceFromUrl(graphic.priceTrackUrl);
+
+                if (newPrice === graphic.price) {
+                    return NextResponse.json(graphic);
+                }
+
+                const updatedGraphics = await prismadb.graphics.update({
+                    where: {
+                        id: graphic.id,
+                    },
+                    data: {
+                        price: newPrice,
+                    },
+                });
+
+                await prismadb.priceTracking.create({
+                    data: {
+                        productId: graphic.id,
+                        price: newPrice,
+                        productType: "GRAPHICS",
+                        priceTrackUrl: graphic.priceTrackUrl
+                    }
+                });
+
+                return NextResponse.json(updatedGraphics);
+            } catch (error) {
+                console.error("[PRICE_FETCH_ERROR]", error);
+                return new NextResponse("Failed to update price", { status: 500 });
+            }
         }
 
         return NextResponse.json(graphic);
@@ -88,45 +115,53 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
-        const graphic = await prismadb.graphics.findUnique({
-            where: { id: params.graphicsId },
+        const existingGraphics = await prismadb.graphics.findUnique({
+            where: {
+                id: params.graphicsId,
+            }
         });
 
-        if (!graphic) {
+        if (!existingGraphics) {
             return new NextResponse("Graphics not found", { status: 404 });
         }
 
-        const updatedData = await prismadb.graphics.update({
-            where: { id: params.graphicsId },
-            data: {
-                name,
-                brand,
-                model,
-                memory,
-                memoryType,
-                maxClock,
-                priceTrackUrl,
-            }
-        });
+        let updatedData: any = { name, brand, model, memory, memoryType, maxClock, priceTrackUrl };
 
-        if (priceTrackUrl && priceTrackUrl !== graphic.priceTrackUrl) {
-            const updatedAt = updatedData.updatedAt;
+        if (priceTrackUrl && priceTrackUrl !== existingGraphics.priceTrackUrl) {
+            const newPrice = await fetchPriceFromUrl(priceTrackUrl);
 
-            if (!isToday(updatedAt)) {
-                const newPrice = await fetchPriceFromUrl(priceTrackUrl);
-                await prismadb.graphics.update({
-                    where: { id: updatedData.id },
-                    data: { price: newPrice }
-                });
-            }
+            updatedData.price = newPrice;
+            updatedData.priceTrackUrl = priceTrackUrl;
+        } else {
+            updatedData.priceTrackUrl = existingGraphics.priceTrackUrl;
         }
 
-        return NextResponse.json(updatedData);
+        const updatedGraphics = await prismadb.graphics.update({
+            where: {
+                id: params.graphicsId,
+            },
+            data: updatedData
+        });
+
+        if (updatedData.price !== existingGraphics.price) {
+            await prismadb.priceTracking.create({
+                data: {
+                    productId: updatedGraphics.id,
+                    price: updatedData.price,
+                    productType: "GRAPHICS",
+                    priceTrackUrl: updatedData.priceTrackUrl
+                }
+            });
+        }
+
+        return NextResponse.json(updatedGraphics);
     } catch (error) {
         console.log('[GRAPHICS_PATCH]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
 };
+
+
 
 
 export async function DELETE (
@@ -159,6 +194,13 @@ export async function DELETE (
         const graphics = await prismadb.graphics.deleteMany({
             where: {
                 id: params.graphicsId,
+            }
+        });
+
+        await prismadb.priceTracking.deleteMany({
+            where: {
+                productId: params.graphicsId,
+                productType: "GRAPHICS"
             }
         });
 

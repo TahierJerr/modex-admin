@@ -98,43 +98,58 @@ export async function GET(
         if (!params.storeId) {
             return new NextResponse("Store ID is required", { status: 400 });
         }
-
-        const memories = await prismadb.memory.findMany({
+        
+        const memory = await prismadb.memory.findMany({
             where: {
                 storeId: params.storeId
             }
         });
-
-        const updatedMemories = await Promise.all(memories.map(async (memory) => {
+        
+        const updatedMemory = await Promise.all(memory.map(async (memory) => {
             if (!memory.priceTrackUrl) {
                 return memory;
             }
-
+            
             if (!isToday(memory.updatedAt)) {
                 try {
-                    const newPrice = await fetchPriceFromUrl(memory.priceTrackUrl);
-
-                    return await prismadb.memory.update({
-                        where: {
-                            id: memory.id,
-                        },
-                        data: {
-                            price: newPrice,
-                            updatedAt: new Date(),
-                        },
-                    });
+                    const price = await fetchPriceFromUrl(memory.priceTrackUrl);
+                    
+                    if (price !== memory.price) {
+                        await prismadb.graphics.update({
+                            where: {
+                                id: memory.id
+                            },
+                            data: {
+                                price
+                            }
+                        });
+                        
+                        await prismadb.priceTracking.create({
+                            data: {
+                                productId: memory.id,
+                                price,
+                                productType: "MEMORY",
+                                priceTrackUrl: memory.priceTrackUrl
+                            }
+                        });
+                        
+                        return {
+                            ...memory,
+                            price
+                        };
+                    }
+                    
                 } catch (error) {
-                    console.error("[PRICE_FETCH_ERROR]", error);
-                    return memory;
+                    console.error(`[PRICE_FETCH_ERROR] ${error}`);
                 }
             }
-
+            
             return memory;
         }));
-
-        return NextResponse.json(updatedMemories);
+        
+        return NextResponse.json(updatedMemory);
     } catch (error) {
         console.log('[MEMORY_GET]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
-}
+};

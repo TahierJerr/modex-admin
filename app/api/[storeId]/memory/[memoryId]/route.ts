@@ -14,7 +14,6 @@ export async function GET (
             return new NextResponse("Memory ID is required", { status: 400 });
         }
 
-        // Fetch the memory by ID
         const memory = await prismadb.memory.findUnique({
             where: {
                 id: params.memoryId,
@@ -25,26 +24,34 @@ export async function GET (
             return new NextResponse("Memory not found", { status: 404 });
         }
 
-        // Check if the memory has a price tracking URL
         if (!memory.priceTrackUrl) {
-            return NextResponse.json(memory); // Return memory if no URL
+            return NextResponse.json(memory);
         }
 
-        // Check if the memory was updated today
         if (!isToday(memory.updatedAt)) {
             try {
-                // Fetch the updated price from the URL
                 const newPrice = await fetchPriceFromUrl(memory.priceTrackUrl);
 
-                // Update the memory's price
+                if (newPrice === memory.price) {
+                    return NextResponse.json(memory);
+                }
+
                 const updatedMemory = await prismadb.memory.update({
                     where: {
                         id: memory.id,
                     },
                     data: {
                         price: newPrice,
-                        updatedAt: new Date(), // Update the updatedAt field
                     },
+                });
+
+                await prismadb.priceTracking.create({
+                    data: {
+                        productId: memory.id,
+                        price: newPrice,
+                        productType: "MEMORY",
+                        priceTrackUrl: memory.priceTrackUrl
+                    }
                 });
 
                 return NextResponse.json(updatedMemory);
@@ -54,7 +61,6 @@ export async function GET (
             }
         }
 
-        // If updated today, return the memory as is
         return NextResponse.json(memory);
 
     } catch (error) {
@@ -137,6 +143,17 @@ export async function PATCH(
             data: updatedData
         });
 
+        if (updatedData.price !== existingMemory.price) {
+            await prismadb.priceTracking.create({
+                data: {
+                    productId: updatedMemory.id,
+                    price: updatedData.price,
+                    productType: "MEMORY",
+                    priceTrackUrl: updatedData.priceTrackUrl
+                }
+            });
+        }
+
         return NextResponse.json(updatedMemory);
 
     } catch (error) {
@@ -175,6 +192,13 @@ export async function DELETE (
         const memory = await prismadb.memory.deleteMany({
             where: {
                 id: params.memoryId,
+            }
+        });
+
+        await prismadb.priceTracking.deleteMany({
+            where: {
+                productId: params.memoryId,
+                productType: "MEMORY"
             }
         });
 
