@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
+import isToday from "@/lib/utils/istoday";
 
 export async function GET (
     req: Request,
@@ -18,10 +20,50 @@ export async function GET (
             }
         });
 
-        return NextResponse.json(cooler);
+        if (!cooler) {
+            return new NextResponse("Cooler not found", { status: 404 });
+        }
 
+        if (!cooler.priceTrackUrl) {
+            return NextResponse.json(cooler);
+        }
+
+        if (!isToday(cooler.updatedAt)) {
+            try {
+                const newPrice = await fetchPriceFromUrl(cooler.priceTrackUrl);
+
+                if (newPrice === cooler.price) {
+                    return NextResponse.json(cooler);
+                }
+
+                const updatedCooler = await prismadb.cooler.update({
+                    where: {
+                        id: cooler.id,
+                    },
+                    data: {
+                        price: newPrice,
+                    },
+                });
+
+                await prismadb.priceTracking.create({
+                    data: {
+                        productId: cooler.id,
+                        price: newPrice,
+                        productType: "COOLER",
+                        priceTrackUrl: cooler.priceTrackUrl
+                    }
+                });
+
+                return NextResponse.json(updatedCooler);
+            } catch (error) {
+                console.error("[PRICE_FETCH_ERROR_COOLER]", error);
+                return new NextResponse("Failed to update price", { status: 500 });
+            }
+        }
+
+        return NextResponse.json(cooler);
     } catch (error) {
-        console.log('[COOLER_GET]', error);
+        console.log('[COOLER_UNIQUE_GET]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
 };
@@ -32,6 +74,7 @@ const coolerSchema = z.object({
     type: z.string().min(1, { message: "Cooler type is required" }),
     fanModel: z.string().min(1, { message: "Cooler fan model is required" }),
     rgb: z.string().min(1, { message: "Cooler RGB is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function PATCH (
@@ -57,7 +100,7 @@ export async function PATCH (
             return new NextResponse(validation.error.message, { status: 400 });
         }
 
-        const { name, model, type, fanModel, rgb } = validation.data;
+        const { name, model, type, fanModel, rgb, priceTrackUrl } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {
@@ -70,20 +113,47 @@ export async function PATCH (
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
-        const cooler = await prismadb.cooler.updateMany({
+        const existingCooler = await prismadb.cooler.findUnique({
+            where: {
+                id: params.coolerId
+            }
+        });
+
+        if (!existingCooler) {
+            return new NextResponse("Cooler not found", { status: 404 });
+        }
+
+        let updatedData: any = { name, model, type, fanModel, rgb, priceTrackUrl };
+
+        if (priceTrackUrl && !existingCooler?.priceTrackUrl) {
+            const newPrice = await fetchPriceFromUrl(priceTrackUrl);
+
+            updatedData.price = newPrice;
+            updatedData.priceTrackUrl = priceTrackUrl;
+        } else {
+            updatedData.price = existingCooler.price;
+            updatedData.priceTrackUrl = existingCooler.priceTrackUrl;
+        }
+
+        const updatedCooler = await prismadb.cooler.update({
             where: {
                 id: params.coolerId,
             },
-            data: {
-                name,
-                model,
-                type,
-                fanModel,
-                rgb
-            }
-        })
+            data: updatedData
+        });
 
-        return NextResponse.json(cooler);
+        if (updatedData.price !== existingCooler.price) {
+            await prismadb.priceTracking.create({
+                data: {
+                    productId: updatedCooler.id,
+                    price: updatedData.price,
+                    productType: "COOLER",
+                    priceTrackUrl: updatedData.priceTrackUrl
+                }
+            })
+        }
+
+        return NextResponse.json(updatedCooler);
 
     } catch (error) {
         console.log('[COOLER_PATCH]', error);
@@ -121,6 +191,13 @@ export async function DELETE (
         const cooler = await prismadb.cooler.deleteMany({
             where: {
                 id: params.coolerId,
+            }
+        });
+
+        await prismadb.priceTracking.deleteMany({
+            where: {
+                productId: params.coolerId,
+                productType: "COOLER"
             }
         });
 

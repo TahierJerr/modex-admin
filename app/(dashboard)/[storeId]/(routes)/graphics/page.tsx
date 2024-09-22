@@ -4,7 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { GraphicsClient } from "./components/client";
 import { GraphicsColumn } from "./components/columns";
-import formatPrice from "@/functions/formatprice";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const GraphicsPage = async ({
     params

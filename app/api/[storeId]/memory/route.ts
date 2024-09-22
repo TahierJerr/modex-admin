@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
 import prismadb from '@/lib/prismadb';
 import { z } from 'zod';
-import { fetchPriceFromUrl } from '@/functions/trackprice';
-import isToday from "@/functions/istoday";
+import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
+import isToday from "@/lib/utils/istoday";
+import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 
 const memorySchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -20,68 +20,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.storeId) {
-            return new NextResponse("Store ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where: {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const body = await req.json();
-
-        const validation = memorySchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, type, speed, capacity, rgb, priceTrackUrl } = validation.data;
-
-        let price = null;
-        if (priceTrackUrl) {
-            price = await fetchPriceFromUrl(priceTrackUrl);
-        }
-
-        const memory = await prismadb.memory.create({
-            data: {
-                name,
-                model,
-                type,
-                speed,
-                capacity,
-                rgb,
-                price,
-                priceTrackUrl,
-                storeId: params.storeId
-            }
-        });
-
-        const productType = "MEMORY";
-
-        if(price && priceTrackUrl) {
-        await prismadb.priceTracking.create({
-            data: {
-                productId: memory.id,
-                price: price,
-                productType: productType,
-                priceTrackUrl: priceTrackUrl,
-            }
-        });
-    }
+        const memory = await handleProductCreation(req, { storeId: params.storeId }, memorySchema, "MEMORY", prismadb.memory, (data) => data, true);
 
         return NextResponse.json(memory);
     } catch (error) {

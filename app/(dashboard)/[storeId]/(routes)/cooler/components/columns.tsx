@@ -7,6 +7,7 @@ import { CellAction } from "./cell-action"
 export type CoolerColumn = {
     id: string
     name: string
+    price: string
     createdAt: string;
 }
 
@@ -14,6 +15,10 @@ export const columns: ColumnDef<CoolerColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "model",

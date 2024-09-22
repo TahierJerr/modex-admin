@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { CoolerClient } from "./components/client";
 import { CoolerColumn } from "./components/columns";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const CoolerPage = async ({
     params
@@ -22,6 +23,7 @@ const CoolerPage = async ({
     const formattedCooler: CoolerColumn[] = cooler.map((item) => ({
         id: item.id,
         name: item.name,
+        price: formatPrice(item.price ?? 0),
         model: item.model,
         type: item.type,
         fanModel: item.fanModel,

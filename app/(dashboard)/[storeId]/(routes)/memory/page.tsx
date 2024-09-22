@@ -4,7 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { MemoryClient } from "./components/client";
 import { MemoryColumn } from "./components/columns";
-import formatPrice from "@/functions/formatprice";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const MemoryPage = async ({
     params

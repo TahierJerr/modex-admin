@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
 import { z } from 'zod';
 import prismadb from '@/lib/prismadb';
-import { fetchPriceFromUrl } from '@/functions/trackprice';
-import isToday from '@/functions/istoday';
+import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
+import isToday from '@/lib/utils/istoday';
+import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 
 const graphicsSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -20,68 +20,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const { userId } = auth();
-        
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-        
-        if (!params.storeId) {
-            return new NextResponse("Store ID is required", { status: 400 });
-        }
-        
-        const storeByUserId = await prismadb.store.findFirst({
-            where: {
-                id: params.storeId,
-                userId
-            }
-        });
-        
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-        
-        const body = await req.json();
-        
-        const validation = graphicsSchema.safeParse(body);
-        
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-        
-        const { name, brand, model, memory, memoryType, maxClock, priceTrackUrl } = validation.data;
-        
-        let price = null;
-        if (priceTrackUrl) {
-            price = await fetchPriceFromUrl(priceTrackUrl);
-        }
-        
-        const graphics = await prismadb.graphics.create({
-            data: {
-                name,
-                brand,
-                model,
-                memory,
-                memoryType,
-                maxClock,
-                price,
-                storeId: params.storeId,
-                priceTrackUrl,
-            }
-        });
-        
-        const productType = "GRAPHICS";
-        
-        if(price && priceTrackUrl) {
-            await prismadb.priceTracking.create({
-                data: {
-                    productId: graphics.id,
-                    price: price,
-                    productType: productType,
-                    priceTrackUrl: priceTrackUrl
-                }
-            });
-        }
+        const graphics = await handleProductCreation(req, { storeId: params.storeId }, graphicsSchema, "GRAPHICS", prismadb.graphics, (data) => data, true);
         
         return NextResponse.json(graphics);
     } catch (error) {
@@ -139,7 +78,7 @@ export async function GET(
                         };
                     }
                 } catch (error) {
-                    console.error(`[PRICE_FETCH_ERROR] ${error}`);
+                    console.error(`[PRICE_FETCH_ERROR_GRAPHICS] ${error}`);
                 }
             }
             

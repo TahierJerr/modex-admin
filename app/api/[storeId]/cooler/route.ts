@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
 import prismadb from '@/lib/prismadb';
 import { z } from 'zod';
+import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
+import isToday from '@/lib/utils/istoday';
+import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 
 const coolerSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -9,6 +11,7 @@ const coolerSchema = z.object({
     type: z.string().min(1, { message: "Cooler type is required" }),
     fanModel: z.string().min(1, { message: "Cooler fan model is required" }),
     rgb: z.string().min(1, { message: "Cooler RGB is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function POST(
@@ -16,47 +19,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.storeId) {
-            return new NextResponse("Store ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = coolerSchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, type, fanModel, rgb } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const cooler = await prismadb.cooler.create({
-            data: {
-                name,
-                model,
-                type,
-                fanModel,
-                rgb,
-                storeId: params.storeId
-            }
-        });
+        const cooler = await handleProductCreation(req, { storeId: params.storeId }, coolerSchema, "COOLER", prismadb.cooler, (data) => data, true);
 
         return NextResponse.json(cooler);
     } catch (error) {
@@ -81,7 +44,48 @@ export async function GET(
             }
         });
 
-        return NextResponse.json(cooler);
+        const updatedCooler = await Promise.all(cooler.map(async (cooler) => {
+            if (!cooler.priceTrackUrl) {
+                return cooler;
+            }
+
+            if (!isToday(cooler.updatedAt)) {
+                try {
+                    const price = await fetchPriceFromUrl(cooler.priceTrackUrl);
+
+                    if (price !== cooler.price) {
+                        await prismadb.cooler.update({
+                            where: {
+                                id: cooler.id
+                            },
+                            data: {
+                                price
+                            }
+                        });
+
+                        await prismadb.priceTracking.create({
+                            data: {
+                                productId: cooler.id,
+                                price,
+                                productType: "COOLER",
+                                priceTrackUrl: cooler.priceTrackUrl
+                            }
+                        });
+
+                        return {
+                            ...cooler,
+                            price
+                        }
+                    }
+                } catch (error) {
+                    console.log('[PRICE_FETCH_ERROR_COOLER]', error);
+                }
+            }
+
+            return cooler;
+        }));
+
+        return NextResponse.json(updatedCooler);
     } catch (error) {
         console.log('[COOLER_GET]', error);
         return new NextResponse("Internal error", { status: 500 });

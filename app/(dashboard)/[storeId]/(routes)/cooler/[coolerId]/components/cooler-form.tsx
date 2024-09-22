@@ -23,6 +23,7 @@ const formSchema = z.object({
     type: z.string().min(1),
     fanModel: z.string().min(1),
     rgb: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type CoolerFormValues = z.infer<typeof formSchema>;
@@ -46,16 +47,26 @@ export const CoolerForm: React.FC<CoolerFormProps> = ({
     const toastMessage = initialData ? "CPU cooler updated." : "CPU cooler added.";
     const action = initialData ? "Save changes" : "Add";
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        model: initialData.model,
+        type: initialData.type,
+        fanModel: initialData.fanModel,
+        rgb: initialData.rgb,
+        priceTrackUrl: initialData.priceTrackUrl || '',
+    } : {
+        name: '',
+        model: '',
+        type: '',
+        fanModel: '',
+        rgb: '',
+        priceTrackUrl: '',
+    }
+
 
     const form = useForm<CoolerFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            model: '',
-            type: '',
-            fanModel: '',
-            rgb: '',
-        }
+        defaultValues,
     });
 
     const onSubmit = async (data: CoolerFormValues) => {
@@ -179,6 +190,19 @@ export const CoolerForm: React.FC<CoolerFormProps> = ({
                             <FormLabel>CPU cooler rgb</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="Yes or No" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price tracking URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price tracking URL" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

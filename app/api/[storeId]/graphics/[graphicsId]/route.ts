@@ -2,8 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
-import { fetchPriceFromUrl } from "@/functions/trackprice";
-import isToday from "@/functions/istoday";
+import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
+import isToday from "@/lib/utils/istoday";
 
 export async function GET(
     req: Request,
@@ -56,7 +56,7 @@ export async function GET(
 
                 return NextResponse.json(updatedGraphics);
             } catch (error) {
-                console.error("[PRICE_FETCH_ERROR]", error);
+                console.error("[PRICE_FETCH_ERROR_GRAPHICS]", error);
                 return new NextResponse("Failed to update price", { status: 500 });
             }
         }

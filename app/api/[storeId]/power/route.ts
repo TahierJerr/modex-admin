@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
 import prismadb from '@/lib/prismadb';
 import { z } from 'zod';
+import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 
 const powerSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -15,46 +15,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.storeId) {
-            return new NextResponse("Store ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = powerSchema.safeParse(body);
-        
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, wattage, rating } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const power = await prismadb.power.create({
-            data: {
-                name,
-                model,
-                wattage,
-                rating,
-                storeId: params.storeId
-            }
-        });
+        const power = await handleProductCreation(req, { storeId: params.storeId }, powerSchema, "POWER", prismadb.power, (data) => data, true);
 
         return NextResponse.json(power);
     } catch (error) {
