@@ -133,8 +133,10 @@ export async function PATCH(
             updatedData.price = newPrice;
             updatedData.priceTrackUrl = priceTrackUrl;
         } else {
+            updatedData.price = existingGraphics.price;
             updatedData.priceTrackUrl = existingGraphics.priceTrackUrl;
         }
+
 
         const updatedGraphics = await prismadb.graphics.update({
             where: {

@@ -133,6 +133,7 @@ export async function PATCH(
             updatedData.price = newPrice;
             updatedData.priceTrackUrl = priceTrackUrl;
         } else {
+            updatedData.price = existingMemory.price;
             updatedData.priceTrackUrl = existingMemory.priceTrackUrl;
         }
 
