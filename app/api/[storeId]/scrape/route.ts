@@ -25,16 +25,13 @@ export async function GET(
         let productPrice = '';
         let productUrl = '';
 
-        const priceSelectors = ['.pricecontainer', '.pricediv', '.price', 'shop-price'];
-        for (const selector of priceSelectors) {
-            const priceElement = $(selector).first();
-            if (priceElement.length) {
-                productPrice = priceElement.text().trim();
-                const linkElement = priceElement.find('a').first();
-                if (linkElement.length) {
-                    productUrl = linkElement.attr('href') || '';
-                }
-                break;  
+        const priceElement = $('td.shop-price').first();
+        if (priceElement.length) {
+            productPrice = priceElement.text().trim();
+
+            const linkElement = priceElement.find('a').first();
+            if (linkElement.length) {
+                productUrl = linkElement.attr('href') || '';
             }
         }
 
@@ -42,13 +39,13 @@ export async function GET(
         $('.shop-price').each((index, element) => {
             const priceText = $(element).text().trim();
             const price = parseFloat(
-            priceText
-                .replace(/€|\s/g, '')
-                .replace(/,/g, '.')
-                .replace(/-/g, '00')
+                priceText
+                    .replace(/€|\s/g, '')
+                    .replace(/,/g, '.')
+                    .replace(/-/g, '00')
             );
             if (!isNaN(price)) {
-            prices.push(price);
+                prices.push(price);
             }
         });
 
