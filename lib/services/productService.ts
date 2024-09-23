@@ -53,7 +53,7 @@ export async function updateProduct(productId: string, productData: any, product
             updatedData.price = existingProduct.price;
             updatedData.priceTrackUrl = existingProduct.priceTrackUrl;
         }
-        
+
         const product = await productModel.update({
             where: {
                 id: productId,
@@ -65,24 +65,5 @@ export async function updateProduct(productId: string, productData: any, product
     } catch (error) {
         console.error("Error updating product:", error);
         return new NextResponse("Failed to update product. Please try again later.", { status: 500 });
-    }
-}
-
-export async function checkIfProductExists(productId: string, productModel: any) {
-    try {
-        const product = await productModel.findUnique({
-            where: {
-                id: productId,
-            },
-        });
-
-        if (!product) {
-            return new NextResponse("Product not found", { status: 404 });
-        }
-
-        return product;
-    } catch (error) {
-        console.error("Error checking if product exists:", error);
-        return null;
     }
 }
