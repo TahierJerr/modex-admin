@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from "@/lib/utils/istoday";
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 const memorySchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -38,47 +39,9 @@ export async function GET(
             return new NextResponse("Store ID is required", { status: 400 });
         }
         
-        const memory = await prismadb.memory.findMany({
-            where: {
-                storeId: params.storeId
-            }
-        });
+        const memory = await handleProductRetrieval(prismadb.memory)
         
-        const updatedMemory = await Promise.all(memory.map(async (memory) => {
-            if (!memory.priceTrackUrl) {
-                return memory;
-            }
-            
-            if (!isToday(memory.updatedAt)) {
-                try {
-                    const priceData = await fetchPriceFromUrl(memory.priceTrackUrl);
-                    const price = priceData.minPriceNumber;
-                    
-                    if (price !== memory.price) {
-                        await prismadb.graphics.update({
-                            where: {
-                                id: memory.id
-                            },
-                            data: {
-                                price
-                            }
-                        });
-                        
-                        return {
-                            ...memory,
-                            price
-                        };
-                    }
-                    
-                } catch (error) {
-                    console.error(`[PRICE_FETCH_ERROR] ${error}`);
-                }
-            }
-            
-            return memory;
-        }));
-        
-        return NextResponse.json(updatedMemory);
+        return NextResponse.json(memory);
     } catch (error) {
         console.log('[MEMORY_GET]', error);
         return new NextResponse("Internal error", { status: 500 });

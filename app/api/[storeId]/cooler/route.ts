@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from '@/lib/utils/istoday';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 const coolerSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -38,46 +39,9 @@ export async function GET(
             return new NextResponse("Store ID is required", { status: 400 });
         }
 
-        const cooler = await prismadb.cooler.findMany({
-            where: {
-                storeId: params.storeId
-            }
-        });
+        const cooler = await handleProductRetrieval(prismadb.cooler)
 
-        const updatedCooler = await Promise.all(cooler.map(async (cooler) => {
-            if (!cooler.priceTrackUrl) {
-                return cooler;
-            }
-
-            if (!isToday(cooler.updatedAt)) {
-                try {
-                    const priceData = await fetchPriceFromUrl(cooler.priceTrackUrl);
-                    const price = priceData.minPriceNumber;
-
-                    if (price !== cooler.price) {
-                        await prismadb.cooler.update({
-                            where: {
-                                id: cooler.id
-                            },
-                            data: {
-                                price
-                            }
-                        });
-
-                        return {
-                            ...cooler,
-                            price
-                        }
-                    }
-                } catch (error) {
-                    console.log('[PRICE_FETCH_ERROR_COOLER]', error);
-                }
-            }
-
-            return cooler;
-        }));
-
-        return NextResponse.json(updatedCooler);
+        return NextResponse.json(cooler);
     } catch (error) {
         console.log('[COOLER_GET]', error);
         return new NextResponse("Internal error", { status: 500 });

@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("Cooler ID is required", { status: 400 });
         }
 
-        const cooler = await handleProductRetrieval(params.coolerId, prismadb.cooler);
+        const cooler = await handleProductRetrieval(prismadb.cooler, params.coolerId);
 
         return NextResponse.json(cooler);
     } catch (error) {

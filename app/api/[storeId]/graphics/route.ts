@@ -4,6 +4,7 @@ import prismadb from '@/lib/prismadb';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from '@/lib/utils/istoday';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 const graphicsSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -38,46 +39,9 @@ export async function GET(
             return new NextResponse("Store ID is required", { status: 400 });
         }
         
-        const graphics = await prismadb.graphics.findMany({
-            where: {
-                storeId: params.storeId
-            }
-        });
+        const graphics = await handleProductRetrieval(prismadb.graphics)
         
-        const updatedGraphics = await Promise.all(graphics.map(async (graphic) => {
-            if (!graphic.priceTrackUrl) {
-                return graphic;
-            }
-            
-            if (!isToday(graphic.updatedAt)) {
-                try {
-                    const priceData = await fetchPriceFromUrl(graphic.priceTrackUrl);
-                    const price = priceData.minPriceNumber;
-                    
-                    if (price !== graphic.price) {
-                        await prismadb.graphics.update({
-                            where: {
-                                id: graphic.id
-                            },
-                            data: {
-                                price
-                            }
-                        });
-                        
-                        return {
-                            ...graphic,
-                            price
-                        };
-                    }
-                } catch (error) {
-                    console.error(`[PRICE_FETCH_ERROR_GRAPHICS] ${error}`);
-                }
-            }
-            
-            return graphic;
-        }));
-        
-        return NextResponse.json(updatedGraphics);
+        return NextResponse.json(graphics);
     } catch (error) {
         console.log('[GRAPHICS_GET]', error);
         return new NextResponse("Internal error", { status: 500 });

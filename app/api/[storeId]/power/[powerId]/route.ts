@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("PSU ID is required", { status: 400 });
         }
 
-        const power = await handleProductRetrieval(params.powerId, prismadb.power);
+        const power = await handleProductRetrieval(prismadb.power, params.powerId);
 
         return NextResponse.json(power);
 

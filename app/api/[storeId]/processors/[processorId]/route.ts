@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("Processor ID is required", { status: 400 });
         }
 
-        const processor = await handleProductRetrieval(params.processorId, prismadb.processor);
+        const processor = await handleProductRetrieval(prismadb.processor, params.processorId);
 
         return NextResponse.json(processor);
 

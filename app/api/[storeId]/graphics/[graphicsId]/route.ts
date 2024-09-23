@@ -14,7 +14,7 @@ export async function GET(
             return new NextResponse("Graphics ID is required", { status: 400 });
         }
 
-        const graphic = await handleProductRetrieval(params.graphicsId, prismadb.graphics);
+        const graphic = await handleProductRetrieval(prismadb.graphics, params.graphicsId);
 
         return NextResponse.json(graphic);
     } catch (error) {

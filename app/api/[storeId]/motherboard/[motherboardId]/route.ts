@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("Motherboard ID is required", { status: 400 });
         }
 
-        const motherboard = await handleProductRetrieval(params.motherboardId, prismadb.motherboard);
+        const motherboard = await handleProductRetrieval(prismadb.motherboard, params.motherboardId);
 
 
         return NextResponse.json(motherboard);

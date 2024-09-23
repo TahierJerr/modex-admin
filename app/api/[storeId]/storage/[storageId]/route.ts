@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("Storage ID is required", { status: 400 });
         }
 
-        const storage = await handleProductRetrieval(params.storageId, prismadb.storage);
+        const storage = await handleProductRetrieval(prismadb.storage, params.storageId);
 
         return NextResponse.json(storage);
 

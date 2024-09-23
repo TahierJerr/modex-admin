@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from 'zod';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 const processorSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -36,11 +37,7 @@ export async function GET(
             return new NextResponse("Store ID is required", { status: 400 });
         }
 
-        const processor = await prismadb.processor.findMany({
-            where: {
-                storeId: params.storeId
-            }
-        });
+        const processor = await handleProductRetrieval(prismadb.processor)
 
         return NextResponse.json(processor);
     } catch (error) {

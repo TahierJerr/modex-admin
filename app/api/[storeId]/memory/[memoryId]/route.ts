@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("Memory ID is required", { status: 400 });
         }
 
-        const memory = await handleProductRetrieval(params.memoryId, prismadb.memory);
+        const memory = await handleProductRetrieval(prismadb.graphics, params.memoryId);
 
         return NextResponse.json(memory);
 

@@ -14,7 +14,7 @@ export async function GET (
             return new NextResponse("Case ID is required", { status: 400 });
         }
 
-        const pccase = await handleProductRetrieval(params.pccaseId, prismadb.pccase);
+        const pccase = await handleProductRetrieval(prismadb.pccase, params.pccaseId);
 
 
         return NextResponse.json(pccase);

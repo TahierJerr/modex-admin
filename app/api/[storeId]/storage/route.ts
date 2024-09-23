@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from 'zod';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 const storageSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -35,11 +36,7 @@ export async function GET(
             return new NextResponse("Store ID is required", { status: 400 });
         }
 
-        const storage = await prismadb.storage.findMany({
-            where: {
-                storeId: params.storeId
-            }
-        });
+        const storage = await handleProductRetrieval(prismadb.storage)
 
         return NextResponse.json(storage);
     } catch (error) {
