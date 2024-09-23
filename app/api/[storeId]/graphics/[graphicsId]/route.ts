@@ -4,6 +4,9 @@ import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import isToday from "@/lib/utils/istoday";
+import PriceData from "@/types";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET(
     req: Request,
@@ -30,7 +33,10 @@ export async function GET(
 
         if (!isToday(graphic.updatedAt)) {
             try {
-                const newPrice = await fetchPriceFromUrl(graphic.priceTrackUrl);
+                const response = await fetchPriceFromUrl(graphic.priceTrackUrl);
+                const priceData: PriceData = await response.json();
+
+                const newPrice = priceData.minPriceNumber;
 
                 if (newPrice === graphic.price) {
                     return NextResponse.json(graphic);
@@ -43,15 +49,6 @@ export async function GET(
                     data: {
                         price: newPrice,
                     },
-                });
-
-                await prismadb.priceTracking.create({
-                    data: {
-                        productId: graphic.id,
-                        price: newPrice,
-                        productType: "GRAPHICS",
-                        priceTrackUrl: graphic.priceTrackUrl
-                    }
                 });
 
                 return NextResponse.json(updatedGraphics);
@@ -84,77 +81,8 @@ export async function PATCH(
     { params }: { params: { storeId: string; graphicsId: string } }
 ) {
     try {
-        const { userId } = auth();
+        const updatedGraphics = await handleProductModification(req, { storeId: params.storeId, productId: params.graphicsId }, graphicsSchema, "GRAPHICS", prismadb.graphics, (data) => data);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.graphicsId) {
-            return new NextResponse("Graphics ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = graphicsSchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, brand, model, memory, memoryType, maxClock, priceTrackUrl } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where: {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const existingGraphics = await prismadb.graphics.findUnique({
-            where: {
-                id: params.graphicsId,
-            }
-        });
-
-        if (!existingGraphics) {
-            return new NextResponse("Graphics not found", { status: 404 });
-        }
-
-        let updatedData: any = { name, brand, model, memory, memoryType, maxClock, priceTrackUrl };
-
-        if (priceTrackUrl && priceTrackUrl !== existingGraphics.priceTrackUrl) {
-            const newPrice = await fetchPriceFromUrl(priceTrackUrl);
-
-            updatedData.price = newPrice;
-            updatedData.priceTrackUrl = priceTrackUrl;
-        } else {
-            updatedData.price = existingGraphics.price;
-            updatedData.priceTrackUrl = existingGraphics.priceTrackUrl;
-        }
-
-
-        const updatedGraphics = await prismadb.graphics.update({
-            where: {
-                id: params.graphicsId,
-            },
-            data: updatedData
-        });
-
-        if (updatedData.price !== existingGraphics.price) {
-            await prismadb.priceTracking.create({
-                data: {
-                    productId: updatedGraphics.id,
-                    price: updatedData.price,
-                    productType: "GRAPHICS",
-                    priceTrackUrl: updatedData.priceTrackUrl
-                }
-            });
-        }
 
         return NextResponse.json(updatedGraphics);
     } catch (error) {
@@ -171,40 +99,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, graphicsId: string}}
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.graphicsId) {
-            return new NextResponse("GPU ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const graphics = await prismadb.graphics.deleteMany({
-            where: {
-                id: params.graphicsId,
-            }
-        });
-
-        await prismadb.priceTracking.deleteMany({
-            where: {
-                productId: params.graphicsId,
-                productType: "GRAPHICS"
-            }
-        });
+        const graphics = await handleProductRemoval(req, { storeId: params.storeId, productId: params.graphicsId }, "GRAPHICS",prismadb.graphics);
 
         return NextResponse.json(graphics);
 

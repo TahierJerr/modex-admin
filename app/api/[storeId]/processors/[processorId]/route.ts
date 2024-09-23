@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -39,52 +41,9 @@ export async function PATCH (
     { params }: { params: { storeId: string, processorId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const updatedProcessor = await handleProductModification(req, { storeId: params.storeId, productId: params.processorId }, processorSchema, "PROCESSOR", prismadb.processor, (data) => data);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.processorId) {
-            return new NextResponse("Processor ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = processorSchema.safeParse(body);
-        
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, brand, series, baseSpeed, cores } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const processor = await prismadb.processor.updateMany({
-            where: {
-                id: params.processorId,
-            },
-            data: {
-                name,
-                brand,
-                series,
-                baseSpeed,
-                cores,
-            
-            }
-        })
-
-        return NextResponse.json(processor);
+        return NextResponse.json(updatedProcessor);
 
     } catch (error) {
         console.log('[PROCESSOR_PATCH]', error);
@@ -97,33 +56,8 @@ export async function DELETE (
     { params }: { params: { storeId: string, processorId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const processor = await handleProductRemoval(req, { storeId: params.storeId, productId: params.processorId }, "PROCESSOR", prismadb.processor);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.processorId) {
-            return new NextResponse("processor ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const processor = await prismadb.processor.deleteMany({
-            where: {
-                id: params.processorId,
-            }
-        });
 
         return NextResponse.json(processor);
 

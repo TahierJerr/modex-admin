@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -39,52 +41,9 @@ export async function PATCH (
     { params }: { params: { storeId: string, pccaseId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const updatedPccase = await handleProductModification(req, { storeId: params.storeId, productId: params.pccaseId }, pccaseSchema, "PCCASE", prismadb.pccase, (data) => data);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.pccaseId) {
-            return new NextResponse("Case ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = pccaseSchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, color, motherboardSupport, ports } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const pccase = await prismadb.pccase.updateMany({
-            where: {
-                id: params.pccaseId,
-            },
-            data: {
-                name,
-                model,
-                color,
-                motherboardSupport,
-                ports,
-            
-            }
-        })
-
-        return NextResponse.json(pccase);
+        return NextResponse.json(updatedPccase);
 
     } catch (error) {
         console.log('[PCCASE_PATCH]', error);
@@ -97,33 +56,8 @@ export async function DELETE (
     { params }: { params: { storeId: string, pccaseId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const pccase = await handleProductRemoval(req, { storeId: params.storeId, productId: params.pccaseId }, "PCCASE", prismadb.pccase);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.pccaseId) {
-            return new NextResponse("Case ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const pccase = await prismadb.pccase.deleteMany({
-            where: {
-                id: params.pccaseId,
-            }
-        });
 
         return NextResponse.json(pccase);
 

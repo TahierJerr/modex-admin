@@ -15,7 +15,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const storage = await handleProductCreation(req, { storeId: params.storeId }, storageSchema, "STORAGE", prismadb.storage, (data) => data, true);
+        const storage = await handleProductCreation(req, { storeId: params.storeId }, storageSchema, "STORAGE", prismadb.storage, (data) => data);
 
         return NextResponse.json(storage);
     } catch (error) {

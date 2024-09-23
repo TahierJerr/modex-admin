@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import formatPrice from '@/lib/utils/formatPrice';
 
 export async function GET(
     req: Request,
@@ -58,14 +59,9 @@ export async function GET(
         if (!productName || !productPrice) {
             return new NextResponse("Unable to scrape product data", { status: 500 });
         }
-
-        productPrice = productPrice
-            .replace(/€|\s/g, '')
-            .replace(/,/g, '.')
-            .replace(/-/g, '00');
         
-        const formattedMinPrice = parseFloat(productPrice).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
-        const formattedAvgPrice = parseFloat(productAvgPrice).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
+        const formattedMinPrice = formatPrice(parseFloat(productPrice));
+        const formattedAvgPrice = formatPrice(parseFloat(productAvgPrice));
 
         return NextResponse.json({
             name: productName,

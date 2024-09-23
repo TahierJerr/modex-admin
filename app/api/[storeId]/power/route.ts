@@ -15,7 +15,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const power = await handleProductCreation(req, { storeId: params.storeId }, powerSchema, "POWER", prismadb.power, (data) => data, true);
+        const power = await handleProductCreation(req, { storeId: params.storeId }, powerSchema, "POWER", prismadb.power, (data) => data);
 
         return NextResponse.json(power);
     } catch (error) {

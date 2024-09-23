@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -38,51 +40,9 @@ export async function PATCH (
     { params }: { params: { storeId: string, motherboardId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const updatedMotherboard = await handleProductModification(req, { storeId: params.storeId, productId: params.motherboardId }, motherboardSchema, "MOTHERBOARD", prismadb.motherboard, (data) => data);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.motherboardId) {
-            return new NextResponse("Motherboard ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = motherboardSchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, formFactor, wifi } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const motherboard = await prismadb.motherboard.updateMany({
-            where: {
-                id: params.motherboardId,
-            },
-            data: {
-                name,
-                model,
-                formFactor,
-                wifi,
-            
-            }
-        })
-
-        return NextResponse.json(motherboard);
+        return NextResponse.json(updatedMotherboard);
 
     } catch (error) {
         console.log('[MOTHERBOARD_PATCH]', error);
@@ -95,33 +55,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, motherboardId: string}}
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.motherboardId) {
-            return new NextResponse("Motherboard ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const motherboard = await prismadb.motherboard.deleteMany({
-            where: {
-                id: params.motherboardId,
-            }
-        });
+        const motherboard = await handleProductRemoval(req, { storeId: params.storeId, productId: params.motherboardId }, "MOTHERBOARD", prismadb.motherboard);
 
         return NextResponse.json(motherboard);
 

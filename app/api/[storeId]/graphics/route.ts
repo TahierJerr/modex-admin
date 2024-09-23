@@ -4,6 +4,7 @@ import prismadb from '@/lib/prismadb';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from '@/lib/utils/istoday';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import PriceData from '@/types';
 
 const graphicsSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -20,7 +21,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const graphics = await handleProductCreation(req, { storeId: params.storeId }, graphicsSchema, "GRAPHICS", prismadb.graphics, (data) => data, true);
+        const graphics = await handleProductCreation(req, { storeId: params.storeId }, graphicsSchema, "GRAPHICS", prismadb.graphics, (data) => data);
         
         return NextResponse.json(graphics);
     } catch (error) {
@@ -51,7 +52,10 @@ export async function GET(
             
             if (!isToday(graphic.updatedAt)) {
                 try {
-                    const price = await fetchPriceFromUrl(graphic.priceTrackUrl);
+                    const response = await fetchPriceFromUrl(graphic.priceTrackUrl);
+                    const priceData: PriceData = await response.json();
+
+                    const price = priceData.minPriceNumber;
                     
                     if (price !== graphic.price) {
                         await prismadb.graphics.update({
@@ -60,15 +64,6 @@ export async function GET(
                             },
                             data: {
                                 price
-                            }
-                        });
-                        
-                        await prismadb.priceTracking.create({
-                            data: {
-                                productId: graphic.id,
-                                price,
-                                productType: "GRAPHICS",
-                                priceTrackUrl: graphic.priceTrackUrl
                             }
                         });
                         

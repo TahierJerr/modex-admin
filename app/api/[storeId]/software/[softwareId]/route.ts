@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -35,47 +37,9 @@ export async function PATCH (
     { params }: { params: { storeId: string, softwareId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const updatedSoftware = await handleProductModification(req, { storeId: params.storeId, productId: params.softwareId }, softwareSchema, "SOFTWARE", prismadb.software, (data) => data);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.softwareId) {
-            return new NextResponse("Software ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = softwareSchema.safeParse(body);
-        
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const software = await prismadb.software.updateMany({
-            where: {
-                id: params.softwareId,
-            },
-            data: {
-                name,
-            }
-        })
-
-        return NextResponse.json(software);
+        return NextResponse.json(updatedSoftware);
 
     } catch (error) {
         console.log('[SOFTWARE_PATCH]', error);
@@ -88,33 +52,8 @@ export async function DELETE (
     { params }: { params: { storeId: string, softwareId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const software = await handleProductRemoval(req, { storeId: params.storeId, productId: params.softwareId }, "SOFTWARE", prismadb.software);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.softwareId) {
-            return new NextResponse("Software ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const software = await prismadb.software.deleteMany({
-            where: {
-                id: params.softwareId,
-            }
-        });
 
         return NextResponse.json(software);
 

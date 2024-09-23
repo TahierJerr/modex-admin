@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { checkIfAuthorized } from '@/lib/auth/authorization';
 import { validateAndProcessRequest } from '@/lib/utils/requestUtils';
-import { createProduct } from '@/lib/services/productService';
+import { checkIfProductExists, updateProduct } from '@/lib/services/productService';
 
 interface ProductData {
     priceTrackUrl?: string;
 }
 
-export async function handleProductCreation<ProductDataType extends ProductData>(
+export async function handleProductModification<ProductDataType extends ProductData>(
     req: Request,
-    params: { storeId: string },
+    params: { storeId: string, productId: string },
     schema: any,
     productType: string,
     productModel: any,
@@ -21,6 +21,8 @@ export async function handleProductCreation<ProductDataType extends ProductData>
         if (authResponse) {
             return authResponse;
         }
+
+        const existingProduct = await checkIfProductExists(params.productId, productModel);
         
         const productData = await validateAndProcessRequest({
             req,
@@ -28,7 +30,7 @@ export async function handleProductCreation<ProductDataType extends ProductData>
             handler: (data: ProductDataType) => productDataHandler(data),
         });
         
-        const product = await createProduct(productData, params.storeId, productModel);
+        const product = await updateProduct(params.productId, productData, productModel, existingProduct);
         
         return NextResponse.json(product);
     } catch (error) {

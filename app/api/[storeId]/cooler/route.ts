@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from '@/lib/utils/istoday';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import PriceData from '@/types';
 
 const coolerSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -19,7 +20,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const cooler = await handleProductCreation(req, { storeId: params.storeId }, coolerSchema, "COOLER", prismadb.cooler, (data) => data, true);
+        const cooler = await handleProductCreation(req, { storeId: params.storeId }, coolerSchema, "COOLER", prismadb.cooler, (data) => data);
 
         return NextResponse.json(cooler);
     } catch (error) {
@@ -51,7 +52,10 @@ export async function GET(
 
             if (!isToday(cooler.updatedAt)) {
                 try {
-                    const price = await fetchPriceFromUrl(cooler.priceTrackUrl);
+                    const response = await fetchPriceFromUrl(cooler.priceTrackUrl);
+                    const priceData: PriceData = await response.json();
+
+                    const price = priceData.minPriceNumber;
 
                     if (price !== cooler.price) {
                         await prismadb.cooler.update({
@@ -60,15 +64,6 @@ export async function GET(
                             },
                             data: {
                                 price
-                            }
-                        });
-
-                        await prismadb.priceTracking.create({
-                            data: {
-                                productId: cooler.id,
-                                price,
-                                productType: "COOLER",
-                                priceTrackUrl: cooler.priceTrackUrl
                             }
                         });
 

@@ -4,6 +4,9 @@ import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import isToday from "@/lib/utils/istoday";
+import PriceData from "@/types";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -30,7 +33,10 @@ export async function GET (
 
         if (!isToday(cooler.updatedAt)) {
             try {
-                const newPrice = await fetchPriceFromUrl(cooler.priceTrackUrl);
+                const response = await fetchPriceFromUrl(cooler.priceTrackUrl);
+                const priceData: PriceData = await response.json();
+
+                const newPrice = priceData.minPriceNumber;
 
                 if (newPrice === cooler.price) {
                     return NextResponse.json(cooler);
@@ -43,15 +49,6 @@ export async function GET (
                     data: {
                         price: newPrice,
                     },
-                });
-
-                await prismadb.priceTracking.create({
-                    data: {
-                        productId: cooler.id,
-                        price: newPrice,
-                        productType: "COOLER",
-                        priceTrackUrl: cooler.priceTrackUrl
-                    }
                 });
 
                 return NextResponse.json(updatedCooler);
@@ -82,76 +79,7 @@ export async function PATCH (
     { params }: { params: { storeId: string, coolerId: string}}
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.coolerId) {
-            return new NextResponse("Cooler ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = coolerSchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, type, fanModel, rgb, priceTrackUrl } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const existingCooler = await prismadb.cooler.findUnique({
-            where: {
-                id: params.coolerId
-            }
-        });
-
-        if (!existingCooler) {
-            return new NextResponse("Cooler not found", { status: 404 });
-        }
-
-        let updatedData: any = { name, model, type, fanModel, rgb, priceTrackUrl };
-
-        if (priceTrackUrl && !existingCooler?.priceTrackUrl) {
-            const newPrice = await fetchPriceFromUrl(priceTrackUrl);
-
-            updatedData.price = newPrice;
-            updatedData.priceTrackUrl = priceTrackUrl;
-        } else {
-            updatedData.price = existingCooler.price;
-            updatedData.priceTrackUrl = existingCooler.priceTrackUrl;
-        }
-
-        const updatedCooler = await prismadb.cooler.update({
-            where: {
-                id: params.coolerId,
-            },
-            data: updatedData
-        });
-
-        if (updatedData.price !== existingCooler.price) {
-            await prismadb.priceTracking.create({
-                data: {
-                    productId: updatedCooler.id,
-                    price: updatedData.price,
-                    productType: "COOLER",
-                    priceTrackUrl: updatedData.priceTrackUrl
-                }
-            })
-        }
+        const updatedCooler = await handleProductModification(req, { storeId: params.storeId, productId: params.coolerId }, coolerSchema, "COOLER", prismadb.cooler, (data) => data);
 
         return NextResponse.json(updatedCooler);
 
@@ -166,40 +94,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, coolerId: string}}
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.coolerId) {
-            return new NextResponse("Cooler ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const cooler = await prismadb.cooler.deleteMany({
-            where: {
-                id: params.coolerId,
-            }
-        });
-
-        await prismadb.priceTracking.deleteMany({
-            where: {
-                productId: params.coolerId,
-                productType: "COOLER"
-            }
-        });
+        const cooler = await handleProductRemoval(req, { storeId: params.storeId, productId: params.coolerId }, "COOLER", prismadb.cooler);
 
         return NextResponse.json(cooler);
 

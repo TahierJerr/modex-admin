@@ -16,7 +16,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const pccase = await handleProductCreation(req, { storeId: params.storeId }, pccaseSchema, "PCCASE", prismadb.pccase, (data) => data, true);
+        const pccase = await handleProductCreation(req, { storeId: params.storeId }, pccaseSchema, "PCCASE", prismadb.pccase, (data) => data);
 
         return NextResponse.json(pccase);
     } catch (error) {

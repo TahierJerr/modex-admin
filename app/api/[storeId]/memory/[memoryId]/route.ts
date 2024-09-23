@@ -4,6 +4,9 @@ import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import isToday from "@/lib/utils/istoday";
+import PriceData from "@/types";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -30,7 +33,10 @@ export async function GET (
 
         if (!isToday(memory.updatedAt)) {
             try {
-                const newPrice = await fetchPriceFromUrl(memory.priceTrackUrl);
+                const response = await fetchPriceFromUrl(memory.priceTrackUrl);
+                const priceData: PriceData = await response.json();
+
+                const newPrice = priceData.minPriceNumber;
 
                 if (newPrice === memory.price) {
                     return NextResponse.json(memory);
@@ -43,15 +49,6 @@ export async function GET (
                     data: {
                         price: newPrice,
                     },
-                });
-
-                await prismadb.priceTracking.create({
-                    data: {
-                        productId: memory.id,
-                        price: newPrice,
-                        productType: "MEMORY",
-                        priceTrackUrl: memory.priceTrackUrl
-                    }
                 });
 
                 return NextResponse.json(updatedMemory);
@@ -84,76 +81,7 @@ export async function PATCH(
     { params }: { params: { storeId: string, memoryId: string } }
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.memoryId) {
-            return new NextResponse("Memory ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = memorySchema.safeParse(body);
-
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, type, speed, capacity, rgb, priceTrackUrl } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where: {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const existingMemory = await prismadb.memory.findUnique({
-            where: {
-                id: params.memoryId,
-            }
-        });
-
-        if (!existingMemory) {
-            return new NextResponse("Memory not found", { status: 404 });
-        }
-
-        let updatedData: any = { name, model, type, speed, capacity, rgb };
-
-        if (priceTrackUrl && priceTrackUrl !== existingMemory.priceTrackUrl) {
-            const newPrice = await fetchPriceFromUrl(priceTrackUrl);
-            
-            updatedData.price = newPrice;
-            updatedData.priceTrackUrl = priceTrackUrl;
-        } else {
-            updatedData.price = existingMemory.price;
-            updatedData.priceTrackUrl = existingMemory.priceTrackUrl;
-        }
-
-        const updatedMemory = await prismadb.memory.update({
-            where: {
-                id: params.memoryId,
-            },
-            data: updatedData
-        });
-
-        if (updatedData.price !== existingMemory.price) {
-            await prismadb.priceTracking.create({
-                data: {
-                    productId: updatedMemory.id,
-                    price: updatedData.price,
-                    productType: "MEMORY",
-                    priceTrackUrl: updatedData.priceTrackUrl
-                }
-            });
-        }
+        const updatedMemory = handleProductModification(req, { storeId: params.storeId, productId: params.memoryId }, memorySchema, "MEMORY", prismadb.memory, (data) => data);
 
         return NextResponse.json(updatedMemory);
 
@@ -168,40 +96,8 @@ export async function DELETE (
     { params }: { params: { storeId: string, memoryId: string}}
 ) {
     try {
-        const { userId } = auth();
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.memoryId) {
-            return new NextResponse("Memory ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const memory = await prismadb.memory.deleteMany({
-            where: {
-                id: params.memoryId,
-            }
-        });
-
-        await prismadb.priceTracking.deleteMany({
-            where: {
-                productId: params.memoryId,
-                productType: "MEMORY"
-            }
-        });
+        const memory = await handleProductRemoval(req, { storeId: params.storeId, productId: params.memoryId }, "MEMORY",prismadb.memory);
 
         return NextResponse.json(memory);
 

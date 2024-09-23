@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
+import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { handleProductModification } from "@/lib/functions/handleProductModification";
 
 export async function GET (
     req: Request,
@@ -38,51 +40,9 @@ export async function PATCH (
     { params }: { params: { storeId: string, storageId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const updatedStorage = await handleProductModification(req, { storeId: params.storeId, productId: params.storageId }, storageSchema, "STORAGE", prismadb.storage, (data) => data);
 
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-        if (!params.storageId) {
-            return new NextResponse("Storage ID is required", { status: 400 });
-        }
-
-        const body = await req.json();
-
-        const validation = storageSchema.safeParse(body);
-        
-        if (!validation.success) {
-            return new NextResponse(validation.error.message, { status: 400 });
-        }
-
-        const { name, model, type, capacity } = validation.data;
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const storage = await prismadb.storage.updateMany({
-            where: {
-                id: params.storageId,
-            },
-            data: {
-                name,
-                model,
-                type,
-                capacity,
-            
-            }
-        })
-
-        return NextResponse.json(storage);
+        return NextResponse.json(updatedStorage);
 
     } catch (error) {
         console.log('[STORAGE_PATCH]', error);
@@ -95,33 +55,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, storageId: string}}
 ) {
     try {
-        const { userId } = auth();
-
-        if (!userId) {
-            return new NextResponse("Unauthenticated", { status: 401 });
-        }
-
-
-        if (!params.storageId) {
-            return new NextResponse("Storage ID is required", { status: 400 });
-        }
-
-        const storeByUserId = await prismadb.store.findFirst({
-            where : {
-                id: params.storeId,
-                userId
-            }
-        });
-
-        if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
-
-        const storage = await prismadb.storage.deleteMany({
-            where: {
-                id: params.storageId,
-            }
-        });
+        const storage = await handleProductRemoval(req, { storeId: params.storeId, productId: params.storageId }, "STORAGE", prismadb.storage);
 
         return NextResponse.json(storage);
 

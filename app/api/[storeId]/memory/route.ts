@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from "@/lib/utils/istoday";
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
+import PriceData from '@/types';
 
 const memorySchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -20,7 +21,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const memory = await handleProductCreation(req, { storeId: params.storeId }, memorySchema, "MEMORY", prismadb.memory, (data) => data, true);
+        const memory = await handleProductCreation(req, { storeId: params.storeId }, memorySchema, "MEMORY", prismadb.memory, (data) => data);
 
         return NextResponse.json(memory);
     } catch (error) {
@@ -51,7 +52,10 @@ export async function GET(
             
             if (!isToday(memory.updatedAt)) {
                 try {
-                    const price = await fetchPriceFromUrl(memory.priceTrackUrl);
+                    const response = await fetchPriceFromUrl(memory.priceTrackUrl);
+                    const priceData: PriceData = await response.json();
+
+                    const price = priceData.minPriceNumber;
                     
                     if (price !== memory.price) {
                         await prismadb.graphics.update({
@@ -60,15 +64,6 @@ export async function GET(
                             },
                             data: {
                                 price
-                            }
-                        });
-                        
-                        await prismadb.priceTracking.create({
-                            data: {
-                                productId: memory.id,
-                                price,
-                                productType: "MEMORY",
-                                priceTrackUrl: memory.priceTrackUrl
                             }
                         });
                         

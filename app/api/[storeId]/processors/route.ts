@@ -16,7 +16,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const processor = await handleProductCreation(req, { storeId: params.storeId }, processorSchema, "PROCESSOR", prismadb.processor, (data) => data, true);
+        const processor = await handleProductCreation(req, { storeId: params.storeId }, processorSchema, "PROCESSOR", prismadb.processor, (data) => data);
 
         return NextResponse.json(processor);
     } catch (error) {

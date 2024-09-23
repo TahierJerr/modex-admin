@@ -219,15 +219,6 @@ model Motherboard {
   @@index([storeId])
 }
 
-model PriceTracking {
-  id String @id @default(uuid())
-  productId String
-  productType String
-  price Float
-  priceTrackUrl String
-  updatedAt DateTime @default(now())
-}
-
 
 model Warranty {
   id String @id @default(uuid())

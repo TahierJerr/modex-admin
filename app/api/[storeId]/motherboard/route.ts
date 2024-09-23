@@ -15,7 +15,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const motherboard = await handleProductCreation(req, { storeId: params.storeId }, motherboardSchema, "MOTHERBOARD", prismadb.motherboard, (data) => data, true);
+        const motherboard = await handleProductCreation(req, { storeId: params.storeId }, motherboardSchema, "MOTHERBOARD", prismadb.motherboard, (data) => data);
 
         return NextResponse.json(motherboard);
     } catch (error) {
