@@ -38,9 +38,9 @@ export async function handleProductModification<ProductDataType extends ProductD
         console.error(`[${productType}_MODIFICATION]`, error);
         
         if (error === "Unauthorized") {
-            return new Error("Unauthorized");
+            return new Error(`Unauthorized ${error}`);
         } else {
-            return new Error("Internal error");
+            return new Error(`Internal error ${error}`);
         }
     }
 }

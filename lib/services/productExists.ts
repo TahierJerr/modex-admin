@@ -12,7 +12,7 @@ export async function checkIfProductExistsForModification(productModel: any, pro
 
             return product;
     } catch (error) {
-        console.error("Error checking if product exists:", error);
+        console.error(`Error checking if product exists: ${productModel}`, error);
         throw new Error("Internal Server Error");
     }
 }
