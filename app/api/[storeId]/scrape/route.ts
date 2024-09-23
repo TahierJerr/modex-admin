@@ -72,7 +72,6 @@ export async function GET(
             name: productName,
             minPrice: formattedMinPrice,
             avgPrice: formattedAvgPrice,
-            url,
             productUrl,
         });
     } catch (error) {

@@ -90,7 +90,7 @@ const ScrapeForm = () => {
                     <p><strong>Product Name:</strong> {productData.name}</p>
                     <p><strong>Lowest Product Price:</strong> {productData.minPrice}</p>
                     <p><strong>Average Product Price:</strong> {productData.avgPrice}</p>
-                    <p><strong>Product URL:</strong> <a href={productData.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
+                    <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
                 </div>
             )}
         </div>
