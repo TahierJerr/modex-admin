@@ -1,10 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import isToday from "@/lib/utils/istoday";
-import PriceData from "@/types";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
 

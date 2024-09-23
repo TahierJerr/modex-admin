@@ -1,16 +1,15 @@
 import prismadb from "@/lib/prismadb";
-import { auth } from '@clerk/nextjs/server'
-import { NextResponse } from "next/server";
+import { auth } from '@clerk/nextjs/server';
 
 export async function checkIfAuthorized(storeId: string) {
     const { userId } = auth();
 
     if (!userId) {
-        return new NextResponse("Unauthenticated", { status: 401 });
+        throw new Error("Unauthenticated");
     }
 
     if (!storeId) {
-        return new NextResponse("Store ID is required", { status: 400 });
+        throw new Error("Store ID is required");
     }
 
     try {
@@ -22,12 +21,12 @@ export async function checkIfAuthorized(storeId: string) {
         });
 
         if (!storeByUserId) {
-            return new NextResponse("Unauthorized", { status: 403 });
+            throw new Error("Unauthorized");
         }
 
-        return new NextResponse("Authorized", { status: 200 });
+        return true;
     } catch (error) {
         console.error("Database error:", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        throw new Error("Internal Server Error");
     }
 }

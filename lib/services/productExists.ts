@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 export async function checkIfProductExists(productId: string, productModel: any) {
     try {
         const product = await productModel.findUnique({
@@ -9,12 +7,12 @@ export async function checkIfProductExists(productId: string, productModel: any)
         });
 
         if (!product) {
-            return new NextResponse("Product not found", { status: 404 });
+            throw new Error("Product not found");  // Throw an error if the product is not found
         }
 
-        return product;
+        return product;  // Return the found product
     } catch (error) {
         console.error("Error checking if product exists:", error);
-        return null;
+        throw new Error("Internal Server Error");  // Throw an error for unexpected issues
     }
 }

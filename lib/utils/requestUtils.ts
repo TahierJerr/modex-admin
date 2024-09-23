@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { ZodSchema } from "zod";
 
 type ValidateAndProcessRequestParams<T> = {
@@ -11,7 +10,7 @@ export async function validateAndProcessRequest<T>({
     req,
     schema,
     handler,
-}: ValidateAndProcessRequestParams<T>): Promise<NextResponse | any> {
+}: ValidateAndProcessRequestParams<T>): Promise<any> {
     try {
         const body = await req.json();
         const validation = schema.safeParse(body);
@@ -19,12 +18,12 @@ export async function validateAndProcessRequest<T>({
         if (!validation.success) {
             const errorMessages = validation.error.errors.map(err => err.message).join(", ");
             console.error("Validation error:", errorMessages);
-            return new NextResponse(`Validation failed: ${errorMessages}`, { status: 400 });
+            throw new Error(`Validation failed: ${errorMessages}`);
         }
         
         return handler(validation.data);
     } catch (error) {
         console.error("Request processing error:", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        throw new Error("Internal Server Error"); 
     }
 }

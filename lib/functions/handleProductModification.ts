@@ -17,11 +17,7 @@ export async function handleProductModification<ProductDataType extends ProductD
     productDataHandler: (data: ProductDataType) => Partial<ProductDataType>,
 ) {
     try {
-        const authResponse = await checkIfAuthorized(params.storeId);
-        
-        if (authResponse) {
-            return authResponse;
-        }
+        await checkIfAuthorized(params.storeId);
 
         const existingProduct = await checkIfProductExists(params.productId, productModel);
         

@@ -18,10 +18,10 @@ export async function createProduct(productData: any, storeId: string, productMo
             },
         });
 
-        return new NextResponse(product, { status: 201 });
+        return product;  // Return the created product directly
     } catch (error) {
         console.error("Error creating product with price tracking:", error);
-        return new NextResponse("Failed to create product. Please try again later.", { status: 500 });
+        throw new Error("Failed to create product. Please try again later.");  // Throw an error
     }
 }
 
@@ -33,12 +33,13 @@ export async function deleteProduct(productId: string, productModel: any) {
             },
         });
 
-        return new NextResponse(product, { status: 200 });
+        return product;  // Return the deleted product directly
     } catch (error) {
         console.error("Error deleting product:", error);
-        return new NextResponse("Failed to delete product. Please try again later.", { status: 500 });
+        throw new Error("Failed to delete product. Please try again later.");  // Throw an error
     }
 }
+
 
 export async function updateProduct(productId: string, productData: any, productModel: any, existingProduct: any) {
     try {

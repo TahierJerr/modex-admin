@@ -10,11 +10,7 @@ export async function handleProductRemoval(
     productModel: any,
 ) {
     try {
-        const authResponse = await checkIfAuthorized(params.storeId);
-        
-        if (authResponse) {
-            return authResponse;
-        }
+        await checkIfAuthorized(params.storeId);
         
         const product = await deleteProduct(params.productId, productModel);
         

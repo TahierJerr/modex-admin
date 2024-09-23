@@ -16,11 +16,7 @@ export async function handleProductCreation<ProductDataType extends ProductData>
     productDataHandler: (data: ProductDataType) => Partial<ProductDataType>,
 ) {
     try {
-        const authResponse = await checkIfAuthorized(params.storeId);
-        
-        if (authResponse) {
-            return authResponse;
-        }
+        await checkIfAuthorized(params.storeId);
         
         const productData = await validateAndProcessRequest({
             req,
