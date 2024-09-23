@@ -8,6 +8,7 @@ const storageSchema = z.object({
     model: z.string().min(1, { message: "Storage model is required" }),
     type: z.string().min(1, { message: "Storage type is required" }),
     capacity: z.string().min(1, { message: "Storage capacity is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function POST(

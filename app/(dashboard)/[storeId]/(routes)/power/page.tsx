@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { PowerClient } from "./components/client";
 import { PowerColumn } from "./components/columns";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const PowerPage = async ({
     params
@@ -23,6 +24,8 @@ const PowerPage = async ({
         id: item.id,
         name: item.name,
         model: item.model,
+        price: formatPrice(item.price ?? 0),
+        productUrl: item.productUrl ?? "",
         wattage: item.wattage,
         rating: item.rating,
         createdAt: format(item.createdAt, "MMMM do, yyyy")

@@ -1,12 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
-import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
-import isToday from "@/lib/utils/istoday";
-import PriceData from "@/types";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 export async function GET(
     req: Request,
@@ -17,44 +14,7 @@ export async function GET(
             return new NextResponse("Graphics ID is required", { status: 400 });
         }
 
-        const graphic = await prismadb.graphics.findUnique({
-            where: {
-                id: params.graphicsId,
-            }
-        });
-
-        if (!graphic) {
-            return new NextResponse("Graphics not found", { status: 404 });
-        }
-
-        if (!graphic.priceTrackUrl) {
-            return NextResponse.json(graphic);
-        }
-
-        if (!isToday(graphic.updatedAt)) {
-            try {
-                const priceData = await fetchPriceFromUrl(graphic.priceTrackUrl);
-                const newPrice = priceData.minPriceNumber;
-
-                if (newPrice === graphic.price) {
-                    return NextResponse.json(graphic);
-                }
-
-                const updatedGraphics = await prismadb.graphics.update({
-                    where: {
-                        id: graphic.id,
-                    },
-                    data: {
-                        price: newPrice,
-                    },
-                });
-
-                return NextResponse.json(updatedGraphics);
-            } catch (error) {
-                console.error("[PRICE_FETCH_ERROR_GRAPHICS]", error);
-                return new NextResponse("Failed to update price", { status: 500 });
-            }
-        }
+        const graphic = await handleProductRetrieval(params.graphicsId, prismadb.graphics);
 
         return NextResponse.json(graphic);
     } catch (error) {

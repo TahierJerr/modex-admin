@@ -1,9 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from "@/lib/functions/handleProductRetrieval";
 
 export async function GET (
     req: Request,
@@ -14,11 +14,7 @@ export async function GET (
             return new NextResponse("Processor ID is required", { status: 400 });
         }
 
-        const processor = await prismadb.processor.findUnique({
-            where: {
-                id: params.processorId,
-            }
-        });
+        const processor = await handleProductRetrieval(params.processorId, prismadb.processor);
 
         return NextResponse.json(processor);
 
@@ -34,6 +30,7 @@ const processorSchema = z.object({
     series: z.string().min(1, { message: "Processor series is required" }),
     baseSpeed: z.string().min(1, { message: "Processor base speed is required" }),
     cores: z.string().min(1, { message: "Processor cores is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function PATCH (

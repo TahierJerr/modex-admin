@@ -73,6 +73,7 @@ model Processor {
   cores String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,6 +88,7 @@ model Software {
   name String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +108,7 @@ model Graphics {
   maxClock String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,6 +128,7 @@ model Memory {
   rgb String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -142,6 +146,7 @@ model Storage {
   type String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,6 +164,7 @@ model Power {
   rating String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,6 +183,7 @@ model Pccase {
   ports String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,6 +202,7 @@ model Cooler {
   rgb String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -212,6 +220,7 @@ model Motherboard {
   wifi String
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
+  productUrl String? // Optional product URL
   computers Computer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

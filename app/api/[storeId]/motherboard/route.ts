@@ -8,6 +8,7 @@ const motherboardSchema = z.object({
     model: z.string().min(1, { message: "Motherboard model is required" }),
     formFactor: z.string().min(1, { message: "Motherboard form factor is required" }),
     wifi: z.string().min(1, { message: "Motherboard wifi is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function POST(

@@ -26,6 +26,7 @@ const GraphicsPage = async ({
         brand: item.brand,
         model: item.model,
         price: formatPrice(item.price ?? 0),
+        productUrl: item.productUrl ?? "",
         memory: item.memory,
         memoryType: item.memoryType,
         maxClock: item.maxClock,

@@ -8,6 +8,7 @@ export type ProcessorColumn = {
     id: string
     name: string
     brand: string
+    price: string
     series: string
     baseSpeed: string
     cores: string
@@ -18,6 +19,10 @@ export const columns: ColumnDef<ProcessorColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "brand",

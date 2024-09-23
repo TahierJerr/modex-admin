@@ -22,6 +22,7 @@ const formSchema = z.object({
     model: z.string().min(1),
     capacity: z.string().min(1),
     type: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type StorageFormValues = z.infer<typeof formSchema>;
@@ -45,15 +46,23 @@ export const StorageForm: React.FC<StorageFormProps> = ({
     const toastMessage = initialData ? "Storage updated." : "Storage added.";
     const action = initialData ? "Save changes" : "Add";
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        model: initialData.model,
+        capacity: initialData.capacity,
+        type: initialData.type,
+        priceTrackUrl: initialData.priceTrackUrl || '',
+    } : {
+        name: '',
+        model: '',
+        capacity: '',
+        type: '',
+        priceTrackUrl: '',
+    }
 
     const form = useForm<StorageFormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            model: '',
-            capacity: '',
-            type: '',
-        }
+        defaultValues,
+        resolver: zodResolver(formSchema)
     });
 
     const onSubmit = async (data: StorageFormValues) => {
@@ -164,6 +173,19 @@ export const StorageForm: React.FC<StorageFormProps> = ({
                             <FormLabel>Storage capacity</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="XXXGB or XTB" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price tracking URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price tracking URL" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

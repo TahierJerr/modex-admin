@@ -1,12 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
-import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
-import isToday from "@/lib/utils/istoday";
-import PriceData from "@/types";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 export async function GET (
     req: Request,
@@ -17,44 +14,7 @@ export async function GET (
             return new NextResponse("Memory ID is required", { status: 400 });
         }
 
-        const memory = await prismadb.memory.findUnique({
-            where: {
-                id: params.memoryId,
-            }
-        });
-
-        if (!memory) {
-            return new NextResponse("Memory not found", { status: 404 });
-        }
-
-        if (!memory.priceTrackUrl) {
-            return NextResponse.json(memory);
-        }
-
-        if (!isToday(memory.updatedAt)) {
-            try {
-                const priceData = await fetchPriceFromUrl(memory.priceTrackUrl);
-                const newPrice = priceData.minPriceNumber;
-
-                if (newPrice === memory.price) {
-                    return NextResponse.json(memory);
-                }
-
-                const updatedMemory = await prismadb.memory.update({
-                    where: {
-                        id: memory.id,
-                    },
-                    data: {
-                        price: newPrice,
-                    },
-                });
-
-                return NextResponse.json(updatedMemory);
-            } catch (error) {
-                console.error("[PRICE_FETCH_ERROR]", error);
-                return new NextResponse("Failed to update price", { status: 500 });
-            }
-        }
+        const memory = await handleProductRetrieval(params.memoryId, prismadb.memory);
 
         return NextResponse.json(memory);
 

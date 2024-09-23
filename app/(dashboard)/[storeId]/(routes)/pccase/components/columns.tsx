@@ -9,6 +9,7 @@ export type PccaseColumn = {
     name: string
     model: string
     color: string
+    price: string
     motherboardSupport: string
     ports: string
     createdAt: string;
@@ -18,6 +19,10 @@ export const columns: ColumnDef<PccaseColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "model",

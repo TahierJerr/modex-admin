@@ -23,6 +23,7 @@ const formSchema = z.object({
     series: z.string().min(1),
     baseSpeed: z.string().min(1),
     cores: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type ProcessorFormValues = z.infer<typeof formSchema>;
@@ -47,15 +48,25 @@ export const ProcessorForm: React.FC<ProcessorFormProps> = ({
     const action = initialData ? "Save changes" : "Add";
 
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        brand: initialData.brand,
+        series: initialData.series,
+        baseSpeed: initialData.baseSpeed,
+        cores: initialData.cores,
+        priceTrackUrl: initialData.priceTrackUrl || '',
+    } : {
+        name: '',
+        brand: '',
+        series: '',
+        baseSpeed: '',
+        cores: '',
+        priceTrackUrl: '',
+    }
+
     const form = useForm<ProcessorFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            brand: '',
-            series: '',
-            baseSpeed: '',
-            cores: ''
-        }
+        defaultValues,
     });
 
     const onSubmit = async (data: ProcessorFormValues) => {
@@ -179,6 +190,19 @@ export const ProcessorForm: React.FC<ProcessorFormProps> = ({
                             <FormLabel>Number of cores</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="Processor cores" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price tracking URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price tracking URL" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import isToday from '@/lib/utils/istoday';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
-import PriceData from '@/types';
 
 const coolerSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),

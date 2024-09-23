@@ -9,12 +9,14 @@ export async function createProduct(productData: any, storeId: string, productMo
         }
 
         const newPrice = price?.minPriceNumber
+        const productUrl = price?.productUrl
 
         const product = await productModel.create({
             data: {
                 ...productData,
                 storeId: storeId,
                 newPrice,
+                productUrl,
             },
         });
 
@@ -50,9 +52,11 @@ export async function updateProduct(productId: string, productData: any, product
 
             updatedData.price = newPrice.minPriceNumber;
             updatedData.priceTrackUrl = productData.priceTrackUrl;
+            updatedData.productUrl = newPrice.productUrl;
         } else {
             updatedData.price = existingProduct.price;
             updatedData.priceTrackUrl = existingProduct.priceTrackUrl;
+            updatedData.productUrl = existingProduct.productUrl;
         }
 
         const product = await productModel.update({

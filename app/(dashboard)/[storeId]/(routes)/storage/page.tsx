@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { StorageClient } from "./components/client";
 import { StorageColumn } from "./components/columns";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const StoragePage = async ({
     params
@@ -23,6 +24,8 @@ const StoragePage = async ({
         id: item.id,
         name: item.name,
         model: item.model,
+        price: formatPrice(item.price ?? 0),
+        productUrl: item.productUrl ?? "",
         type: item.type,
         capacity: item.capacity,
         createdAt: format(item.createdAt, "MMMM do, yyyy")

@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { PccaseClient } from "./components/client";
 import { PccaseColumn } from "./components/columns";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const PccasePage = async ({
     params
@@ -24,6 +25,8 @@ const PccasePage = async ({
         name: item.name,
         model: item.model,
         color: item.color,
+        price: formatPrice(item.price ?? 0),
+        productUrl: item.productUrl ?? "",
         motherboardSupport: item.motherboardSupport,
         ports: item.ports,
         createdAt: format(item.createdAt, "MMMM do, yyyy")

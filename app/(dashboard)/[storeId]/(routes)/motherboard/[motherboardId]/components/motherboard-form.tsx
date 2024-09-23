@@ -22,6 +22,7 @@ const formSchema = z.object({
     model: z.string().min(1),
     formFactor: z.string().min(1),
     wifi: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type MotherboardFormValues = z.infer<typeof formSchema>;
@@ -45,15 +46,23 @@ export const MotherboardForm: React.FC<MotherboardFormProps> = ({
     const toastMessage = initialData ? "Motherboard updated." : "Motherboard added.";
     const action = initialData ? "Save changes" : "Add";
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        model: initialData.model,
+        formFactor: initialData.formFactor,
+        wifi: initialData.wifi,
+        priceTrackUrl: initialData.priceTrackUrl || '', // Default to an empty string if null
+    } : {
+        name: '',
+        model: '',
+        formFactor: '',
+        wifi: '',
+        priceTrackUrl: '',
+    }
 
     const form = useForm<MotherboardFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            model: '',
-            formFactor: '',
-            wifi: '',
-        }
+        defaultValues,
     });
 
     const onSubmit = async (data: MotherboardFormValues) => {
@@ -164,6 +173,19 @@ export const MotherboardForm: React.FC<MotherboardFormProps> = ({
                             <FormLabel>Motherboard wifi</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="Yes or No" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price track URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price track URL" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

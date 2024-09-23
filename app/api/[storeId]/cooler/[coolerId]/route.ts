@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
-import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
-import isToday from "@/lib/utils/istoday";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 export async function GET (
     req: Request,
@@ -15,44 +14,7 @@ export async function GET (
             return new NextResponse("Cooler ID is required", { status: 400 });
         }
 
-        const cooler = await prismadb.cooler.findUnique({
-            where: {
-                id: params.coolerId,
-            }
-        });
-
-        if (!cooler) {
-            return new NextResponse("Cooler not found", { status: 404 });
-        }
-
-        if (!cooler.priceTrackUrl) {
-            return NextResponse.json(cooler);
-        }
-
-        if (!isToday(cooler.updatedAt)) {
-            try {
-                const priceData = await fetchPriceFromUrl(cooler.priceTrackUrl);
-                const newPrice = priceData.minPriceNumber;
-
-                if (newPrice === cooler.price) {
-                    return NextResponse.json(cooler);
-                }
-
-                const updatedCooler = await prismadb.cooler.update({
-                    where: {
-                        id: cooler.id,
-                    },
-                    data: {
-                        price: newPrice,
-                    },
-                });
-
-                return NextResponse.json(updatedCooler);
-            } catch (error) {
-                console.error("[PRICE_FETCH_ERROR_COOLER]", error);
-                return new NextResponse("Failed to update price", { status: 500 });
-            }
-        }
+        const cooler = await handleProductRetrieval(params.coolerId, prismadb.cooler);
 
         return NextResponse.json(cooler);
     } catch (error) {

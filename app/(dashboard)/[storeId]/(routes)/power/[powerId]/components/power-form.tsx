@@ -22,6 +22,7 @@ const formSchema = z.object({
     model: z.string().min(1),
     wattage: z.string().min(1),
     rating: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type PowerFormValues = z.infer<typeof formSchema>;
@@ -46,14 +47,23 @@ export const PowerForm: React.FC<PowerFormProps> = ({
     const action = initialData ? "Save changes" : "Add";
 
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        model: initialData.model,
+        wattage: initialData.wattage,
+        rating: initialData.rating,
+        priceTrackUrl: initialData.priceTrackUrl || '',
+    } : {
+        name: '',
+        model: '',
+        wattage: '',
+        rating: '',
+        priceTrackUrl: '',
+    }
+
     const form = useForm<PowerFormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            model: '',
-            wattage: '',
-            rating: '',
-        }
+        defaultValues,
+        resolver: zodResolver(formSchema)
     });
 
     const onSubmit = async (data: PowerFormValues) => {
@@ -164,6 +174,19 @@ export const PowerForm: React.FC<PowerFormProps> = ({
                             <FormLabel>Power supply rating</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="80+ Bronze/Silver/Gold" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price tracking URL</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price tracking URL" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

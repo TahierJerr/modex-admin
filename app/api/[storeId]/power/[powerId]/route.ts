@@ -1,9 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from "@/lib/functions/handleProductRetrieval";
 
 export async function GET (
     req: Request,
@@ -14,11 +14,7 @@ export async function GET (
             return new NextResponse("PSU ID is required", { status: 400 });
         }
 
-        const power = await prismadb.power.findUnique({
-            where: {
-                id: params.powerId,
-            }
-        });
+        const power = await handleProductRetrieval(params.powerId, prismadb.power);
 
         return NextResponse.json(power);
 
@@ -33,6 +29,7 @@ const powerSchema = z.object({
     model: z.string().min(1, { message: "PSU model is required" }),
     wattage: z.string().min(1, { message: "PSU wattage is required" }),
     rating: z.string().min(1, { message: "PSU rating is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function PATCH (

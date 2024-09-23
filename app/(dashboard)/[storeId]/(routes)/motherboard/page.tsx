@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { MotherboardClient } from "./components/client";
 import { MotherboardColumn } from "./components/columns";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const MotherboardPage = async ({
     params
@@ -24,6 +25,8 @@ const MotherboardPage = async ({
         name: item.name,
         model: item.model,
         formFactor: item.formFactor,
+        price: formatPrice(item.price ?? 0),
+        productUrl: item.productUrl ?? "",
         wifi: item.wifi,
         createdAt: format(item.createdAt, "MMMM do, yyyy")
     }));

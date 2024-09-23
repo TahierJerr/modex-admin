@@ -9,6 +9,7 @@ const pccaseSchema = z.object({
     color: z.string().min(1, { message: "Case color is required" }),
     motherboardSupport: z.string().min(1, { message: "Case motherboard support is required" }),
     ports: z.string().min(1, { message: "Case ports are required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function POST(

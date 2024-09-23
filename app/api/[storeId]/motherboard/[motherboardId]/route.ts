@@ -3,6 +3,7 @@ import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
 export async function GET (
     req: Request,
@@ -13,11 +14,8 @@ export async function GET (
             return new NextResponse("Motherboard ID is required", { status: 400 });
         }
 
-        const motherboard = await prismadb.motherboard.findUnique({
-            where: {
-                id: params.motherboardId,
-            }
-        });
+        const motherboard = await handleProductRetrieval(params.motherboardId, prismadb.motherboard);
+
 
         return NextResponse.json(motherboard);
 
@@ -32,6 +30,7 @@ const motherboardSchema = z.object({
     model: z.string().min(1, { message: "Motherboard model is required" }),
     formFactor: z.string().min(1, { message: "Motherboard form factor is required" }),
     wifi: z.string().min(1, { message: "Motherboard wifi is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function PATCH (

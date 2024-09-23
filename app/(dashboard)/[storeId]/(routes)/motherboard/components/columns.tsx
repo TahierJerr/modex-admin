@@ -8,6 +8,7 @@ export type MotherboardColumn = {
     id: string
     name: string
     model: string
+    price: string
     formFactor: string
     wifi: String
     createdAt: string;
@@ -17,6 +18,11 @@ export const columns: ColumnDef<MotherboardColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
+        
     },
     {
         accessorKey: "model",

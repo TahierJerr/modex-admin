@@ -1,9 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from "@/lib/functions/handleProductRetrieval";
 
 export async function GET (
     req: Request,
@@ -14,11 +14,7 @@ export async function GET (
             return new NextResponse("Storage ID is required", { status: 400 });
         }
 
-        const storage = await prismadb.storage.findUnique({
-            where: {
-                id: params.storageId,
-            }
-        });
+        const storage = await handleProductRetrieval(params.storageId, prismadb.storage);
 
         return NextResponse.json(storage);
 
@@ -33,6 +29,7 @@ const storageSchema = z.object({
     model: z.string().min(1, { message: "Storage model is required" }),
     type: z.string().min(1, { message: "Storage type is required" }),
     capacity: z.string().min(1, { message: "Storage capacity is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function PATCH (

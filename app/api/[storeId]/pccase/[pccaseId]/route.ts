@@ -1,9 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
+import { handleProductRetrieval } from "@/lib/functions/handleProductRetrieval";
 
 export async function GET (
     req: Request,
@@ -14,11 +14,8 @@ export async function GET (
             return new NextResponse("Case ID is required", { status: 400 });
         }
 
-        const pccase = await prismadb.pccase.findUnique({
-            where: {
-                id: params.pccaseId,
-            }
-        });
+        const pccase = await handleProductRetrieval(params.pccaseId, prismadb.pccase);
+
 
         return NextResponse.json(pccase);
 
@@ -34,6 +31,7 @@ const pccaseSchema = z.object({
     color: z.string().min(1, { message: "Case color is required" }),
     motherboardSupport: z.string().min(1, { message: "Case motherboard support is required" }),
     ports: z.string().min(1, { message: "Case ports are required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function PATCH (

@@ -8,6 +8,7 @@ const powerSchema = z.object({
     model: z.string().min(1, { message: "PSU model is required" }),
     wattage: z.string().min(1, { message: "PSU wattage is required" }),
     rating: z.string().min(1, { message: "PSU rating is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function POST(

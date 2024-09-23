@@ -4,6 +4,7 @@ import prismadb from "@/lib/prismadb"
 
 import { ProcessorClient } from "./components/client";
 import { ProcessorColumn } from "./components/columns";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const ProcessorsPage = async ({
     params
@@ -24,6 +25,8 @@ const ProcessorsPage = async ({
         name: item.name,
         brand: item.brand,
         series: item.series,
+        price: formatPrice(item.price ?? 0),
+        productUrl: item.productUrl ?? "",
         baseSpeed: item.baseSpeed,
         cores: item.cores,
         createdAt: format(item.createdAt, "MMMM do, yyyy")

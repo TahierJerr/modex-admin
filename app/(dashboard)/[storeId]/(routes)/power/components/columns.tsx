@@ -8,6 +8,7 @@ export type PowerColumn = {
     id: string
     name: string
     model: string
+    price: string
     wattage: string
     rating: string
     createdAt: string;
@@ -17,6 +18,10 @@ export const columns: ColumnDef<PowerColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "model",

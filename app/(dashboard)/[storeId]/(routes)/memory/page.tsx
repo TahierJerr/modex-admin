@@ -28,6 +28,7 @@ const MemoryPage = async ({
         model: item.model,
         type: item.type,
         speed: item.speed,
+        productUrl: item.productUrl ?? "",
         price: formatPrice(item.price ?? 0),
         capacity: item.capacity,
         rgb: item.rgb,

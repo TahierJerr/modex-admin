@@ -8,6 +8,7 @@ export type StorageColumn = {
     id: string
     name: string
     model: string
+    price: string
     type: string
     capacity: string
     createdAt: string;
@@ -17,6 +18,10 @@ export const columns: ColumnDef<StorageColumn>[] = [
     {
         accessorKey: "name",
         header: "Name",
+    },
+    {
+        accessorKey: "price",
+        header: "Price",
     },
     {
         accessorKey: "model",

@@ -23,6 +23,7 @@ const formSchema = z.object({
     color: z.string().min(1),
     motherboardSupport: z.string().min(1),
     ports: z.string().min(1),
+    priceTrackUrl: z.string().url().optional()
 });
 
 type PccaseFormValues = z.infer<typeof formSchema>;
@@ -46,16 +47,24 @@ export const PccaseForm: React.FC<PccaseFormProps> = ({
     const toastMessage = initialData ? "Case updated." : "Case added.";
     const action = initialData ? "Save changes" : "Add";
 
+    const defaultValues = initialData ? {
+        name: initialData.name,
+        model: initialData.model,
+        color: initialData.color,
+        motherboardSupport: initialData.motherboardSupport,
+        ports: initialData.ports,
+        priceTrackUrl: initialData.priceTrackUrl || '',
+    } : {
+        name: '',
+        model: '',
+        color: '',
+        motherboardSupport: '',
+        ports: '',
+    }
 
     const form = useForm<PccaseFormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            model: '',
-            color: '',
-            motherboardSupport: '',
-            ports: '',
-        }
+        defaultValues,
+        resolver: zodResolver(formSchema)
     });
 
     const onSubmit = async (data: PccaseFormValues) => {
@@ -179,6 +188,19 @@ export const PccaseForm: React.FC<PccaseFormProps> = ({
                             <FormLabel>Case ports</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="Case ports" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="priceTrackUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price track url</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Price track url" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

@@ -26,6 +26,7 @@ const CoolerPage = async ({
         price: formatPrice(item.price ?? 0),
         model: item.model,
         type: item.type,
+        productUrl: item.productUrl ?? "",
         fanModel: item.fanModel,
         rgb: item.rgb,
         createdAt: format(item.createdAt, "MMMM do, yyyy")

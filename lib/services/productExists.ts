@@ -7,7 +7,7 @@ export async function checkIfProductExists(productId: string, productModel: any)
         });
 
         if (!product) {
-            return null;
+            return new Error("Product not found");
         }
 
         return product;

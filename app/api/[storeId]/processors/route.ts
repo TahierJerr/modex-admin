@@ -9,6 +9,7 @@ const processorSchema = z.object({
     series: z.string().min(1, { message: "Processor series is required" }),
     baseSpeed: z.string().min(1, { message: "Processor base speed is required" }),
     cores: z.string().min(1, { message: "Processor cores is required" }),
+    priceTrackUrl: z.string().url().optional()
 });
 
 export async function POST(
