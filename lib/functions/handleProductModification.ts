@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkIfAuthorized } from '@/lib/auth/authorization';
 import { validateAndProcessRequest } from '@/lib/utils/requestUtils';
 import { updateProduct } from '@/lib/services/productService';
-import { checkIfProductExists } from '@/lib/services/productExists';
+import { checkIfProductExistsForModification } from '@/lib/services/productExists';
 
 interface ProductData {
     priceTrackUrl?: string;
@@ -19,7 +19,8 @@ export async function handleProductModification<ProductDataType extends ProductD
     try {
         await checkIfAuthorized(params.storeId);
 
-        const existingProduct = await checkIfProductExists(params.productId, productModel);
+        const existingProduct = await checkIfProductExistsForModification(params.productId, productModel);
+
         if (!existingProduct) {
             return new NextResponse("Product not found", { status: 404 });
         }

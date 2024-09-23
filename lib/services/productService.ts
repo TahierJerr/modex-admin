@@ -72,3 +72,29 @@ export async function updateProduct(productId: string, productData: any, product
         throw new Error("Failed to update product. Please try again later.");
     }
 }
+
+export async function getProducts(productModel: any) {
+    try {
+        const products = await productModel.findMany();
+
+        return products;
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        throw new Error("Failed to fetch products. Please try again later.");
+    }
+}
+
+export async function getProduct(productId: string, productModel: any) {
+    try {
+        const product = await productModel.findUnique({
+            where: {
+                id: productId,
+            },
+        });
+
+        return product;
+    } catch (error) {
+        console.error("Error fetching product:", error);
+        throw new Error("Failed to fetch product. Please try again later.");
+    }
+}
