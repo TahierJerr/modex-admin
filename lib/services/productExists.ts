@@ -7,12 +7,12 @@ export async function checkIfProductExists(productId: string, productModel: any)
         });
 
         if (!product) {
-            throw new Error("Product not found");  // Throw an error if the product is not found
+            return null;
         }
 
-        return product;  // Return the found product
+        return product;
     } catch (error) {
         console.error("Error checking if product exists:", error);
-        throw new Error("Internal Server Error");  // Throw an error for unexpected issues
+        throw new Error("Internal Server Error");
     }
 }

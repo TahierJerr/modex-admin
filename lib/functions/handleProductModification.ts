@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { checkIfAuthorized } from '@/lib/auth/authorization';
 import { validateAndProcessRequest } from '@/lib/utils/requestUtils';
-import {  updateProduct } from '@/lib/services/productService';
+import { updateProduct } from '@/lib/services/productService';
 import { checkIfProductExists } from '../services/productExists';
 
 interface ProductData {
@@ -10,7 +10,7 @@ interface ProductData {
 
 export async function handleProductModification<ProductDataType extends ProductData>(
     req: Request,
-    params: { storeId: string, productId: string },
+    params: { storeId: string; productId: string },
     schema: any,
     productType: string,
     productModel: any,
@@ -20,18 +20,26 @@ export async function handleProductModification<ProductDataType extends ProductD
         await checkIfAuthorized(params.storeId);
 
         const existingProduct = await checkIfProductExists(params.productId, productModel);
-        
+        if (!existingProduct) {
+            return new NextResponse("Product not found", { status: 404 });
+        }
+
         const productData = await validateAndProcessRequest({
             req,
             schema,
             handler: (data: ProductDataType) => productDataHandler(data),
         });
+
+        const updatedProduct = await updateProduct(params.productId, productData, productModel, existingProduct);
         
-        const product = await updateProduct(params.productId, productData, productModel, existingProduct);
-        
-        return product;
+        return NextResponse.json(updatedProduct);
     } catch (error) {
-        console.error(`[${productType}_POST_PRODUCT_CREATION]`, error);
-        return new Error("Internal error");
+        console.error(`[${productType}_MODIFICATION]`, error);
+        
+        if (error === "Unauthorized") {
+            return new NextResponse("Unauthorized", { status: 403 });
+        } else {
+            return new NextResponse("Internal error", { status: 500 });
+        }
     }
 }

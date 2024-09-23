@@ -18,12 +18,12 @@ export async function validateAndProcessRequest<T>({
         if (!validation.success) {
             const errorMessages = validation.error.errors.map(err => err.message).join(", ");
             console.error("Validation error:", errorMessages);
-            throw new Error(`Validation failed: ${errorMessages}`);
+            return new Error(`Validation failed: ${errorMessages}`);
         }
         
         return handler(validation.data);
     } catch (error) {
         console.error("Request processing error:", error);
-        throw new Error("Internal Server Error"); 
+        return new Error("Internal Server Error");
     }
 }

@@ -24,7 +24,7 @@ export async function checkIfAuthorized(storeId: string) {
             throw new Error("Unauthorized");
         }
 
-        return true;
+        return true; 
     } catch (error) {
         console.error("Database error:", error);
         throw new Error("Internal Server Error");
