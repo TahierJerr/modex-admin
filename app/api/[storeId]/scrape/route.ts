@@ -28,12 +28,14 @@ export async function GET(
         const priceElement = $('td.shop-price').first();
         if (priceElement.length) {
             productPrice = priceElement.text().trim();
-
-            const linkElement = priceElement.find('a').first();
-            if (linkElement.length) {
-                productUrl = linkElement.attr('href') || '';
-            }
         }
+
+        const linkElement = priceElement.find('a');
+
+        if (linkElement.length) {
+            productUrl = linkElement.attr('href') || '';
+        }
+        
 
         const prices: number[] = [];
         $('.shop-price').each((index, element) => {
