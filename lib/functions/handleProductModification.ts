@@ -29,9 +29,9 @@ export async function handleProductModification<ProductDataType extends ProductD
         
         const product = await updateProduct(params.productId, productData, productModel, existingProduct);
         
-        return NextResponse.json(product);
+        return product;
     } catch (error) {
         console.error(`[${productType}_POST_PRODUCT_CREATION]`, error);
-        return new NextResponse("Internal error", { status: 500 });
+        return new Error("Internal error");
     }
 }
