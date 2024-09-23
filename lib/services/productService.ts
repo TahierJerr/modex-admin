@@ -1,6 +1,4 @@
-import { fetchPriceFromUrl } from "../scraping/fetchPriceFromUrl";
-
-import { NextResponse } from 'next/server';
+import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 
 export async function createProduct(productData: any, storeId: string, productModel: any) {
     let price = null;

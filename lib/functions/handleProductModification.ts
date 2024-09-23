@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkIfAuthorized } from '@/lib/auth/authorization';
 import { validateAndProcessRequest } from '@/lib/utils/requestUtils';
 import { updateProduct } from '@/lib/services/productService';
-import { checkIfProductExists } from '../services/productExists';
+import { checkIfProductExists } from '@/lib/services/productExists';
 
 interface ProductData {
     priceTrackUrl?: string;

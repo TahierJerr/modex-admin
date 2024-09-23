@@ -1,6 +1,5 @@
-import { checkIfAuthorized } from '../auth/authorization';
-import { deleteProduct } from '../services/productService';
-
+import { checkIfAuthorized } from '@/lib/auth/authorization';
+import { deleteProduct } from '@/lib/services/productService';
 
 export async function handleProductRemoval(
     req: Request,

@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { checkIfAuthorized } from '@/lib/auth/authorization';
 import { validateAndProcessRequest } from '@/lib/utils/requestUtils';
 import { createProduct } from '@/lib/services/productService';
