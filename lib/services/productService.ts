@@ -15,8 +15,8 @@ export async function createProduct(productData: any, storeId: string, productMo
             data: {
                 ...productData,
                 storeId: storeId,
-                newPrice,
-                productUrl,
+                price: newPrice,
+                productUrl: productUrl,
             },
         });
 
