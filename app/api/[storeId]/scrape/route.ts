@@ -24,7 +24,7 @@ export async function GET(
         const productName = $('h1').text().trim();
         let productPrice = '';
         
-        const priceSelectors = ['.pricecontainer', '.pricediv', '.price'];
+        const priceSelectors = ['.pricecontainer', '.pricediv', '.price', 'shop-price'];
         for (const selector of priceSelectors) {
             const priceElement = $(selector).first();
             if (priceElement.length) {
