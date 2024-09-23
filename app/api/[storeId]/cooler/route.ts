@@ -52,9 +52,7 @@ export async function GET(
 
             if (!isToday(cooler.updatedAt)) {
                 try {
-                    const response = await fetchPriceFromUrl(cooler.priceTrackUrl);
-                    const priceData: PriceData = await response.json();
-
+                    const priceData = await fetchPriceFromUrl(cooler.priceTrackUrl);
                     const price = priceData.minPriceNumber;
 
                     if (price !== cooler.price) {

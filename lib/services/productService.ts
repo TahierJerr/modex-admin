@@ -58,12 +58,12 @@ export async function updateProduct(productId: string, productData: any, product
             where: {
                 id: productId,
             },
-            data: productData,
+            data: updatedData,
         });
 
-        return new NextResponse(product, { status: 200 });
+        return product;
     } catch (error) {
         console.error("Error updating product:", error);
-        return new NextResponse("Failed to update product. Please try again later.", { status: 500 });
+        throw new Error("Failed to update product. Please try again later.");
     }
 }

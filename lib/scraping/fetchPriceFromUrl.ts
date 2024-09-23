@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cheerio from 'cheerio';
 import formatPrice from "../utils/formatPrice";
-import { NextResponse } from "next/server";
 import priceToNumber from "../utils/priceToNumber";
 
 export async function fetchPriceFromUrl(url: string) {
@@ -18,11 +17,9 @@ export async function fetchPriceFromUrl(url: string) {
         }
 
         const linkElement = priceElement.find('a');
-
         if (linkElement.length) {
             productUrl = linkElement.attr('href') || '';
         }
-        
 
         const prices: number[] = [];
         $('.shop-price').each((index, element) => {
@@ -43,9 +40,9 @@ export async function fetchPriceFromUrl(url: string) {
             : parseFloat(productPrice).toString();
 
         if (!productPrice) {
-            return new NextResponse("Unable to scrape product data", { status: 500 });
+            throw new Error("Unable to scrape product data");
         }
-        
+
         const formattedMinPrice = formatPrice(parseFloat(productPrice));
         const formattedAvgPrice = formatPrice(parseFloat(productAvgPrice));
 
@@ -57,9 +54,9 @@ export async function fetchPriceFromUrl(url: string) {
             productUrl,
         };
 
-        return NextResponse.json(productData); 
+        return productData;
     } catch (error) {
         console.error('[TRACK_PRICE]', error);
-        throw new NextResponse('Failed to track price', { status: 500 });
+        throw new Error('Failed to track price');
     }
 }

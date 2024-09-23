@@ -33,9 +33,7 @@ export async function GET(
 
         if (!isToday(graphic.updatedAt)) {
             try {
-                const response = await fetchPriceFromUrl(graphic.priceTrackUrl);
-                const priceData: PriceData = await response.json();
-
+                const priceData = await fetchPriceFromUrl(graphic.priceTrackUrl);
                 const newPrice = priceData.minPriceNumber;
 
                 if (newPrice === graphic.price) {
@@ -82,7 +80,6 @@ export async function PATCH(
 ) {
     try {
         const updatedGraphics = await handleProductModification(req, { storeId: params.storeId, productId: params.graphicsId }, graphicsSchema, "GRAPHICS", prismadb.graphics, (data) => data);
-
 
         return NextResponse.json(updatedGraphics);
     } catch (error) {

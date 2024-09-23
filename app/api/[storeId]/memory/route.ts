@@ -52,9 +52,7 @@ export async function GET(
             
             if (!isToday(memory.updatedAt)) {
                 try {
-                    const response = await fetchPriceFromUrl(memory.priceTrackUrl);
-                    const priceData: PriceData = await response.json();
-
+                    const priceData = await fetchPriceFromUrl(memory.priceTrackUrl);
                     const price = priceData.minPriceNumber;
                     
                     if (price !== memory.price) {
