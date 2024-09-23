@@ -28,7 +28,7 @@ const ScrapeForm = () => {
     const params = useParams();
 
     const [loading, setLoading] = useState(false);
-    const [productData, setProductData] = useState<{ name: string; price: string; url: string } | null>(null);
+    const [productData, setProductData] = useState<{ name: string; minPrice: string, avgPrice: string, url: string, productUrl: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const onSubmit = async (data: ScrapeFormValues) => {
@@ -88,8 +88,9 @@ const ScrapeForm = () => {
                 <div className="product-data mt-8 p-4 border rounded-lg bg-gray-100">
                     <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
                     <p><strong>Product Name:</strong> {productData.name}</p>
-                    <p><strong>Product Price:</strong> {productData.price}</p>
-                    <p><strong>Product URL:</strong> <a href={productData.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.url}</a></p>
+                    <p><strong>Lowest Product Price:</strong> {productData.minPrice}</p>
+                    <p><strong>Average Product Price:</strong> {productData.avgPrice}</p>
+                    <p><strong>Product URL:</strong> <a href={productData.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
                 </div>
             )}
         </div>

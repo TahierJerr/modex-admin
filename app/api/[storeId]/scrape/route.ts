@@ -23,15 +23,38 @@ export async function GET(
 
         const productName = $('h1').text().trim();
         let productPrice = '';
-        
+        let productUrl = '';
+
         const priceSelectors = ['.pricecontainer', '.pricediv', '.price', 'shop-price'];
         for (const selector of priceSelectors) {
             const priceElement = $(selector).first();
             if (priceElement.length) {
                 productPrice = priceElement.text().trim();
-                break;
+                const linkElement = priceElement.find('a').first();
+                if (linkElement.length) {
+                    productUrl = linkElement.attr('href') || '';
+                }
+                break;  
             }
         }
+
+        const prices: number[] = [];
+        $('.shop-price').each((index, element) => {
+            const priceText = $(element).text().trim();
+            const price = parseFloat(
+            priceText
+                .replace(/€|\s/g, '')
+                .replace(/,/g, '.')
+                .replace(/-/g, '00')
+            );
+            if (!isNaN(price)) {
+            prices.push(price);
+            }
+        });
+
+        const productAvgPrice = prices.length
+            ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toString()
+            : parseFloat(productPrice).toString();
 
         if (!productName || !productPrice) {
             return new NextResponse("Unable to scrape product data", { status: 500 });
@@ -42,12 +65,15 @@ export async function GET(
             .replace(/,/g, '.')
             .replace(/-/g, '00');
         
-        const formattedPrice = parseFloat(productPrice).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
+        const formattedMinPrice = parseFloat(productPrice).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
+        const formattedAvgPrice = parseFloat(productAvgPrice).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
 
         return NextResponse.json({
             name: productName,
-            price: formattedPrice,
+            minPrice: formattedMinPrice,
+            avgPrice: formattedAvgPrice,
             url,
+            productUrl,
         });
     } catch (error) {
         console.error('[SCRAPE_GET]', error);

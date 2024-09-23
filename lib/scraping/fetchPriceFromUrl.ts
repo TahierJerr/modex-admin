@@ -7,7 +7,7 @@ export async function fetchPriceFromUrl(url: string) {
         const $ = cheerio.load(data);
 
         let productPrice = '';
-        const priceSelectors = ['.pricecontainer', '.pricediv', '.price', 'price-tag'];
+        const priceSelectors = ['.pricecontainer', '.pricediv', '.price', 'price-tag', 'shop-price'];
 
         for (const selector of priceSelectors) {
             const priceElement = $(selector).first();
