@@ -19,7 +19,7 @@ export async function handleProductModification<ProductDataType extends ProductD
     try {
         await checkIfAuthorized(params.storeId);
 
-        const existingProduct = await checkIfProductExistsForModification(params.productId, productModel);
+        const existingProduct = await checkIfProductExistsForModification(productModel, params.productId);
 
         if (!existingProduct) {
             return new NextResponse("Product not found", { status: 404 });
