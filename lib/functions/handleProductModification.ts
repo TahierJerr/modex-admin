@@ -33,14 +33,14 @@ export async function handleProductModification<ProductDataType extends ProductD
 
         const updatedProduct = await updateProduct(params.productId, productData, productModel, existingProduct);
         
-        return NextResponse.json(updatedProduct);
+        return updatedProduct;
     } catch (error) {
         console.error(`[${productType}_MODIFICATION]`, error);
         
         if (error === "Unauthorized") {
-            return new NextResponse("Unauthorized", { status: 403 });
+            return new Error("Unauthorized");
         } else {
-            return new NextResponse("Internal error", { status: 500 });
+            return new Error("Internal error");
         }
     }
 }
