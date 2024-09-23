@@ -10,11 +10,13 @@ export async function createProduct(productData: any, storeId: string, productMo
             price = await fetchPriceFromUrl(productData.priceTrackUrl);
         }
 
+        const newPrice = price?.minPriceNumber
+
         const product = await productModel.create({
             data: {
                 ...productData,
                 storeId: storeId,
-                price,
+                newPrice,
             },
         });
 
@@ -48,7 +50,7 @@ export async function updateProduct(productId: string, productData: any, product
         if (productData.priceTrackUrl && productData.priceTrackUrl !== existingProduct.priceTrackUrl) {
             const newPrice = await fetchPriceFromUrl(productData.priceTrackUrl);
 
-            updatedData.price = newPrice;
+            updatedData.price = newPrice.minPriceNumber;
             updatedData.priceTrackUrl = productData.priceTrackUrl;
         } else {
             updatedData.price = existingProduct.price;
