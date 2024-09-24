@@ -114,14 +114,11 @@ const ScrapeForm = () => {
                 <div className="product-data mt-8 p-4 border rounded-lg bg-gray-100">
                     <div>
                         <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
-                        <p><strong>Product Name:</strong> {productData.productName}</p>
+                        <p><strong>Product Name:</strong><a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productName}</a></p>
                         <p><strong>Lowest Product Price:</strong> {productData?.minPrice}</p>
                         <p><strong>Average Product Price:</strong> {productData?.avgPrice}</p>
-                        <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold mb-2">Product Price Chart:</h2>
-                        {/* Pass chartData to PriceChart component */}
                         {chartData && <PriceChart ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} avgPriceNumber={avgPriceNumber} />}
                     </div>
                 </div>
