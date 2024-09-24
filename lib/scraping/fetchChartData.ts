@@ -9,7 +9,6 @@ export async function fetchChartData(url: string): Promise<ProductGraphData[]> {
         }
 
         const data = await response.json();
-        console.log("Fetched data:", data);  // Log the full data response
 
         // Access the source data from the fetched response
         const sourceData = data.dataset?.source;

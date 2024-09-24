@@ -47,14 +47,22 @@ const ScrapeForm = () => {
             if (response.ok && scrapedData) {
                 setProductData(scrapedData.productData);
     
-                const transformedChartData = scrapedData.dataset.source.map((item: any) => ({
-                    date: new Date(item[0]).toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
-                    minPrice: Number(item[1]), // Ensure minPrice is a number
-                    avgPrice: Number(item[2])  // Ensure avgPrice is a number
-                }));
+                // Check if productGraphData is available
+                const chartData = scrapedData.productGraphData; // Use the correct field for chart data
+                if (Array.isArray(chartData)) {
+                    const transformedChartData = chartData.map((item) => ({
+                        date: item.date, // Assuming it's already in the correct format
+                        minPrice: Number(item.minPrice), // Ensure minPrice is a number
+                        avgPrice: Number(item.avgPrice)  // Ensure avgPrice is a number
+                    }));
     
-                // Save transformed chart data to state
-                setChartData(transformedChartData);
+                    // Save transformed chart data to state
+                    setChartData(transformedChartData);
+                } else {
+                    console.error("Chart data is not an array:", chartData);
+                    setError("No chart data available"); // Set error message
+                    setChartData(null); // Reset chart data
+                }
             } else {
                 console.error("Scraping failed:", scrapedData.error);
                 setError(scrapedData.error || "Scraping failed"); // Set error message
@@ -71,7 +79,8 @@ const ScrapeForm = () => {
         } finally {
             setLoading(false);
         }
-    };    
+    };
+    
 
     return (
         <div className="scrape-form">

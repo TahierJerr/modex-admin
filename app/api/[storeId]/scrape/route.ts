@@ -23,8 +23,6 @@ export async function GET(
         const productData: ProductData = await fetchPriceFromUrl(url)
 
         const productGraphData: ProductGraphData[] = await fetchChartData(uri);
-        
-        console.log("Product Chart Data API:", productGraphData);
 
         return NextResponse.json({
             productData,
