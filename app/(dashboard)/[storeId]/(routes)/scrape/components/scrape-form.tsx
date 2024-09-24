@@ -45,10 +45,8 @@ const ScrapeForm = () => {
             const scrapedData = await response.json();
     
             if (response.ok && scrapedData) {
-                // Save product data to state
                 setProductData(scrapedData.productData);
     
-                // Extract and transform the chart data from the dataset
                 const transformedChartData = scrapedData.dataset.source.map((item: any) => ({
                     date: new Date(item[0]).toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
                     minPrice: Number(item[1]), // Ensure minPrice is a number
