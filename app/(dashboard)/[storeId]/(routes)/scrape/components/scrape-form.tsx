@@ -79,9 +79,10 @@ const ScrapeForm = () => {
         }
     };
     
-    const minPrice = formatPrice(Number(productData?.minPrice));
-    const avgPrice = formatPrice(Number(productData?.avgPrice));
+    const minPrice = formatPrice(productData?.minPrice ? Number(productData.minPrice) : 0);
+    const avgPrice = formatPrice(productData?.avgPrice ? Number(productData.avgPrice) : 0);
     const minPriceNumber = priceToNumber((productData?.minPrice ?? "0").toString());
+    const avgPriceNumber = priceToNumber((productData?.avgPrice ?? "0").toString());
 
     return (
         <div className="scrape-form">
@@ -122,7 +123,7 @@ const ScrapeForm = () => {
                     <div>
                         <h2 className="text-lg font-bold mb-2">Product Price Chart:</h2>
                         {/* Pass chartData to PriceChart component */}
-                        {chartData && <PriceChart ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} />}
+                        {chartData && <PriceChart ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} avgPriceNumber={avgPriceNumber} />}
                     </div>
                 </div>
             )}
