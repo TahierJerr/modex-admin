@@ -1,6 +1,6 @@
 import isToday from "@/lib/utils/istoday";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
-import PriceData from "@/types";
+import ProductData from "@/types";
 
 export async function updateProductPrice(product: any, productModel: any) {
     if (!product.priceTrackUrl) {
@@ -9,7 +9,7 @@ export async function updateProductPrice(product: any, productModel: any) {
     
     if (!isToday(product.updatedAt)) {
         try {
-            const priceData: PriceData = await fetchPriceFromUrl(product.priceTrackUrl);
+            const priceData: ProductData = await fetchPriceFromUrl(product.priceTrackUrl);
             const newPrice = priceData.minPriceNumber;
     
             if (newPrice === product.price) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
-import ProductData from '@/types';
+import ProductData, { ProductGraphData } from '@/types';
+import { fetchChartData } from '@/lib/scraping/fetchChartData';
 
 export async function GET(
     req: Request,
@@ -13,18 +14,19 @@ export async function GET(
 
         const { searchParams } = new URL(req.url);
         const url = searchParams.get('url');
+        const uri = searchParams.get('uri');
 
-        if (!url) {
-            return new NextResponse("URL is required", { status: 400 });
+        if (!url || !uri) {
+            return new NextResponse("URL and URI are required", { status: 400 });
         }
 
         const productData: ProductData = await fetchPriceFromUrl(url)
 
+        const productGraphData: ProductGraphData[] = await fetchChartData(uri); 
+
         return NextResponse.json({
-            name: productData.minPrice,
-            minPrice: productData.minPrice,
-            avgPrice: productData.avgPrice,
-            productUrl: productData.productUrl
+            productData,
+            productGraphData,
         });
     } catch (error) {
         console.error('[SCRAPE_GET]', error);

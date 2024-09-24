@@ -8,9 +8,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
+import PriceChart from "@/components/ui/price-chart";
 
 const formSchema = z.object({
     url: z.string().url({
+        message: "Invalid URL",
+    }),
+    uri: z.string().url({
         message: "Invalid URL",
     }),
 });
@@ -22,28 +26,33 @@ const ScrapeForm = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             url: "",
+            uri: "",
         },
     });
 
     const params = useParams();
 
     const [loading, setLoading] = useState(false);
-    const [productData, setProductData] = useState<{ name: string; minPrice: string, avgPrice: string, url: string, productUrl: string } | null>(null);
+    const [productData, setProductData] = useState<{ name: string; minPrice: string; avgPrice: string; url: string; productUrl: string } | null>(null);
+    const [chartData, setChartData] = useState<{ date: string; minPrice: number; avgPrice: number }[] | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const onSubmit = async (data: ScrapeFormValues) => {
         setLoading(true);
         setError(null); // Reset error state
         try {
-            const response = await fetch(`/api/${params.storeId}/scrape?url=${encodeURIComponent(data.url)}`);
+            const response = await fetch(`/api/${params.storeId}/scrape?url=${encodeURIComponent(data.url)}&uri=${encodeURIComponent(data.uri)}`);
             const scrapedData = await response.json();
-    
+
             if (response.ok && scrapedData) {
-                setProductData(scrapedData); // Save the scraped data to state
+                // Save both product data and chart data to state
+                setProductData(scrapedData.productData);
+                setChartData(scrapedData.productGraphData); // Assuming this is how the data is structured
             } else {
                 console.error("Scraping failed:", scrapedData.error);
                 setError(scrapedData.error || "Scraping failed"); // Set error message
                 setProductData(null); // Reset the state if scraping fails
+                setChartData(null); // Reset chart data
             }
         } catch (error) {
             console.error("Error during scraping:", error);
@@ -74,6 +83,19 @@ const ScrapeForm = () => {
                             </FormItem>
                         )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="uri"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel htmlFor="uri">Chart URI</FormLabel>
+                                <FormControl>
+                                    <Input {...field} placeholder="https://tweakers.net/ajax/price_chart/xxxxxxxx/nl/" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <Button type="submit" disabled={loading}>
                         {loading ? "Scraping..." : "Scrape Product Data"}
                     </Button>
@@ -86,11 +108,18 @@ const ScrapeForm = () => {
             )}
             {productData && (
                 <div className="product-data mt-8 p-4 border rounded-lg bg-gray-100">
-                    <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
-                    <p><strong>Product Name:</strong> {productData.name}</p>
-                    <p><strong>Lowest Product Price:</strong> {productData.minPrice}</p>
-                    <p><strong>Average Product Price:</strong> {productData.avgPrice}</p>
-                    <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
+                    <div>
+                        <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
+                        <p><strong>Product Name:</strong> {productData.name}</p>
+                        <p><strong>Lowest Product Price:</strong> {productData.minPrice}</p>
+                        <p><strong>Average Product Price:</strong> {productData.avgPrice}</p>
+                        <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold mb-2">Product Price Chart:</h2>
+                        {/* Pass chartData to PriceChart component */}
+                        {chartData && <PriceChart productData={chartData} />}
+                    </div>
                 </div>
             )}
         </div>

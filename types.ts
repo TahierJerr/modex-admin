@@ -5,3 +5,12 @@ export default interface ProductData {
     avgPrice: string;
     productUrl: string;
 }
+
+export interface ProductGraphData {
+    /** 
+     * Date in format YYYY-MM-DD (e.g., "2023-03-01")
+     */
+    date: string;
+    minPrice: number;
+    avgPrice: number;
+}
