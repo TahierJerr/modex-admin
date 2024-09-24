@@ -79,8 +79,7 @@ const ScrapeForm = () => {
         }
     };
     
-    const minPrice = formatPrice(productData?.minPrice ? Number(productData.minPrice) : 0);
-    const avgPrice = formatPrice(productData?.avgPrice ? Number(productData.avgPrice) : 0);
+
     const minPriceNumber = priceToNumber((productData?.minPrice ?? "0").toString());
     const avgPriceNumber = priceToNumber((productData?.avgPrice ?? "0").toString());
 
@@ -116,8 +115,8 @@ const ScrapeForm = () => {
                     <div>
                         <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
                         <p><strong>Product Name:</strong> {productData.productName}</p>
-                        <p><strong>Lowest Product Price:</strong> {minPrice}</p>
-                        <p><strong>Average Product Price:</strong> {avgPrice}</p>
+                        <p><strong>Lowest Product Price:</strong> {productData?.minPrice}</p>
+                        <p><strong>Average Product Price:</strong> {productData?.avgPrice}</p>
                         <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
                     </div>
                     <div>

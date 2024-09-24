@@ -48,18 +48,20 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
             
             switch (value) {
                 case '2w':
-                start = subWeeks(end, 2)
+                    start = subWeeks(end, 2)
+                    break
                 case '1m':
-                start = subMonths(end, 1)
-                break
+                    start = subMonths(end, 1)
+                    break
                 case '6m':
-                start = subMonths(end, 6)
-                break
+                    start = subMonths(end, 6)
+                    break
                 case '1y':
-                start = subYears(end, 1)
-                break
+                    start = subYears(end, 1)
+                    break
                 default:
-                return
+                    start = subMonths(end, 1)
+                    break
             }
             
             setDateRange({ from: start, to: end })
@@ -67,8 +69,9 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
         
         const filteredData = filterData(dateRange?.from, dateRange?.to)
 
-        const yAxisMin = Math.floor(minPriceNumber / 2) // Start from half of the minimum price
-        const yAxisMax = Math.ceil(avgPriceNumber * 1.2)
+        const yAxisMin = Math.floor(minPriceNumber / 2) 
+        const yAxisMax = Math.ceil(avgPriceNumber * 1.8)
+        
 
         return (
         <Card className="w-full max-w-[1200px] mx-auto">
@@ -131,13 +134,13 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis 
                             dataKey="date" 
-                            tickFormatter={(tick) => format(new Date(tick), 'MMM dd')}
+                            tickFormatter={(tick) => format(new Date(tick), 'dd MMM')}
                             />
                             <YAxis 
-                            domain={[yAxisMin, yAxisMax]}
-                            tickFormatter={(value) => `€${value}`}
+                                domain={[yAxisMin, yAxisMax]}
+                                tickFormatter={(value) => `€${value}`}
                             />
-                            <Tooltip labelFormatter={(label) => format(new Date(label), 'yyyy-MM-dd')} />
+                            <Tooltip labelFormatter={(label) => format(new Date(label), 'dd-MM-yyyy')} />
                                 <Legend />
                                 <Line type="monotone" dataKey="avgPrice" stroke="#ff2c2c" name="Average Price" />
                                 <Line type="monotone" dataKey="minPrice" stroke="#32cd32" name="Minimum Price" />
