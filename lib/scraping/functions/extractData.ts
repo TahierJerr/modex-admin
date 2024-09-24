@@ -1,0 +1,27 @@
+export function extractPriceData($: any) {
+    const priceElement = $('td.shop-price').first();
+    if (!priceElement.length) {
+        throw new Error("Price not found.");
+    }
+
+    const productPrice = priceElement.text().trim();
+    const linkElement = priceElement.find('a');
+    const productUrl = linkElement.length ? linkElement.attr('href') || '' : '';
+
+    if (!productUrl) {
+        throw new Error("Url not found.");
+    }
+
+    return { productPrice, productUrl };
+}
+
+export function extractUri($: cheerio.Root) {
+    const uriElement = $('twk-price-history-graph#priceHistoryGraph').first();
+    const productUri = uriElement.length ? uriElement.attr('optionsrc') || '' : '';
+
+    if (!productUri) {
+        throw new Error("Uri not found.");
+    }
+
+    return productUri;
+}
