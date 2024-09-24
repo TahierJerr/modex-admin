@@ -43,11 +43,20 @@ const ScrapeForm = () => {
         try {
             const response = await fetch(`/api/${params.storeId}/scrape?url=${encodeURIComponent(data.url)}&uri=${encodeURIComponent(data.uri)}`);
             const scrapedData = await response.json();
-
+    
             if (response.ok && scrapedData) {
-                // Save both product data and chart data to state
+                // Save product data to state
                 setProductData(scrapedData.productData);
-                setChartData(scrapedData.productGraphData); // Assuming this is how the data is structured
+    
+                // Transform the chart data to match the ProductGraphData interface
+                const transformedChartData = scrapedData.productGraphData.map((item: any) => ({
+                    date: item.date,
+                    minPrice: Number(item.minPrice), // Ensure this is a number
+                    avgPrice: Number(item.avgPrice)  // Ensure this is a number
+                }));
+    
+                // Save transformed chart data to state
+                setChartData(transformedChartData);
             } else {
                 console.error("Scraping failed:", scrapedData.error);
                 setError(scrapedData.error || "Scraping failed"); // Set error message
