@@ -3,16 +3,15 @@ import priceToNumber from "@/lib/utils/priceToNumber";
 
 export function formatPrices(productPrice: string) {
     const prices: number[] = [];
-    const parsedPrice = parseFloat(productPrice.replace(/€|\s/g, '').replace(/,/g, '.').replace(/-/g, '00'));
-    if (!isNaN(parsedPrice)) {
-        prices.push(parsedPrice);
-    }
+    const parsedPrice = formatPrice(parseFloat(productPrice));
+
+    prices.push(parseFloat(productPrice));
 
     const avgPrice = prices.length
         ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toString()
         : parsedPrice.toString();
 
-    const formattedMinPrice = formatPrice(parsedPrice);
+    const formattedMinPrice = formatPrice(parseFloat(productPrice));
     const formattedAvgPrice = formatPrice(parseFloat(avgPrice));
 
     return {

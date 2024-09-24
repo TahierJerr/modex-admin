@@ -16,10 +16,10 @@ import { ProductGraphData } from '@/types'
 
 interface PriceChartProps {
     productData: ProductGraphData[]
-    productType: string;
+    ProductName: string;
 }
 
-const PriceChart:React.FC<PriceChartProps> = ({ productData, productType }) => {
+const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName }) => {
     const [data, setData] = useState<typeof productData>([])
         const [dateRange, setDateRange] = useState<DateRange | undefined>({
             from: subYears(new Date(), 1),
@@ -29,7 +29,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, productType }) => {
         
         useEffect(() => {
             setData(productData)
-        }, [])
+        }, [productData])
         
         const filterData = (start: Date | undefined, end: Date | undefined) => {
             if (!start || !end || !data) return []
@@ -66,7 +66,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, productType }) => {
         return (
         <Card className="w-full max-w-[1200px] mx-auto">
             <CardHeader>
-                <CardTitle>{productType} Price Trends</CardTitle>
+                <CardTitle>{ProductName} Price Trends</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex space-x-4 mb-4">

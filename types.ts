@@ -1,4 +1,5 @@
 export default interface ProductData {
+    productName: string;
     minPriceNumber: number;
     avgPriceNumber: number;
     minPrice: string;

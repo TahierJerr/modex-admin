@@ -29,7 +29,7 @@ const ScrapeForm = () => {
     const params = useParams();
 
     const [loading, setLoading] = useState(false);
-    const [productData, setProductData] = useState<{ name: string; minPrice: string; avgPrice: string; url: string; productUrl: string,  } | null>(null);
+    const [productData, setProductData] = useState<{ productName: string; minPrice: string; avgPrice: string; url: string; productUrl: string,  } | null>(null);
     const [chartData, setChartData] = useState<{ date: string; minPrice: number; avgPrice: number }[] | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -109,7 +109,7 @@ const ScrapeForm = () => {
                 <div className="product-data mt-8 p-4 border rounded-lg bg-gray-100">
                     <div>
                         <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
-                        <p><strong>Product Name:</strong> {productData.name}</p>
+                        <p><strong>Product Name:</strong> {productData.productName}</p>
                         <p><strong>Lowest Product Price:</strong> {productData.minPrice}</p>
                         <p><strong>Average Product Price:</strong> {productData.avgPrice}</p>
                         <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
@@ -117,7 +117,7 @@ const ScrapeForm = () => {
                     <div>
                         <h2 className="text-lg font-bold mb-2">Product Price Chart:</h2>
                         {/* Pass chartData to PriceChart component */}
-                        {chartData && <PriceChart productType={productData.name} productData={chartData} />}
+                        {chartData && <PriceChart ProductName={productData.productName} productData={chartData} />}
                     </div>
                 </div>
             )}

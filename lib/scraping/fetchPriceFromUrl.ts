@@ -2,7 +2,7 @@ import axios from "axios";
 import * as cheerio from 'cheerio';
 import { ProductGraphData } from "@/types";
 import { fetchChartData } from "./fetchChartData";
-import { extractPriceData, extractUri } from "./functions/extractData";
+import { extractName, extractPriceData, extractUri } from "./functions/extractData";
 import { formatPrices } from "./functions/formatPrices";
 
 export async function fetchPriceFromUrl(url: string) {
@@ -13,11 +13,13 @@ export async function fetchPriceFromUrl(url: string) {
 
         const { productPrice, productUrl } = extractPriceData($);
         const productUri = extractUri($);
+        const productName = extractName($);
         
         const productGraphData: ProductGraphData[] = await fetchChartData(productUri)
         const { minPriceNumber, avgPriceNumber, minPrice, avgPrice } = formatPrices(productPrice)
         
         return {
+            productName,
             minPriceNumber,
             avgPriceNumber,
             minPrice,
