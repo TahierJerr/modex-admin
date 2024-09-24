@@ -14,9 +14,6 @@ const formSchema = z.object({
     url: z.string().url({
         message: "Invalid URL",
     }),
-    uri: z.string().url({
-        message: "Invalid URL",
-    }),
 });
 
 type ScrapeFormValues = z.infer<typeof formSchema>;
@@ -26,14 +23,13 @@ const ScrapeForm = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             url: "",
-            uri: "",
         },
     });
 
     const params = useParams();
 
     const [loading, setLoading] = useState(false);
-    const [productData, setProductData] = useState<{ name: string; minPrice: string; avgPrice: string; url: string; productUrl: string } | null>(null);
+    const [productData, setProductData] = useState<{ name: string; minPrice: string; avgPrice: string; url: string; productUrl: string,  } | null>(null);
     const [chartData, setChartData] = useState<{ date: string; minPrice: number; avgPrice: number }[] | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +37,7 @@ const ScrapeForm = () => {
         setLoading(true);
         setError(null); // Reset error state
         try {
-            const response = await fetch(`/api/${params.storeId}/scrape?url=${encodeURIComponent(data.url)}&uri=${encodeURIComponent(data.uri)}`);
+            const response = await fetch(`/api/${params.storeId}/scrape?url=${encodeURIComponent(data.url)}`);
             const scrapedData = await response.json();
     
             if (response.ok && scrapedData) {
@@ -94,19 +90,6 @@ const ScrapeForm = () => {
                                 <FormLabel htmlFor="url">URL</FormLabel>
                                 <FormControl>
                                     <Input {...field} placeholder="https://www.example.com/product" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="uri"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel htmlFor="uri">Chart URI</FormLabel>
-                                <FormControl>
-                                    <Input {...field} placeholder="https://tweakers.net/ajax/price_chart/xxxxxxxx/nl/" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

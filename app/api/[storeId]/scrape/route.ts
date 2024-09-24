@@ -22,11 +22,11 @@ export async function GET(
 
         const productData: ProductData = await fetchPriceFromUrl(url)
 
-        const productGraphData: ProductGraphData[] = await fetchChartData(uri);
+        const productGraphData = productData.productGraphData
 
         return NextResponse.json({
             productData,
-            productGraphData,
+            productGraphData
         });
     } catch (error) {
         console.error('[SCRAPE_GET]', error);

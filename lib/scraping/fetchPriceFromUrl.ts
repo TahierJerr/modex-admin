@@ -2,6 +2,8 @@ import axios from "axios";
 import * as cheerio from 'cheerio';
 import formatPrice from "../utils/formatPrice";
 import priceToNumber from "../utils/priceToNumber";
+import { ProductGraphData } from "@/types";
+import { fetchChartData } from "./fetchChartData";
 
 export async function fetchPriceFromUrl(url: string) {
     try {
@@ -10,16 +12,29 @@ export async function fetchPriceFromUrl(url: string) {
 
         let productPrice = '';
         let productUrl = '';
+        let productUri = '';
 
         const priceElement = $('td.shop-price').first();
+
         if (priceElement.length) {
             productPrice = priceElement.text().trim();
         }
 
         const linkElement = priceElement.find('a');
+
         if (linkElement.length) {
             productUrl = linkElement.attr('href') || '';
         }
+
+        const uriElement = $('.priceHistoryGraph').first();
+
+        if (uriElement.length) {
+            productUri = uriElement.attr('optionsrc') || '';
+        }
+
+        const productGraphData: ProductGraphData[] = await fetchChartData(productUri)
+
+        console.log(productGraphData)
 
         const prices: number[] = [];
         $('.shop-price').each((index, element) => {
@@ -54,7 +69,10 @@ export async function fetchPriceFromUrl(url: string) {
             productUrl,
         };
 
-        return productData;
+        return {
+            ...productData,
+            productGraphData
+        }
     } catch (error) {
         console.error('[TRACK_PRICE]', error);
         throw new Error('Failed to track price');

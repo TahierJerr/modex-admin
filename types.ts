@@ -4,6 +4,7 @@ export default interface ProductData {
     minPrice: string;
     avgPrice: string;
     productUrl: string;
+    productGraphData: ProductGraphData[];
 }
 
 export interface ProductGraphData {
