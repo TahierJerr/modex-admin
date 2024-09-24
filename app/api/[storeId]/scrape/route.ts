@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
 import ProductData, { ProductGraphData } from '@/types';
-import { fetchChartData } from '@/lib/scraping/fetchChartData';
 
 export async function GET(
     req: Request,
@@ -14,10 +13,9 @@ export async function GET(
 
         const { searchParams } = new URL(req.url);
         const url = searchParams.get('url');
-        const uri = searchParams.get('uri');
 
-        if (!url || !uri) {
-            return new NextResponse("URL and URI are required", { status: 400 });
+        if (!url) {
+            return new NextResponse("URL is required", { status: 400 });
         }
 
         const productData: ProductData = await fetchPriceFromUrl(url)
