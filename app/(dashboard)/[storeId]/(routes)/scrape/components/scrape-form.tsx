@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import PriceChart from "@/components/ui/price-chart";
 import formatPrice from "@/lib/utils/formatPrice";
+import priceToNumber from "@/lib/utils/priceToNumber";
 
 const formSchema = z.object({
     url: z.string().url({
@@ -80,6 +81,7 @@ const ScrapeForm = () => {
     
     const minPrice = formatPrice(Number(productData?.minPrice));
     const avgPrice = formatPrice(Number(productData?.avgPrice));
+    const minPriceNumber = priceToNumber((productData?.minPrice ?? "0").toString());
 
     return (
         <div className="scrape-form">
@@ -120,7 +122,7 @@ const ScrapeForm = () => {
                     <div>
                         <h2 className="text-lg font-bold mb-2">Product Price Chart:</h2>
                         {/* Pass chartData to PriceChart component */}
-                        {chartData && <PriceChart ProductName={productData.productName} productData={chartData} />}
+                        {chartData && <PriceChart ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} />}
                     </div>
                 </div>
             )}
