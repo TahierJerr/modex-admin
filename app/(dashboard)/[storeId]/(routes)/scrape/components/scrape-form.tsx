@@ -48,11 +48,11 @@ const ScrapeForm = () => {
                 // Save product data to state
                 setProductData(scrapedData.productData);
     
-                // Transform the chart data to match the ProductGraphData interface
-                const transformedChartData = scrapedData.productGraphData.map((item: any) => ({
-                    date: item.date,
-                    minPrice: Number(item.minPrice), // Ensure this is a number
-                    avgPrice: Number(item.avgPrice)  // Ensure this is a number
+                // Extract and transform the chart data from the dataset
+                const transformedChartData = scrapedData.dataset.source.map((item: any) => ({
+                    date: new Date(item[0]).toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
+                    minPrice: Number(item[1]), // Ensure minPrice is a number
+                    avgPrice: Number(item[2])  // Ensure avgPrice is a number
                 }));
     
                 // Save transformed chart data to state
@@ -73,7 +73,7 @@ const ScrapeForm = () => {
         } finally {
             setLoading(false);
         }
-    };
+    };    
 
     return (
         <div className="scrape-form">
