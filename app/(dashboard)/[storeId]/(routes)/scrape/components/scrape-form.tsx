@@ -9,6 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import PriceChart from "@/components/ui/price-chart";
+import formatPrice from "@/lib/utils/formatPrice";
 
 const formSchema = z.object({
     url: z.string().url({
@@ -77,6 +78,8 @@ const ScrapeForm = () => {
         }
     };
     
+    const minPrice = formatPrice(Number(productData?.minPrice));
+    const avgPrice = formatPrice(Number(productData?.avgPrice));
 
     return (
         <div className="scrape-form">
@@ -110,8 +113,8 @@ const ScrapeForm = () => {
                     <div>
                         <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
                         <p><strong>Product Name:</strong> {productData.productName}</p>
-                        <p><strong>Lowest Product Price:</strong> {productData.minPrice}</p>
-                        <p><strong>Average Product Price:</strong> {productData.avgPrice}</p>
+                        <p><strong>Lowest Product Price:</strong> {minPrice}</p>
+                        <p><strong>Average Product Price:</strong> {avgPrice}</p>
                         <p><strong>Product URL:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productUrl}</a></p>
                     </div>
                     <div>
