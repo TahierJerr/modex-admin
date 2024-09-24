@@ -134,7 +134,7 @@ const ScrapeForm = () => {
                     <div>
                         <h2 className="text-lg font-bold mb-2">Product Price Chart:</h2>
                         {/* Pass chartData to PriceChart component */}
-                        {chartData && <PriceChart productData={chartData} />}
+                        {chartData && <PriceChart productType={productData.name} productData={chartData} />}
                     </div>
                 </div>
             )}

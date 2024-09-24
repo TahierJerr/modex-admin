@@ -16,9 +16,10 @@ import { ProductGraphData } from '@/types'
 
 interface PriceChartProps {
     productData: ProductGraphData[]
+    productType: string;
 }
 
-const PriceChart:React.FC<PriceChartProps> = ({ productData }) => {
+const PriceChart:React.FC<PriceChartProps> = ({ productData, productType }) => {
     const [data, setData] = useState<typeof productData>([])
         const [dateRange, setDateRange] = useState<DateRange | undefined>({
             from: subYears(new Date(), 1),
@@ -65,7 +66,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData }) => {
         return (
         <Card className="w-full max-w-[1200px] mx-auto">
             <CardHeader>
-                <CardTitle>Graphics Card Price Trends</CardTitle>
+                <CardTitle>{productType} Price Trends</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex space-x-4 mb-4">
@@ -127,8 +128,8 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData }) => {
                             <YAxis />
                             <Tooltip labelFormatter={(label) => format(new Date(label), 'yyyy-MM-dd')} />
                                 <Legend />
-                                <Line type="monotone" dataKey="avgPrice" stroke="hsl(var(--primary))" name="Average Price" />
-                                <Line type="monotone" dataKey="minPrice" stroke="hsl(var(--secondary))" name="Minimum Price" />
+                                <Line type="monotone" dataKey="avgPrice" stroke="#ff2c2c" name="Average Price" />
+                                <Line type="monotone" dataKey="minPrice" stroke="#32cd32" name="Minimum Price" />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
