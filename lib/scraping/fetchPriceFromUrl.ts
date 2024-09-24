@@ -8,6 +8,7 @@ import { fetchChartData } from "./fetchChartData";
 export async function fetchPriceFromUrl(url: string) {
     try {
         const { data } = await axios.get(url);
+        console.log(url)
         const $ = cheerio.load(data);
 
         let productPrice = '';
@@ -22,14 +23,26 @@ export async function fetchPriceFromUrl(url: string) {
 
         const linkElement = priceElement.find('a');
 
+        if (!productPrice) {
+            throw new Error("Price not found.");
+        }
+
         if (linkElement.length) {
             productUrl = linkElement.attr('href') || '';
+        }
+
+        if (!productUrl) {
+            throw new Error("Url not found.");
         }
 
         const uriElement = $('.priceHistoryGraph').first();
 
         if (uriElement.length) {
             productUri = uriElement.attr('optionsrc') || '';
+        }
+
+        if (!productUri) {
+            throw new Error("Uri not found.");
         }
 
         const productGraphData: ProductGraphData[] = await fetchChartData(productUri)
@@ -68,6 +81,9 @@ export async function fetchPriceFromUrl(url: string) {
             avgPrice: formattedAvgPrice,
             productUrl,
         };
+
+        console.log(`Product Data: ${productData}`)
+        console.log(`Product Graph Data: ${productGraphData}`)
 
         return {
             ...productData,
