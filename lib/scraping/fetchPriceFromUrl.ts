@@ -3,35 +3,47 @@ import * as cheerio from 'cheerio';
 import formatPrice from "../utils/formatPrice";
 import priceToNumber from "../utils/priceToNumber";
 
-export async function fetchPriceFromUrl(url: string) {
+interface ProductData {
+    minPriceNumber: number;
+    avgPriceNumber: number;
+    minPrice: string;
+    avgPrice: string;
+    productUrl: string;
+}
+
+export async function fetchPriceFromUrl(url: string): Promise<ProductData> {
     try {
         const { data } = await axios.get(url);
         const $ = cheerio.load(data);
 
         let productPrice = '';
         let productUrl = '';
-
-        const priceElement = $('td.shop-price').first();
-        if (priceElement.length) {
-            productPrice = priceElement.text().trim();
-        }
-
-        const linkElement = priceElement.find('a');
-        if (linkElement.length) {
-            productUrl = linkElement.attr('href') || '';
-        }
-
         const prices: number[] = [];
-        $('.shop-price').each((index, element) => {
-            const priceText = $(element).text().trim();
+
+        $('.shop-listing tr').each((index, element) => {
+            const priceElement = $(element).find('td.shop-price').first();
+            const deliveryElement = $(element).find('td.shop-delivery').first();
+            
+            const priceText = priceElement.text().trim();
             const price = parseFloat(
                 priceText
                     .replace(/€|\s/g, '')
                     .replace(/,/g, '.')
                     .replace(/-/g, '00')
             );
-            if (!isNaN(price)) {
+
+            const deliveryText = deliveryElement.text().trim().toLowerCase();
+
+            if (!isNaN(price) && deliveryText.includes("morgen")) {
                 prices.push(price);
+
+                if (!productPrice) {
+                    productPrice = priceText;
+                    const linkElement = priceElement.find('a');
+                    if (linkElement.length) {
+                        productUrl = linkElement.attr('href') || '';
+                    }
+                }
             }
         });
 
@@ -40,13 +52,13 @@ export async function fetchPriceFromUrl(url: string) {
             : parseFloat(productPrice).toString();
 
         if (!productPrice) {
-            throw new Error("Unable to scrape product data");
+            throw new Error("Unable to scrape product data with valid delivery time");
         }
 
-        const formattedMinPrice = formatPrice(parseFloat(productPrice));
-        const formattedAvgPrice = formatPrice(parseFloat(productAvgPrice));
+        const formattedMinPrice = formatPrice(priceToNumber(productPrice));
+        const formattedAvgPrice = formatPrice(priceToNumber(productAvgPrice));
 
-        const productData = {
+        const productData: ProductData = {
             minPriceNumber: priceToNumber(productPrice),
             avgPriceNumber: priceToNumber(productAvgPrice),
             minPrice: formattedMinPrice,

@@ -1,4 +1,4 @@
-export default interface PriceData {
+export default interface ProductData {
     minPriceNumber: number;
     avgPriceNumber: number;
     minPrice: string;

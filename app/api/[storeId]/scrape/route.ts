@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-import formatPrice from '@/lib/utils/formatPrice';
+import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
+import ProductData from '@/types';
 
 export async function GET(
     req: Request,
@@ -19,55 +18,13 @@ export async function GET(
             return new NextResponse("URL is required", { status: 400 });
         }
 
-        const { data } = await axios.get(url);
-        const $ = cheerio.load(data);
-
-        const productName = $('h1').text().trim();
-        let productPrice = '';
-        let productUrl = '';
-
-        const priceElement = $('td.shop-price').first();
-        if (priceElement.length) {
-            productPrice = priceElement.text().trim();
-        }
-
-        const linkElement = priceElement.find('a');
-
-        if (linkElement.length) {
-            productUrl = linkElement.attr('href') || '';
-        }
-        
-
-        const prices: number[] = [];
-        $('.shop-price').each((index, element) => {
-            const priceText = $(element).text().trim();
-            const price = parseFloat(
-                priceText
-                    .replace(/€|\s/g, '')
-                    .replace(/,/g, '.')
-                    .replace(/-/g, '00')
-            );
-            if (!isNaN(price)) {
-                prices.push(price);
-            }
-        });
-
-        const productAvgPrice = prices.length
-            ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toString()
-            : parseFloat(productPrice).toString();
-
-        if (!productName || !productPrice) {
-            return new NextResponse("Unable to scrape product data", { status: 500 });
-        }
-        
-        const formattedMinPrice = formatPrice(parseFloat(productPrice));
-        const formattedAvgPrice = formatPrice(parseFloat(productAvgPrice));
+        const productData: ProductData = await fetchPriceFromUrl(url)
 
         return NextResponse.json({
-            name: productName,
-            minPrice: formattedMinPrice,
-            avgPrice: formattedAvgPrice,
-            productUrl,
+            name: productData.minPrice,
+            minPrice: productData.minPrice,
+            avgPrice: productData.avgPrice,
+            productUrl: productData.productUrl
         });
     } catch (error) {
         console.error('[SCRAPE_GET]', error);
