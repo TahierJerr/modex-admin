@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Calendar as CalendarIcon } from "lucide-react"
-import { format, subMonths, subYears, startOfDay, endOfDay } from "date-fns"
+import { format, subMonths, subYears, startOfDay, endOfDay, subWeeks } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
@@ -17,9 +17,10 @@ import { ProductGraphData } from '@/types'
 interface PriceChartProps {
     productData: ProductGraphData[]
     ProductName: string;
+    minPriceNumber: number;
 }
 
-const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName }) => {
+const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPriceNumber }) => {
     const [data, setData] = useState<typeof productData>([])
         const [dateRange, setDateRange] = useState<DateRange | undefined>({
             from: subYears(new Date(), 1),
@@ -45,6 +46,8 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName }) => {
             let start: Date
             
             switch (value) {
+                case '2w':
+                start = subWeeks(end, 2)
                 case '1m':
                 start = subMonths(end, 1)
                 break
@@ -62,7 +65,9 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName }) => {
         }
         
         const filteredData = filterData(dateRange?.from, dateRange?.to)
-        
+
+        const XaxisNumber = Math.floor(minPriceNumber / 50)
+
         return (
         <Card className="w-full max-w-[1200px] mx-auto">
             <CardHeader>
@@ -75,6 +80,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName }) => {
                             <SelectValue placeholder="Select time range" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="2w">Last 2 Weeks</SelectItem>
                             <SelectItem value="1m">Last Month</SelectItem>
                             <SelectItem value="6m">Last 6 Months</SelectItem>
                             <SelectItem value="1y">Last Year</SelectItem>
@@ -125,7 +131,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName }) => {
                             dataKey="date" 
                             tickFormatter={(tick) => format(new Date(tick), 'MMM dd')}
                             />
-                            <YAxis />
+                            <YAxis from={XaxisNumber} />
                             <Tooltip labelFormatter={(label) => format(new Date(label), 'yyyy-MM-dd')} />
                                 <Legend />
                                 <Line type="monotone" dataKey="avgPrice" stroke="#ff2c2c" name="Average Price" />
