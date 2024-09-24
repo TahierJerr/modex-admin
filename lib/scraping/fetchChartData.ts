@@ -8,13 +8,12 @@ export async function fetchChartData(url: string): Promise<ProductGraphData[]> {
             throw new Error(`HTTP error! status: ${response.status} for URL: ${url}`);
         }
 
-        const data: { dataset: ProductGraphData[] } = await response.json();
-        
-        if (!Array.isArray(data.dataset)) {
-            throw new Error(`Expected an array for dataset but received: ${typeof data.dataset}`);
-        }
+        const data = await response.json();
+        console.log("Fetched data:", data);  // Log the full data response
 
-        return data.dataset;
+        // Fallback if dataset is not an array
+        const dataset = Array.isArray(data.dataset) ? data.dataset : [];
+        return dataset;
     } catch (error) {
         console.error("Failed to fetch chart data:", error);
         throw error;
