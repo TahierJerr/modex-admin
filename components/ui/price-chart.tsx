@@ -68,10 +68,12 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
     
     const filteredData = filterData(dateRange?.from, dateRange?.to)
 
-    const yAxisMin = Math.max(Math.min(...filteredData.map(item => item.minPrice), minPriceNumber))
+    console.log(`minPriceNumber: ${minPriceNumber}, avgPriceNumber: ${avgPriceNumber}`)
+
+    const yAxisMin = Math.min(...filteredData.map(item => item.minPrice), minPriceNumber)
     const yAxisMax = Math.max(...filteredData.map(item => item.avgPrice), avgPriceNumber)
 
-    console.log(`Price Max: ${yAxisMax}, Price Min: ${yAxisMin}`)   
+    console.log(`Price Max: ${yAxisMax}, Price Min: ${yAxisMin}`)
 
     const calculatePercentageChange = () => {
         if (filteredData.length < 2) return 0
@@ -91,7 +93,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
             <CardHeader>
                 <CardTitle>{ProductName} Price Trends</CardTitle>
                 <div className={`text-lg font-semibold ${trendColor} flex items-center`}>
-                    {`Price is trending ${trendText} by ${percentageChange.toFixed(2)}% `}
+                    {`Average price is trending ${trendText} by ${percentageChange.toFixed(2)}% `}
                     {trendIcon}
                 </div>
             </CardHeader>
@@ -151,8 +153,16 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis 
                                 dataKey="date" 
-                                tickFormatter={(tick) => format(new Date(tick), 'dd MMM')}
+                                tickFormatter={(tick, index) => {
+                                    const totalTicks = filteredData.length;
+                                    const maxTicks = 10;
+                                    if (totalTicks <= maxTicks || index % Math.ceil(totalTicks / maxTicks) === 0) {
+                                        return format(new Date(tick), 'dd MMM');
+                                    }
+                                    return '';
+                                }}
                             />
+                            <YAxis domain={[yAxisMin, yAxisMax]} />
                             <Tooltip labelFormatter={(label) => format(new Date(label), 'dd-MM-yyyy')} />
                             <Legend />
                             <Line type="monotone" dataKey="avgPrice" stroke="#ff2c2c" name="Average Price" />
