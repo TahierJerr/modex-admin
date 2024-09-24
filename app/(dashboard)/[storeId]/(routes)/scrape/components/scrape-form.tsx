@@ -114,11 +114,11 @@ const ScrapeForm = () => {
                 <div className="product-data mt-8 p-4 border rounded-lg bg-gray-100">
                     <div>
                         <h2 className="text-lg font-bold mb-2">Scraped Product Data:</h2>
-                        <p><strong>Product Name:</strong><a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productName}</a></p>
-                        <p><strong>Lowest Product Price:</strong> {productData?.minPrice}</p>
-                        <p><strong>Average Product Price:</strong> {productData?.avgPrice}</p>
+                        <p><strong>Product Name:</strong> <a href={productData.productUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">{productData.productName}</a></p>
+                        <p><strong>Lowest Product Price:</strong> {formatPrice(minPriceNumber)}</p>
+                        <p><strong>Average Product Price:</strong> {formatPrice(avgPriceNumber)}</p>
                     </div>
-                    <div>
+                    <div className="mb-2">
                         {chartData && <PriceChart ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} avgPriceNumber={avgPriceNumber} />}
                     </div>
                 </div>

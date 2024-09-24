@@ -85,11 +85,12 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
     const trendIcon = isTrendingUp ? <TrendingUpIcon className='h-4 w-4 text-red-500' strokeWidth={1.4} /> : <TrendingDownIcon className="h-4 w-4 text-green-500" strokeWidth={1.4} />
 
     return (
-        <Card className="w-full max-w-[1200px] mx-auto">
+        <Card className="w-full mx-auto">
             <CardHeader>
                 <CardTitle>{ProductName} Price Trends</CardTitle>
-                <div className={`text-lg font-semibold ${trendColor}`}>
-                    {`Price is trending ${trendText} by ${percentageChange.toFixed(2)}% ${trendIcon}`}
+                <div className={`text-lg font-semibold ${trendColor} flex items-center`}>
+                    {`Price is trending ${trendText} by ${percentageChange.toFixed(2)}% `}
+                    {trendIcon}
                 </div>
             </CardHeader>
             <CardContent>
@@ -150,7 +151,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
                                 dataKey="date" 
                                 tickFormatter={(tick) => format(new Date(tick), 'dd MMM')}
                             />
-                            <YAxis domain={[yAxisMin, yAxisMax]} />
+                            <YAxis domain={[() => yAxisMin, () => yAxisMax]} />
                             <Tooltip labelFormatter={(label) => format(new Date(label), 'dd-MM-yyyy')} />
                             <Legend />
                             <Line type="monotone" dataKey="avgPrice" stroke="#ff2c2c" name="Average Price" />
