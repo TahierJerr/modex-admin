@@ -68,7 +68,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
     
     const filteredData = filterData(dateRange?.from, dateRange?.to)
 
-    const yAxisMin = Math.min(...filteredData.map(item => item.minPrice), minPriceNumber)
+    const yAxisMin = Math.max(Math.min(...filteredData.map(item => item.minPrice), minPriceNumber))
     const yAxisMax = Math.max(...filteredData.map(item => item.avgPrice), avgPriceNumber)
 
     const calculatePercentageChange = () => {
@@ -82,7 +82,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
     const isTrendingUp = percentageChange > 0
     const trendColor = isTrendingUp ? 'text-red-500' : 'text-green-500'
     const trendText = isTrendingUp ? 'up' : 'down'
-    const trendIcon = isTrendingUp ? <TrendingUpIcon className='h-4 w-4 text-red-500' strokeWidth={1.4} /> : <TrendingDownIcon className="h-4 w-4 text-green-500" strokeWidth={1.4} />
+    const trendIcon = isTrendingUp ? <TrendingUpIcon className='h-6 w-6 text-red-500 ml-2' strokeWidth={1.4} /> : <TrendingDownIcon className="h-6 w-6 ml-2 text-green-500" strokeWidth={1.4} />
 
     return (
         <Card className="w-full mx-auto">

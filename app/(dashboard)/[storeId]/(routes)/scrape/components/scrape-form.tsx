@@ -118,7 +118,7 @@ const ScrapeForm = () => {
                         <p><strong>Lowest Product Price:</strong> {formatPrice(minPriceNumber)}</p>
                         <p><strong>Average Product Price:</strong> {formatPrice(avgPriceNumber)}</p>
                     </div>
-                    <div className="mb-2">
+                    <div className="mt-2">
                         {chartData && <PriceChart ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} avgPriceNumber={avgPriceNumber} />}
                     </div>
                 </div>
