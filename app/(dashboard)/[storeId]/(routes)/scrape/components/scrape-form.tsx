@@ -87,7 +87,9 @@ const ScrapeForm = () => {
 
     // Filter for yAxisMin, excluding zero values
     const minPriceFiltered = chartData?.map(item => item.minPrice).filter(price => price > 0) || [];
-    const calculatedYAxisMin = minPriceFiltered.length > 0 ? Math.min(...minPriceFiltered) : minPriceNumber;
+    const calculatedYAxisMin = minPriceFiltered.length > 0 
+        ? Math.min(...minPriceFiltered) - (Math.min(...minPriceFiltered) * 0.2) // Reduce by 10%
+        : minPriceNumber;
 
     return (
         <div className="scrape-form">
