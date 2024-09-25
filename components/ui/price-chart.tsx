@@ -68,7 +68,7 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, yAxisM
     
     const filteredData = filterData(dateRange?.from, dateRange?.to)
 
-    console.log(`Price Max: ${yAxisMax}, Price Min: ${yAxisMin}`)
+    console.log(`yAxisMin: ${yAxisMin}, yAxisMax: ${yAxisMax}`)
 
     const calculatePercentageChange = () => {
         if (filteredData.length < 2) return 0

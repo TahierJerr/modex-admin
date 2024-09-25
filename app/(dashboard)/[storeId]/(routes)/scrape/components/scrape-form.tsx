@@ -83,6 +83,8 @@ const ScrapeForm = () => {
     const minPriceNumber = priceToNumber((productData?.minPrice ?? "0").toString());
     const avgPriceNumber = priceToNumber((productData?.avgPrice ?? "0").toString());
 
+    console.log(`minPriceNumber: ${minPriceNumber}, avgPriceNumber: ${avgPriceNumber}`);
+
     return (
         <div className="scrape-form">
             <Form {...form}>
