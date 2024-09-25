@@ -119,7 +119,7 @@ const ScrapeForm = () => {
                         <p><strong>Average Product Price:</strong> {formatPrice(avgPriceNumber)}</p>
                     </div>
                     <div className="mt-2">
-                        {chartData && <PriceChart yAxisMax={Math.max(...chartData.map(item => item.avgPrice), avgPriceNumber)} yAxisMin={Math.min(...chartData.map(item => item.minPrice), minPriceNumber)} ProductName={productData.productName} productData={chartData} minPriceNumber={minPriceNumber} avgPriceNumber={avgPriceNumber} />}
+                        {chartData && <PriceChart yAxisMax={Math.max(...chartData.map(item => item.avgPrice), avgPriceNumber)} yAxisMin={Math.min(...chartData.map(item => item.minPrice).filter(price => !isNaN(price)), minPriceNumber)} ProductName={productData.productName} productData={chartData}/>}
                     </div>
                 </div>
             )}

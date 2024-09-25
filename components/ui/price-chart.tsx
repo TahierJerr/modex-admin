@@ -16,13 +16,11 @@ import { ProductGraphData } from '@/types'
 interface PriceChartProps {
     productData: ProductGraphData[]
     ProductName: string;
-    minPriceNumber: number;
-    avgPriceNumber: number;
     yAxisMax: number;
     yAxisMin: number;
 }
 
-const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPriceNumber, avgPriceNumber, yAxisMax, yAxisMin }) => {
+const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, yAxisMax, yAxisMin }) => {
     const [data, setData] = useState<typeof productData>([])
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: subYears(new Date(), 1),
@@ -69,8 +67,6 @@ const PriceChart:React.FC<PriceChartProps> = ({ productData, ProductName, minPri
     }
     
     const filteredData = filterData(dateRange?.from, dateRange?.to)
-
-    console.log(`minPriceNumber: ${minPriceNumber}, avgPriceNumber: ${avgPriceNumber}`)
 
     console.log(`Price Max: ${yAxisMax}, Price Min: ${yAxisMin}`)
 
