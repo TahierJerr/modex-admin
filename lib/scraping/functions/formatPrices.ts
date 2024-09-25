@@ -7,19 +7,15 @@ export function formatPrices(productPrice: string) {
 
     prices.push(parseFloat(productPrice));
 
-    const minPrice = prices.length
-        ? (Math.min(...prices)).toString()
-        : parsedPrice.toString();
-
     const avgPrice = prices.length
         ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toString()
         : parsedPrice.toString();
 
-    const formattedMinPrice = formatPrice(parseFloat(minPrice));
+    const formattedMinPrice = formatPrice(parseFloat(productPrice));
     const formattedAvgPrice = formatPrice(parseFloat(avgPrice));
 
     return {
-        minPriceNumber: priceToNumber(minPrice),
+        minPriceNumber: priceToNumber(productPrice),
         avgPriceNumber: priceToNumber(avgPrice),
         minPrice: formattedMinPrice,
         avgPrice: formattedAvgPrice,
