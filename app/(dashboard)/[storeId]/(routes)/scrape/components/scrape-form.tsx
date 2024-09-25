@@ -80,9 +80,9 @@ type ScrapeFormValues = z.infer<typeof formSchema>;
             };
             
             
-            const minPriceNumber = priceToNumber((productData?.minPrice ?? "0").toString());
+            console.log('Raw minPrice:', productData?.minPrice);
+            const minPriceNumber = priceToNumber((productData?.minPrice ?? "Infinity").toString());
             const avgPriceNumber = priceToNumber((productData?.avgPrice ?? "0").toString());
-            
             console.log(`minPriceNumber: ${minPriceNumber}, avgPriceNumber: ${avgPriceNumber}`);
             
             return (
