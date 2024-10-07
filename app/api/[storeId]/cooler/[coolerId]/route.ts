@@ -55,7 +55,6 @@ export async function DELETE (
         const cooler = await handleProductRemoval(req, { storeId: params.storeId, productId: params.coolerId }, "COOLER", prismadb.cooler, "coolerId");
 
         return NextResponse.json(cooler);
-
     } catch (error) {
         console.log('[COOLER_DELETE]', error);
         return new NextResponse("Internal error", { status: 500 });

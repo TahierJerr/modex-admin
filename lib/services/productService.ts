@@ -35,7 +35,7 @@ export async function deleteProduct(productId: string, productModel: any) {
             },
         });
 
-        return product;  // Return the deleted product directly
+        return product; 
     } catch (error) {
         console.error("Error deleting product:", error);
         throw new Error("Failed to delete product. Please try again later.");  // Throw an error

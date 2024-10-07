@@ -28,7 +28,7 @@ export async function handleProductRemoval(
         
         return product;
     } catch (error) {
-        console.error(`[${productType}_POST_PRODUCT_CREATION]`, error);
+        console.error(`[${productType}_POST_PRODUCT_REMOVAL]`, error);
         return new Error("Internal error");
     }
 }
