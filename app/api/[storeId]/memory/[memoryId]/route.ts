@@ -55,7 +55,7 @@ export async function DELETE (
 ) {
     try {
 
-        const memory = await handleProductRemoval(req, { storeId: params.storeId, productId: params.memoryId }, "MEMORY",prismadb.memory);
+        const memory = await handleProductRemoval(req, { storeId: params.storeId, productId: params.memoryId }, "MEMORY", prismadb.memory, "memoryId");
 
         return NextResponse.json(memory);
 

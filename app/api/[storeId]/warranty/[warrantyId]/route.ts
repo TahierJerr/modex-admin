@@ -51,7 +51,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, warrantyId: string}}
 ) {
     try {
-        const warranty = await handleProductRemoval(req, { storeId: params.storeId, productId: params.warrantyId }, "WARRANTY", prismadb.warranty);
+        const warranty = await handleProductRemoval(req, { storeId: params.storeId, productId: params.warrantyId }, "WARRANTY", prismadb.warranty, "warrantyId");
 
 
         return NextResponse.json(warranty);

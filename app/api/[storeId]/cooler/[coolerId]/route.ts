@@ -52,7 +52,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, coolerId: string}}
 ) {
     try {
-        const cooler = await handleProductRemoval(req, { storeId: params.storeId, productId: params.coolerId }, "COOLER", prismadb.cooler);
+        const cooler = await handleProductRemoval(req, { storeId: params.storeId, productId: params.coolerId }, "COOLER", prismadb.cooler, "coolerId");
 
         return NextResponse.json(cooler);
 

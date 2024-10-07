@@ -54,7 +54,7 @@ export async function DELETE (
     { params }: { params: { storeId: string, pccaseId: string}}
 ) {
     try {
-        const pccase = await handleProductRemoval(req, { storeId: params.storeId, productId: params.pccaseId }, "PCCASE", prismadb.pccase);
+        const pccase = await handleProductRemoval(req, { storeId: params.storeId, productId: params.pccaseId }, "PCCASE", prismadb.pccase, "pccaseId");
 
 
         return NextResponse.json(pccase);
