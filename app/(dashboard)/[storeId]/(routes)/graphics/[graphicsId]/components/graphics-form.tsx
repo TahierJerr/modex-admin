@@ -221,7 +221,7 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
                         <FormItem>
                             <FormLabel>GPU performance</FormLabel>
                             <FormControl>
-                                <Input disabled={loading} placeholder="Compared to RTX 3060 12GB" {...field}/>
+                                <Input type="number" disabled={loading} placeholder="Compared to RTX 3060 12GB" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -234,7 +234,7 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
                         <FormItem>
                             <FormLabel>Price tracking URL</FormLabel>
                             <FormControl>
-                                <Input type="number" disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
+                                <Input disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
