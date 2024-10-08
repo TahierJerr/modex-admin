@@ -7,11 +7,16 @@ import { formatPrices } from "./functions/formatPrices";
 import Bottleneck from 'bottleneck';
 
 const limiter = new Bottleneck({
-    minTime: 100,
+    minTime: 50,
     maxConcurrent: 1
 });
 
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
+    if (!url.startsWith("https://tweakers.net")) {
+        console.log(`Skipping fetch for URL: ${url} (not a valid Tweakers.net URL)`);
+        return fallbackData;
+    }
+
     let retries = 3;
 
     while (retries > 0) {
@@ -23,7 +28,6 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
 
             const { productPrice, productUrl } = extractPriceData($);
 
-            // Check if productPrice is valid
             if (!productPrice) {
                 throw new Error("Price not found.");
             }
@@ -48,7 +52,6 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             retries--;
             console.error('[TRACK_PRICE]', error);
 
-            // Handling specific cases
             if (retries === 0 || error?.response?.status === 429) {
                 console.log('Retries exhausted or rate limit hit. Returning fallback data.');
 
@@ -59,7 +62,7 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
                 }
             }
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
 
