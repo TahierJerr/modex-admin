@@ -56,8 +56,8 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
         memory: initialData.memory,
         memoryType: initialData.memoryType,
         maxClock: initialData.maxClock,
-        performance: initialData.performance || 0,
-        priceTrackUrl: initialData.priceTrackUrl || '',
+        performance: initialData.performance ?? 0, // Ensures it defaults to 0 if undefined
+        priceTrackUrl: initialData.priceTrackUrl ?? '',
     } : {
         name: '',
         brand: '',
@@ -68,7 +68,6 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
         performance: 0,
         priceTrackUrl: '',
     };
-
 
     const form = useForm<GraphicsFormValues>({
         resolver: zodResolver(formSchema),
@@ -215,18 +214,27 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
                     )}
                     />
                     <FormField
-                    control={form.control}
-                    name="performance"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>GPU performance</FormLabel>
-                            <FormControl>
-                                <Input type="number" disabled={loading} placeholder="Compared to RTX 3060 12GB" {...field}/>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                    />
+                            control={form.control}
+                            name="performance"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>GPU performance</FormLabel>
+                                    <FormControl>
+                                        <Input 
+                                            type="number" 
+                                            disabled={loading} 
+                                            placeholder="Compared to RTX 3060 12GB" 
+                                            {...field} 
+                                            onChange={(e) => {
+                                                const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                                                field.onChange(value);
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     <FormField
                     control={form.control}
                     name="priceTrackUrl"
