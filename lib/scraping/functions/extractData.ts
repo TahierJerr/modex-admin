@@ -13,7 +13,16 @@ export function extractPriceData($: any) {
         throw new Error("Price not found.");
     }
 
-    const productPrice = priceElement.text().trim();
+    let productPrice = priceElement.text().trim();
+
+    productPrice = productPrice.replace(/[^\d,.-]/g, '').replace(',', '.');
+
+    const priceNumber = parseFloat(productPrice);
+
+    if (isNaN(priceNumber)) {
+        throw new Error("Invalid price format.");
+    }
+
     const linkElement = priceElement.find('a');
     const productUrl = linkElement.length ? linkElement.attr('href') || '' : '';
 
@@ -21,8 +30,9 @@ export function extractPriceData($: any) {
         throw new Error("Url not found.");
     }
 
-    return { productPrice, productUrl };
+    return { productPrice: priceNumber, productUrl };
 }
+
 
 export function extractUri($: cheerio.Root) {
     const uriElement = $('twk-price-history-graph#priceHistoryGraph').first();
