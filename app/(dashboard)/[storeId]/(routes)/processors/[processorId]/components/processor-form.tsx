@@ -202,7 +202,7 @@ export const ProcessorForm: React.FC<ProcessorFormProps> = ({
                         <FormItem>
                             <FormLabel>Price tracking URL</FormLabel>
                             <FormControl>
-                                <Input disabled={loading} placeholder="Price tracking URL" {...field}/>
+                                <Input disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

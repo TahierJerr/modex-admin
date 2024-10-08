@@ -218,7 +218,7 @@ export const MemoryForm: React.FC<MemoryFormProps> = ({
                         <FormItem>
                             <FormLabel>Price track URL</FormLabel>
                             <FormControl>
-                                <Input disabled={loading} placeholder="https://example.com/product" {...field}/>
+                                <Input disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

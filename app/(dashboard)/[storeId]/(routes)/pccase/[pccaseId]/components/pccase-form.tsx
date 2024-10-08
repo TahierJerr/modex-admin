@@ -200,7 +200,7 @@ export const PccaseForm: React.FC<PccaseFormProps> = ({
                         <FormItem>
                             <FormLabel>Price track url</FormLabel>
                             <FormControl>
-                                <Input disabled={loading} placeholder="Price track url" {...field}/>
+                                <Input disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
