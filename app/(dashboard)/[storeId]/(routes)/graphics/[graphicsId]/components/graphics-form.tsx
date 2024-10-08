@@ -234,7 +234,7 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
                         <FormItem>
                             <FormLabel>Price tracking URL</FormLabel>
                             <FormControl>
-                                <Input disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
+                                <Input type="number" disabled={loading} placeholder="example: https://tweakers.net/pricewatch/productId/product" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
