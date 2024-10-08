@@ -6,35 +6,34 @@ import { extractName, extractPriceData, extractUri } from "./functions/extractDa
 import { formatPrices } from "./functions/formatPrices";
 import Bottleneck from 'bottleneck';
 
-// Create a rate limiter to limit requests
 const limiter = new Bottleneck({
-    minTime: 2000, // 2 seconds between requests
-    maxConcurrent: 1 // Process only one request at a time
+    minTime: 100,
+    maxConcurrent: 1
 });
 
-// Fetch price from the given URL with retry logic and fallback to cached/default data
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
-    let retries = 3; // Set maximum retries
+    let retries = 3;
+
     while (retries > 0) {
         try {
-            // Use the limiter to schedule the axios request
             const { data } = await limiter.schedule(() => axios.get(url));
-            console.log(url);
+            console.log('Fetching data from:', url);
 
             const $ = cheerio.load(data);
 
-            // Extract the product data
             const { productPrice, productUrl } = extractPriceData($);
+
+            // Check if productPrice is valid
+            if (!productPrice) {
+                throw new Error("Price not found.");
+            }
+            
             const productUri = extractUri($);
             const productName = extractName($);
-
-            // Fetch the product's historical graph data
             const productGraphData: ProductGraphData[] = await fetchChartData(productUri);
 
-            // Format price data for display
             const { minPriceNumber, avgPriceNumber, minPrice, avgPrice } = formatPrices(productPrice);
 
-            // Return the collected and formatted data
             return {
                 productName,
                 minPriceNumber,
@@ -49,15 +48,20 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             retries--;
             console.error('[TRACK_PRICE]', error);
 
-            // If the error is a 429 (too many requests) and retries exhausted, return fallback data
+            // Handling specific cases
             if (retries === 0 || error?.response?.status === 429) {
                 console.log('Retries exhausted or rate limit hit. Returning fallback data.');
+
                 if (fallbackData) {
-                    return fallbackData; // Return cached or default fallback data
+                    return fallbackData;
                 } else {
                     throw new Error('Failed to track price and no fallback data available.');
                 }
             }
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
+
+    return fallbackData;
 }
