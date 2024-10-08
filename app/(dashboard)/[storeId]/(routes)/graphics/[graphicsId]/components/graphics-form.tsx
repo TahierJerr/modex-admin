@@ -24,6 +24,7 @@ const formSchema = z.object({
     memory: z.string().min(1),
     memoryType: z.string().min(1),
     maxClock: z.string().min(1),
+    performance: z.number().int().optional(),
     priceTrackUrl: z.string().url().optional()
 });
 
@@ -55,6 +56,7 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
         memory: initialData.memory,
         memoryType: initialData.memoryType,
         maxClock: initialData.maxClock,
+        performance: initialData.performance || 0,
         priceTrackUrl: initialData.priceTrackUrl || '',
     } : {
         name: '',
@@ -63,6 +65,7 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
         memory: '',
         memoryType: '',
         maxClock: '',
+        performance: 0,
         priceTrackUrl: '',
     };
 
@@ -206,6 +209,19 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
                             <FormLabel>GPU Max clock speed</FormLabel>
                             <FormControl>
                                 <Input disabled={loading} placeholder="xxxxMhz" {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="performance"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>GPU performance</FormLabel>
+                            <FormControl>
+                                <Input disabled={loading} placeholder="Compared to RTX 3060 12GB" {...field}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

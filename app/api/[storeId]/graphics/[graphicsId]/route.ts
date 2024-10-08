@@ -31,6 +31,7 @@ const graphicsSchema = z.object({
     memory: z.string().min(1, { message: "GPU memory is required" }),
     memoryType: z.string().min(1, { message: "GPU memory type is required" }),
     maxClock: z.string().min(1, { message: "GPU max clock is required" }),
+    performance: z.number().int().optional(),
     priceTrackUrl: z.string().url().optional()
 });
 
@@ -47,9 +48,6 @@ export async function PATCH(
         return new NextResponse("Internal error", { status: 500 });
     }
 };
-
-
-
 
 export async function DELETE (
     req: Request,

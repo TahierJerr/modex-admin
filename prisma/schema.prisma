@@ -106,6 +106,7 @@ model Graphics {
   memory String
   memoryType String
   maxClock String
+  performance Int?
   price Float?  // Optional price
   priceTrackUrl String? // Optional price tracking URL
   productUrl String? // Optional product URL

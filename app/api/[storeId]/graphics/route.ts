@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import prismadb from '@/lib/prismadb';
-import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
-import isToday from '@/lib/utils/istoday';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
@@ -13,6 +11,7 @@ const graphicsSchema = z.object({
     memory: z.string().min(1, { message: "GPU memory is required" }),
     memoryType: z.string().min(1, { message: "GPU memory type is required" }),
     maxClock: z.string().min(1, { message: "GPU max clock is required" }),
+    performance: z.number().int().optional(),
     priceTrackUrl: z.string().url().optional()
 });
 
