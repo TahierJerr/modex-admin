@@ -21,8 +21,6 @@ export function extractPriceData($: any) {
         throw new Error("Url not found.");
     }
 
-    console.log("Raw Product Price Text:", productPriceText); // Log the raw price text
-
     // Convert the price string to a number
     const productPrice = parseFloat(
         productPriceText
@@ -30,8 +28,6 @@ export function extractPriceData($: any) {
             .replace(/\./g, '')          // Remove thousands separator (period)
             .replace(',', '.')            // Replace decimal comma with a dot
     );
-
-    console.log("Parsed Product Price (as number):", productPrice); // Log the parsed price
 
     if (isNaN(productPrice)) {
         throw new Error("Invalid price format.");
