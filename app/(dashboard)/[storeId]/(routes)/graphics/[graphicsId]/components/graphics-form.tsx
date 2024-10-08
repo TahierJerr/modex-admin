@@ -56,8 +56,8 @@ export const GraphicsForm: React.FC<GraphicsFormProps> = ({
         memory: initialData.memory,
         memoryType: initialData.memoryType,
         maxClock: initialData.maxClock,
-        performance: initialData.performance ?? 0, // Ensures it defaults to 0 if undefined
-        priceTrackUrl: initialData.priceTrackUrl ?? '',
+        performance: initialData.performance || 0, // Ensures it defaults to 0 if undefined
+        priceTrackUrl: initialData.priceTrackUrl || '',
     } : {
         name: '',
         brand: '',
