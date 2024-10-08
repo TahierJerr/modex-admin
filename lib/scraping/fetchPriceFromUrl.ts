@@ -34,9 +34,21 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             
             const productUri = extractUri($);
             const productName = extractName($);
-            const productGraphData: ProductGraphData[] = await fetchChartData(productUri);
 
             const { minPriceNumber, avgPriceNumber, minPrice, avgPrice } = formatPrices(productPrice);
+
+            if (!productUri) {
+                return {
+                    productName,
+                    minPriceNumber,
+                    avgPriceNumber,
+                    minPrice,
+                    avgPrice,
+                    productUrl
+                }
+            }
+            
+            const productGraphData: ProductGraphData[] = await fetchChartData(productUri);
 
             return {
                 productName,

@@ -30,7 +30,7 @@ export function extractUri($: cheerio.Root) {
 
     if (!productUri) {
         console.error("Uri not found.",);
-        return '';
+        return null;
     }
 
     return productUri;
