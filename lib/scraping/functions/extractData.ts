@@ -21,8 +21,8 @@ export function extractPriceData($: any) {
 
     // Iterate over accepted shop IDs to find the first occurrence of each
     for (const shopId of acceptedShopIds) {
-        // Find the first row for the current shop ID
-        const shopRow = $(`tr.data-shop-id="${shopId}"`).first();
+        // Use attribute selector for data-shop-id, not class selector
+        const shopRow = $(`tr[data-shop-id="${shopId}"]`).first();
         
         if (shopRow.length) {
             priceElement = shopRow.find('td.shop-price'); // Find the price element within this shop row
