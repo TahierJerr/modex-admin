@@ -8,12 +8,38 @@ export function extractName($: any) {
 }
 
 export function extractPriceData($: any) {
-    const priceElement = $('td.shop-price').first();
-    if (!priceElement.length) {
+    const acceptedShopIds = [
+        '9046',
+        '156',
+        '6743',
+        '6703',
+        '8294',
+    ];
+
+    // Initialize a variable to hold the found price element
+    let priceElement: any = null;
+
+    // Iterate over accepted shop IDs to find the first occurrence of each
+    for (const shopId of acceptedShopIds) {
+        // Find the first row for the current shop ID
+        const shopRow = $(`tr.data-shop-id[data-shop-id='${shopId}']`).first();
+        
+        if (shopRow.length) {
+            priceElement = shopRow.find('td.shop-price'); // Find the price element within this shop row
+            
+            if (priceElement.length) {
+                break; // Exit loop if we found a price element
+            }
+        }
+    }
+
+    // Check if a price element was found
+    if (!priceElement || !priceElement.length) {
         throw new Error("Price not found.");
     }
 
-    const productPriceText = priceElement.text().trim(); // Extract the text
+    // Extract the text from the price element
+    const productPriceText = priceElement.text().trim();
     const linkElement = priceElement.find('a');
     const productUrl = linkElement.length ? linkElement.attr('href') || '' : '';
 
@@ -33,9 +59,9 @@ export function extractPriceData($: any) {
         throw new Error("Invalid price format.");
     }
 
+    // Return the product price and URL
     return { productPrice, productUrl };
 }
-
 
 
 export function extractUri($: cheerio.Root) {
