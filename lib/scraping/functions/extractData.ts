@@ -13,16 +13,7 @@ export function extractPriceData($: any) {
         throw new Error("Price not found.");
     }
 
-    let productPrice = priceElement.text().trim();
-
-    productPrice = productPrice.replace(/[^\d,.-]/g, '').replace(',', '.');
-
-    const priceNumber = parseFloat(productPrice);
-
-    if (isNaN(priceNumber)) {
-        throw new Error("Invalid price format.");
-    }
-
+    const productPriceText = priceElement.text().trim(); // Extract the text
     const linkElement = priceElement.find('a');
     const productUrl = linkElement.length ? linkElement.attr('href') || '' : '';
 
@@ -30,8 +21,20 @@ export function extractPriceData($: any) {
         throw new Error("Url not found.");
     }
 
-    return { productPrice: priceNumber, productUrl };
+    console.log("Raw Product Price Text:", productPriceText); // Log the raw price text
+
+    // Convert the price string to a number
+    const productPrice = parseFloat(productPriceText.replace(/[^\d,.-]/g, '').replace(',', '.'));
+
+    console.log("Parsed Product Price (as number):", productPrice); // Log the parsed price
+
+    if (isNaN(productPrice)) {
+        throw new Error("Invalid price format.");
+    }
+
+    return { productPrice, productUrl };
 }
+
 
 
 export function extractUri($: cheerio.Root) {
