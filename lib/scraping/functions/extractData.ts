@@ -29,7 +29,8 @@ export function extractUri($: cheerio.Root) {
     const productUri = uriElement.length ? uriElement.attr('optionsrc') || '' : '';
 
     if (!productUri) {
-        throw new Error("Uri not found.");
+        console.error("Uri not found.",);
+        return '';
     }
 
     return productUri;
