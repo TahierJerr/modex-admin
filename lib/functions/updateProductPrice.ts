@@ -50,6 +50,7 @@ export async function updateProductPrice(product: any, productModel: any) {
 
 export async function updateProductsPrices(products: any[], productModel: any) {
     if (!products || products.length === 0) {
+        console.log(`[${new Date().toISOString()}] No products provided. Exiting function.`);
         return []; // Return empty array if no products are provided
     }
 
@@ -57,6 +58,7 @@ export async function updateProductsPrices(products: any[], productModel: any) {
     const productsToUpdate = products.filter((product) => !isToday(product.updatedAt));
 
     if (productsToUpdate.length === 0) {
+        console.log(`[${new Date().toISOString()}] All products have been updated today. Exiting function.`);
         return products; // Return the products if all have been updated today
     }
 
@@ -67,49 +69,38 @@ export async function updateProductsPrices(products: any[], productModel: any) {
         return acc;
     }, []);
 
-    let delayBetweenBatches = 2000; // Start with 2 seconds delay
-    const maxRetries = 3; // Maximum number of retries for each request
+    const delayBetweenBatches = 2000; // Delay between batches (2 seconds)
     const updatedProducts: any[] = [];
 
-    // Exponential backoff delay calculation
-    const getExponentialDelay = (retryCount: number) => {
-        return delayBetweenBatches * Math.pow(2, retryCount) + Math.floor(Math.random() * 500); // Add random jitter
-    };
+    console.log(`[${new Date().toISOString()}] Starting to process ${productsToUpdate.length} products in ${batchedProducts.length} batches.`);
 
-    // Process each batch sequentially with delay and retries
-    for (const batch of batchedProducts) {
-        let retries = 0;
-        let batchResults;
+    // Process each batch sequentially with delay
+    for (const [batchIndex, batch] of batchedProducts.entries()) {
+        console.log(`[${new Date().toISOString()}] Processing batch ${batchIndex + 1} of ${batchedProducts.length}.`);
+        try {
+            const batchResults = await Promise.all(batch.map(async (product: any) => {
+                try {
+                    const result = await updateProductPrice(product, productModel);
+                    console.log(`[${new Date().toISOString()}] Updated product ID: ${product.id}`);
+                    return result;
+                } catch (error) {
+                    console.error(`[${new Date().toISOString()}] [BATCH_PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
+                    return product; // Return the original product on error to keep the flow
+                }
+            }));
 
-        // Retry loop for handling rate limits and errors
-        while (retries < maxRetries) {
-            try {
-                // Update the products in the current batch
-                batchResults = await Promise.all(batch.map(async (product: any) => {
-                    try {
-                        return await updateProductPrice(product, productModel);
-                    } catch (error) {
-                        console.error("[PRODUCT_UPDATE_ERROR]", error);
-                        return product; // Return the original product on error
-                    }
-                }));
+            updatedProducts.push(...batchResults);
 
-                // If the batch is successful, break out of the retry loop
-                updatedProducts.push(...batchResults);
-                break;
-
-            } catch (error) {
-                retries++;
-                console.error(`[BATCH_UPDATE_ERROR - Retry ${retries}]`, error);
-
-                // Apply exponential backoff delay before the next retry
-                await new Promise((resolve) => setTimeout(resolve, getExponentialDelay(retries)));
-            }
+        } catch (batchError) {
+            console.error(`[${new Date().toISOString()}] [BATCH_ERROR]`, batchError);
+            // Optionally: Continue processing the next batch even if one batch fails.
         }
 
-        // Apply the delay between batches to avoid hitting rate limits
+        // Delay between batches to avoid rate limiting
         await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
     }
 
+    console.log(`[${new Date().toISOString()}] Finished processing all batches. Returning updated products.`);
     return updatedProducts; // Return the updated products
 }
+
