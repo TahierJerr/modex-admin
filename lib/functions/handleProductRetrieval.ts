@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { updateProductPrice, updateProductsPrices } from '@/lib/functions/updateProductPrice';
 import { getProduct, getProducts } from "../services/productService";
 
@@ -22,11 +24,9 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
                 products.filter((product: any) => product && Object.keys(product).length > 0)
             );
 
-            updateProductsPrices(validatedProducts, productModel).catch((error) => 
-                console.error("[BACKGROUND_UPDATE_ERROR]", error)
-            );
+            const updatedProducts = await updateProductsPrices(validatedProducts, productModel);
 
-            return validatedProducts;
+            return updatedProducts;
         }
     } catch (error) {
         console.error("[PRODUCT_RETRIEVAL_ERROR]", error);

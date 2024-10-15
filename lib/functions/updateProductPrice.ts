@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import isToday from "@/lib/utils/istoday";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import ProductData from "@/types";
@@ -77,7 +79,7 @@ export async function updateProductsPrices(products: any[], productModel: any) {
         return acc;
     }, []);
 
-    const delayBetweenBatches = 2000; // Delay between batches (2 seconds)
+    const delayBetweenBatches = 3000; // Delay between batches (3 seconds)
     const updatedProducts: any[] = [];
 
     console.log(`[${new Date().toISOString()}] Starting to process ${productsToUpdate.length} products in ${batchedProducts.length} batches.`);
