@@ -26,11 +26,6 @@ export async function updateProductPrice(product: any, productModel: any) {
             const priceData: ProductData = await fetchPriceFromUrl(product.priceTrackUrl, fallbackData);
             const newPrice = priceData.minPriceNumber;
 
-
-            if (newPrice === product.price) {
-                return product; // No change in price, return the product as is
-            }
-
             // Update the product price in the database
             const updatedProduct = await productModel.update({
                 where: {
@@ -39,7 +34,7 @@ export async function updateProductPrice(product: any, productModel: any) {
                 data: {
                     price: newPrice,
                 },
-            });            
+            });
 
             return updatedProduct; // Return the updated product
         } catch (error) {
