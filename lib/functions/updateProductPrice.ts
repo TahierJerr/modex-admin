@@ -100,13 +100,13 @@ export async function updateProductsPrices(products: any[], productModel: any) {
             }));
 
             updatedProducts.push(...batchResults);
-
         } catch (batchError) {
             console.error(`[${new Date().toISOString()}] [BATCH_ERROR for batch ${batchIndex + 1}]`, batchError);
         }
 
         // Delay between batches to avoid rate limiting
         await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+        console.log(`[${new Date().toISOString()}] Finished waiting for batch ${batchIndex + 1}`);
     }
 
     console.log(`[${new Date().toISOString()}] Finished processing all batches. Returning updated products.`);
