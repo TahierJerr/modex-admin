@@ -2,12 +2,12 @@ import axios from "axios";
 import * as cheerio from 'cheerio';
 import { ProductGraphData } from "@/types";
 import { fetchChartData } from "./fetchChartData";
-import { extractName, extractPriceData, extractUri } from "./functions/extractData";
+import { extractName, extractPriceData, extractUri } from "./functions/tweakers/extractData";
 import { formatPrices } from "./functions/formatPrices";
 import Bottleneck from 'bottleneck';
 
 const limiter = new Bottleneck({
-    minTime: 1,
+    minTime: 500,
     maxConcurrent: 1
 });
 
