@@ -67,23 +67,47 @@ export async function updateProductsPrices(products: any[], productModel: any) {
         return acc;
     }, []);
 
-    const delayBetweenBatches = 2000; // Delay between batches (2 seconds)
+    let delayBetweenBatches = 2000; // Start with 2 seconds delay
+    const maxRetries = 3; // Maximum number of retries for each request
     const updatedProducts: any[] = [];
 
-    // Process each batch sequentially with delay
+    // Exponential backoff delay calculation
+    const getExponentialDelay = (retryCount: number) => {
+        return delayBetweenBatches * Math.pow(2, retryCount) + Math.floor(Math.random() * 500); // Add random jitter
+    };
+
+    // Process each batch sequentially with delay and retries
     for (const batch of batchedProducts) {
-        const batchResults = await Promise.all(batch.map(async (product: any) => {
+        let retries = 0;
+        let batchResults;
+
+        // Retry loop for handling rate limits and errors
+        while (retries < maxRetries) {
             try {
-                return await updateProductPrice(product, productModel);
+                // Update the products in the current batch
+                batchResults = await Promise.all(batch.map(async (product: any) => {
+                    try {
+                        return await updateProductPrice(product, productModel);
+                    } catch (error) {
+                        console.error("[PRODUCT_UPDATE_ERROR]", error);
+                        return product; // Return the original product on error
+                    }
+                }));
+
+                // If the batch is successful, break out of the retry loop
+                updatedProducts.push(...batchResults);
+                break;
+
             } catch (error) {
-                console.error("[BATCH_PRODUCT_UPDATE_ERROR]", error);
-                return product; // Return the original product on error
+                retries++;
+                console.error(`[BATCH_UPDATE_ERROR - Retry ${retries}]`, error);
+
+                // Apply exponential backoff delay before the next retry
+                await new Promise((resolve) => setTimeout(resolve, getExponentialDelay(retries)));
             }
-        }));
+        }
 
-        updatedProducts.push(...batchResults);
-
-        // Delay between batches to avoid rate limiting
+        // Apply the delay between batches to avoid hitting rate limits
         await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
     }
 

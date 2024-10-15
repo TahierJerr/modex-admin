@@ -17,14 +17,16 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
         } else {
             const products = await getProducts(productModel);
 
-            // // Validate products before updating
-            // const validatedProducts = await Promise.all(
-            //     products.filter((product: any) => product && Object.keys(product).length > 0)
-            // );
+            // Validate products before updating
+            const validatedProducts = await Promise.all(
+                products.filter((product: any) => product && Object.keys(product).length > 0)
+            );
 
-            // const updatedProducts = await updateProductsPrices(validatedProducts, productModel);
+            updateProductsPrices(validatedProducts, productModel).catch((error) => 
+                console.error("[BACKGROUND_UPDATE_ERROR]", error)
+            );
 
-            return products;
+            return validatedProducts;
         }
     } catch (error) {
         console.error("[PRODUCT_RETRIEVAL_ERROR]", error);
