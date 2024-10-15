@@ -6,6 +6,7 @@ export default interface ProductData {
     avgPrice: string;
     productUrl: string;
     productGraphData: ProductGraphData[];
+    error: boolean
 }
 
 export interface ProductGraphData {

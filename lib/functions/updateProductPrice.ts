@@ -18,12 +18,17 @@ export async function updateProductPrice(product: any, productModel: any) {
             minPrice: `$${product.price || '0.00'}`,
             avgPrice: `$${product.price || '0.00'}`,
             productUrl: product.priceTrackUrl,
-            productGraphData: [] // Default or empty graph data
+            productGraphData: [], // Default or empty graph data
         };
         
         // Fetch the latest price data from the URL, using fallback if necessary
         const priceData: ProductData = await fetchPriceFromUrl(product.priceTrackUrl, fallbackData);
         const newPrice = priceData.minPriceNumber;
+
+        if (priceData.error) {
+            console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}]`, 'Failed to fetch price data.');
+            return product; // Return the original product
+        }
         
         // Update the product price in the database
         const updatedProduct = await productModel.update({
