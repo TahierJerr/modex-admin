@@ -6,16 +6,10 @@ import { extractName, extractPriceData, extractUri } from "./functions/tweakers/
 import { formatPrices } from "./functions/formatPrices";
 import Bottleneck from 'bottleneck';
 
-// Rate limiting using Bottleneck
 const limiter = new Bottleneck({
-    minTime: 100, // Delay between requests (adjust as needed)
-    maxConcurrent: 1 // Maximum concurrent requests
+    minTime: 50,
+    maxConcurrent: 1
 });
-
-// Helper function for adding a delay
-async function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
     if (!url.startsWith("https://tweakers.net")) {
@@ -27,19 +21,20 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
 
     while (retries > 0) {
         try {
-            // Schedule requests with rate limiting
             const { data } = await limiter.schedule(() => axios.get(url));
             console.log('Fetching data from:', url);
 
             const $ = cheerio.load(data);
+
             const { productPrice, productUrl } = extractPriceData($);
 
             if (!productPrice) {
                 throw new Error("Price not found.");
             }
-
+            
             const productUri = extractUri($);
             const productName = extractName($);
+
             const { minPriceNumber, avgPriceNumber, minPrice, avgPrice } = formatPrices(productPrice);
 
             if (!productUri) {
@@ -50,9 +45,9 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
                     minPrice,
                     avgPrice,
                     productUrl
-                };
+                }
             }
-
+            
             const productGraphData: ProductGraphData[] = await fetchChartData(productUri);
 
             return {
@@ -69,7 +64,6 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             retries--;
             console.error('[TRACK_PRICE]', error);
 
-            // Handle rate limit error (429) or retries exhausted
             if (retries === 0 || error?.response?.status === 429) {
                 console.log('Retries exhausted or rate limit hit. Returning fallback data.');
 
@@ -80,37 +74,9 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
                 }
             }
 
-            // Small delay before retrying
-            await delay(100);
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
 
     return fallbackData;
-}
-
-// New function to batch fetch URLs with rate limiting
-export async function fetchPricesFromUrls(urls: string[], fallbackDataList: any[] = []) {
-    const batchSize = 5; // Number of URLs to process in one batch
-    const delayBetweenBatches = 2000; // 2 seconds delay between batches
-
-    const results: any[] = [];
-
-    for (let i = 0; i < urls.length; i += batchSize) {
-        const batch = urls.slice(i, i + batchSize);
-        const batchFallbackData = fallbackDataList.slice(i, i + batchSize);
-
-        // Fetch each batch concurrently
-        const batchResults = await Promise.all(
-            batch.map((url, index) => fetchPriceFromUrl(url, batchFallbackData[index]))
-        );
-
-        results.push(...batchResults);
-
-        // Add delay between batches to avoid overwhelming the server
-        if (i + batchSize < urls.length) {
-            await delay(delayBetweenBatches);
-        }
-    }
-
-    return results;
 }
