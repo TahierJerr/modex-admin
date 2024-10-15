@@ -42,8 +42,9 @@ export async function updateProductPrice(product: any, productModel: any) {
                 },
                 data: {
                     price: newPrice,
+                    updatedAt: new Date(), // Automatically sets the updatedAt to the current date and time
                 },
-            });
+            });            
 
             console.log(`[${new Date().toISOString()}] Updated product ID: ${product.id} to new price: ${newPrice}`);
             return updatedProduct; // Return the updated product
