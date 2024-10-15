@@ -18,13 +18,13 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
             const products = await getProducts(productModel);
 
             // Validate products before updating
-            const validatedProducts = await Promise.all(
+            const updatedProducts = await Promise.all(
                 products
                     .filter((product: any) => product && Object.keys(product).length > 0) // Skip empty products
                     .map((product: any) => updateProductPrice(product, productModel))
             );
 
-            const updatedProducts = await updateProductsPrices(validatedProducts, productModel);
+            // const updatedProducts = await updateProductsPrices(validatedProducts, productModel);
 
             return updatedProducts;
         }
