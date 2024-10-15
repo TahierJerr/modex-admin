@@ -22,12 +22,9 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
                 products.filter((product: any) => product && Object.keys(product).length > 0)
             );
 
-            try {
-                await updateProductsPrices(validatedProducts, productModel);
-            } catch (error) {
-                console.error("[BACKGROUND_UPDATE_ERROR]", error);
-            }
-            
+            updateProductsPrices(validatedProducts, productModel).catch((error) => 
+                console.error("[BACKGROUND_UPDATE_ERROR]", error)
+            );
 
             return validatedProducts;
         }
