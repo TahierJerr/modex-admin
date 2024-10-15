@@ -74,6 +74,11 @@ export async function updateProductsPrices(products: any[], productModel: any) {
 
     console.log(`[${new Date().toISOString()}] Starting to process ${productsToUpdate.length} products in ${batchedProducts.length} batches.`);
 
+    // log each second
+    setInterval(() => {
+        console.log(`[${new Date().toISOString()}] Processing ${productsToUpdate.length} products in ${batchedProducts.length} batches. Please wait...`);
+    }, 1000);
+
     // Process each batch sequentially with delay
     for (const [batchIndex, batch] of batchedProducts.entries()) {
         console.log(`[${new Date().toISOString()}] Processing batch ${batchIndex + 1} of ${batchedProducts.length}.`);
@@ -103,4 +108,3 @@ export async function updateProductsPrices(products: any[], productModel: any) {
     console.log(`[${new Date().toISOString()}] Finished processing all batches. Returning updated products.`);
     return updatedProducts; // Return the updated products
 }
-
