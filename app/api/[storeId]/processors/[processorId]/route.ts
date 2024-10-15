@@ -5,6 +5,8 @@ import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
 import { handleProductModification } from "@/lib/functions/handleProductModification";
 import { handleProductRetrieval } from "@/lib/functions/handleProductRetrieval";
 
+export const maxDuration = 30;
+
 export async function GET (
     req: Request,
     { params }: { params: { processorId: string}}

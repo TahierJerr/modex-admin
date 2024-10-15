@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
+export const maxDuration = 30;
+
 const powerSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     model: z.string().min(1, { message: "PSU model is required" }),

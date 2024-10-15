@@ -4,6 +4,8 @@ import prismadb from '@/lib/prismadb';
 import { handleProductCreation } from '@/lib/functions/handleProductCreation';
 import { handleProductRetrieval } from '@/lib/functions/handleProductRetrieval';
 
+export const maxDuration = 30;
+
 const graphicsSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     brand: z.string().min(1, { message: "Brand is required" }),
