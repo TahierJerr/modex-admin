@@ -7,7 +7,7 @@ import { formatPrices } from "./functions/formatPrices";
 import Bottleneck from 'bottleneck';
 
 const limiter = new Bottleneck({
-    minTime: 50,
+    minTime: 500,
     maxConcurrent: 1
 });
 

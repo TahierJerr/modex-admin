@@ -1,4 +1,4 @@
-import { updateProductPrice } from '@/lib/functions/updateProductPrice';
+import { updateProductPrice, updateProductsPrices } from '@/lib/functions/updateProductPrice';
 import { getProduct, getProducts } from "../services/productService";
 
 export async function handleProductRetrieval(productModel: any, productId?: string) {
@@ -17,15 +17,14 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
         } else {
             const products = await getProducts(productModel);
 
-            // Log products to see if any are missing
-            console.log("Fetched products:", products);
-
             // Validate products before updating
-            const updatedProducts = await Promise.all(
+            const validatedProducts = await Promise.all(
                 products
                     .filter((product: any) => product && Object.keys(product).length > 0) // Skip empty products
                     .map((product: any) => updateProductPrice(product, productModel))
             );
+
+            const updatedProducts = await updateProductsPrices(validatedProducts, productModel);
 
             return updatedProducts;
         }
