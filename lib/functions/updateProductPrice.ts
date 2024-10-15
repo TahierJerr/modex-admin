@@ -1,5 +1,5 @@
 import isToday from "@/lib/utils/istoday";
-import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
+import { fetchPriceFromUrl, fetchPricesFromUrls } from "@/lib/scraping/fetchPriceFromUrl";
 import ProductData from "@/types";
 
 export async function updateProductPrice(product: any, productModel: any) {
@@ -46,4 +46,63 @@ export async function updateProductPrice(product: any, productModel: any) {
     }
 
     return product; // Return the product if it was updated today
+}
+
+export async function updateProductPrices(products: any[], productModel: any) {
+    const productsToUpdate = products.filter(product => {
+        return product.priceTrackUrl && !isToday(product.updatedAt);
+    });
+
+    if (productsToUpdate.length === 0) {
+        return products; // Return early if no products need updating
+    }
+
+    // Create fallback data for each product
+    const fallbackDataList = productsToUpdate.map(product => ({
+        productName: product.name || 'Unknown Product',
+        minPriceNumber: product.price || 0,
+        avgPriceNumber: product.price || 0,
+        minPrice: `$${product.price || '0.00'}`,
+        avgPrice: `$${product.price || '0.00'}`,
+        productUrl: product.priceTrackUrl,
+        productGraphData: [] // Default or empty graph data
+    }));
+
+    // Extract the URLs to fetch prices for
+    const urls = productsToUpdate.map(product => product.priceTrackUrl);
+
+    try {
+        // Fetch the prices for all products in batches
+        const priceDataList: ProductData[] = await fetchPricesFromUrls(urls, fallbackDataList);
+
+        // Update the prices in the database
+        const updatedProducts = await Promise.all(
+            productsToUpdate.map(async (product, index) => {
+                const priceData = priceDataList[index];
+                const newPrice = priceData.minPriceNumber;
+
+                if (newPrice !== product.price) {
+                    // Update the product in the database if the price has changed
+                    const updatedProduct = await productModel.update({
+                        where: {
+                            id: product.id,
+                        },
+                        data: {
+                            price: newPrice,
+                        },
+                    });
+
+                    return updatedProduct;
+                }
+
+                // If the price hasn't changed, return the product as is
+                return product;
+            })
+        );
+
+        return updatedProducts; // Return all updated products
+    } catch (error) {
+        console.error("[PRICE_FETCH_ERROR_PRODUCTS]", error);
+        throw new Error("Failed to update product prices");
+    }
 }
