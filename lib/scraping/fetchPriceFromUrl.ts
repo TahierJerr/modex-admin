@@ -13,7 +13,6 @@ const limiter = new Bottleneck({
 
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
     if (!url.startsWith("https://tweakers.net")) {
-        console.log(`Skipping fetch for URL: ${url} (not a valid Tweakers.net URL)`);
         return fallbackData;
     }
 
@@ -22,7 +21,6 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
     while (retries > 0) {
         try {
             const { data } = await limiter.schedule(() => axios.get(url));
-            console.log('Fetching data from:', url);
 
             const $ = cheerio.load(data);
 
@@ -65,7 +63,6 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             console.error('[TRACK_PRICE]', error);
 
             if (retries === 0 || error?.response?.status === 429) {
-                console.log('Retries exhausted or rate limit hit. Returning fallback data.');
 
                 if (fallbackData) {
                     return fallbackData;
