@@ -91,22 +91,21 @@ export async function updateProductsPrices(products: any[], productModel: any) {
         console.log(`[${new Date().toISOString()}] Processing batch ${batchIndex + 1} of ${batchedProducts.length}.`);
         try {
             const batchResults = await Promise.all(batch.map(async (product: any) => {
-                console.log(`[${new Date().toISOString()}] Updating product ID: ${product.id}`);
                 try {
                     const result = await updateProductPrice(product, productModel);
-                    console.log(`[${new Date().toISOString()}] Successfully updated product ID: ${product.id}`);
+                    console.log(`[${new Date().toISOString()}] Updated product ID: ${product.id}`);
                     return result;
                 } catch (error) {
-                    console.error(`[${new Date().toISOString()}] [BATCH_PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
+                    console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
                     return product; // Return the original product on error to keep the flow
                 }
             }));
-
+        
             updatedProducts.push(...batchResults);
-
         } catch (batchError) {
-            console.error(`[${new Date().toISOString()}] [BATCH_ERROR]`, batchError);
+            console.error(`[${new Date().toISOString()}] [BATCH_ERROR for batch ${batchIndex + 1}]`, batchError);
             // Optionally: Continue processing the next batch even if one batch fails.
+            
         }
 
         // Delay between batches to avoid rate limiting
