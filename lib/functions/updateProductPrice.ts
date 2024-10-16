@@ -1,18 +1,22 @@
 export const maxDuration = 60;
 
-import { isSameDate } from "@/lib/utils/istoday";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import ProductData from "@/types";
 import prismadb from "../prismadb";
+
+const today: Date = new Date();
+
 
 export async function updateProductPrice(product: any, productModel: any) {
     if (!product.priceTrackUrl) {
         return product;
     }
 
-    const today: Date = new Date();
+    const productDate = new Date(product.updatedAt);
+    const todayString = today.toISOString().split('T')[0];
+    const productDateString = productDate.toISOString().split('T')[0];
 
-    if (!isSameDate(product.updatedAt, today)) {
+    if (productDateString === todayString) {
         return product;
     }
     
@@ -67,8 +71,13 @@ export async function updateGraphicsCardPrices(params: string) {
         },
     });
 
-    const today: Date = new Date();
-    const productsToUpdate = products.filter((product) => !isSameDate(product.updatedAt, today));
+    const todayString = today.toISOString().split('T')[0];
+
+const productsToUpdate = products.filter((product) => {
+    const productDate = new Date(product.updatedAt).toISOString().split('T')[0];
+    return productDate !== todayString;
+});
+
 
     // log date of product and today
     console.log('Product Date:', products[0].updatedAt);
