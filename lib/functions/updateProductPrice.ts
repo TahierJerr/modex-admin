@@ -4,21 +4,12 @@ import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import ProductData from "@/types";
 import prismadb from "../prismadb";
 
-const today: Date = new Date();
-
-
 export async function updateProductPrice(product: any, productModel: any) {
     if (!product.priceTrackUrl) {
         return product;
     }
-
-    const productDate = new Date(product.updatedAt);
-    const todayString = today.toISOString().split('T')[0];
-    const productDateString = productDate.toISOString().split('T')[0];
-
-    if (productDateString === todayString) {
-        return product;
-    }
+    
+    console.log(`Starting update for product ID: ${product.id}`);
     
     try {
         const fallbackData = {
@@ -30,23 +21,21 @@ export async function updateProductPrice(product: any, productModel: any) {
             productUrl: product.priceTrackUrl,
             productGraphData: [],
         };
-        
+
         const priceData: ProductData = await fetchPriceFromUrl(product.priceTrackUrl, fallbackData);
         const newPrice = priceData.minPriceNumber;
-
+        
         if (priceData.error) {
-            console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}]`, 'Failed to fetch price data.');
+            console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}] Failed to fetch price data.`);
             return product;
         }
         
         const updatedProduct = await productModel.update({
-            where: {
-                id: product.id,
-            },
-            data: {
-                price: newPrice,
-            },
+            where: { id: product.id },
+            data: { price: newPrice },
         });
+        
+        console.log(`Product ID: ${product.id} updated successfully.`);
         
         return updatedProduct;
     } catch (error) {
@@ -54,6 +43,7 @@ export async function updateProductPrice(product: any, productModel: any) {
         return product;
     }
 }
+
 
 // create cron job
 export async function updateGraphicsCardPrices(params: string) {
