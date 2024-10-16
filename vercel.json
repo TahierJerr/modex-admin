@@ -1,6 +1,6 @@
 {
     "functions": {
-        "api/[storeId]/updatePrices/route.js": {
+        "api/**/**/*.js": {
             "maxDuration": 60
         }
     },
