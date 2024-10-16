@@ -1,12 +1,12 @@
 {
     "functions": {
-        "api/updatePrices/route.js": {
+        "api/updatePrice/route.js": {
             "maxDuration": 60
         }
     },
     "crons": [
         {
-            "path": "/api/updatePrices",
+            "path": "/api/updatePrice",
             "schedule": "0 6 * * *"
         }
     ]
