@@ -1,8 +1,9 @@
-export const maxDuration = 60;
+export const maxDuration = 600;
 
 import { isSameDate } from "@/lib/utils/istoday";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import ProductData from "@/types";
+import prismadb from "../prismadb";
 
 export async function updateProductPrice(product: any, productModel: any) {
     if (!product.priceTrackUrl) {
@@ -44,11 +45,30 @@ export async function updateProductPrice(product: any, productModel: any) {
     }
 }
 
+const productModels = {
+    processor: prismadb.processor,
+    graphics: prismadb.graphics,
+    motherboard: prismadb.motherboard,
+    memory: prismadb.memory,
+    storage: prismadb.storage,
+    power: prismadb.power,
+    pccase: prismadb.pccase,
+    cooler: prismadb.cooler,
+};
 // create cron job
-export async function updateProductsPrices(products: any[], productModel: any) {
-    if (!products || products.length === 0) {
-        return [];
-    }
+export async function updateProductsPrices() {
+    // get all products with their productModel and put it in an array
+    const products = (await Promise.all(
+        Object.entries(productModels).map(async ([modelName, productModel]: [string, any]) => {
+            
+            const modelProducts = await productModel.findMany();
+
+            return modelProducts.map((product: any) => ({
+                ...product,
+                productModel
+            }));
+        })
+    )).flat();
 
     const parseDate = (dateString: string): Date => new Date(dateString);
 
@@ -80,7 +100,7 @@ export async function updateProductsPrices(products: any[], productModel: any) {
         try {
             const batchResults = await Promise.all(batch.map(async (product: any) => {
                 try {
-                    const result = await updateProductPrice(product, productModel);
+                    const result = await updateProductPrice(product, product.productModel);
                     return result;
                 } catch (error) {
                     console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
