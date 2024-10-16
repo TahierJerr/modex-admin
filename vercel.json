@@ -1,6 +1,6 @@
 {
     "functions": {
-        "/api/[storeId]/updatePrices/route.ts": {
+        "api/[storeId]/updatePrices/route.ts": {
             "runtime": "edge"
         }
     },
