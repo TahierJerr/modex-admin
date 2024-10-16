@@ -1,4 +1,4 @@
-export const maxDuration = 600;
+export const maxDuration = 60;
 
 import { isSameDate } from "@/lib/utils/istoday";
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";

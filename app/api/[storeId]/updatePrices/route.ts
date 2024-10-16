@@ -1,4 +1,4 @@
-export const maxDuration = 600;
+export const maxDuration = 60;
 
 import { updateGraphicsCardPrices } from "@/lib/functions/updateProductPrice";
 import { NextResponse } from "next/server";
