@@ -2,7 +2,7 @@
 "crons": [
     {
         "path": "/api/clrgi1xkm0000gawknqwc2rl4/updatePrices",
-        "schedule": "20 21 * * *"
+        "schedule": "0 2 * * *"
     }
 ]
 }
