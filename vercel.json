@@ -1,6 +1,6 @@
 {
     "functions": {
-        "api/[storeId]/**/*.ts": {
+        "api/[storeId]/updatePrices/route.ts": {
             "maxDuration": 60
         }
     },
