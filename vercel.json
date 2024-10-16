@@ -7,7 +7,8 @@
     "crons": [
         {
             "path": "/api/clrgi1xkm0000gawknqwc2rl4/updatePrices",
-            "schedule": "0 6 * * *"
+            "schedule": "0 6 * * *",
+            "maxDuration": 60
         }
     ]
 }
