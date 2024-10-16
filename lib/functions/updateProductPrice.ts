@@ -9,7 +9,7 @@ export async function updateProductPrice(product: any, productModel: any) {
         return product;
     }
 
-    console.log(`Starting update for product ID: ${product.id}`);
+    console.log(`Starting update for product ID: ${product.id} at ${new Date().toISOString()}`);
 
     try {
         const fallbackData = {
@@ -22,31 +22,32 @@ export async function updateProductPrice(product: any, productModel: any) {
             productGraphData: [],
         };
 
-        console.log(`Fetching price data from URL: ${product.priceTrackUrl}`);
+        console.log(`Fetching price data from URL: ${product.priceTrackUrl} at ${new Date().toISOString()}`);
         const priceData: ProductData = await fetchPriceFromUrl(product.priceTrackUrl, fallbackData);
-        console.log(`Price data fetched: ${JSON.stringify(priceData)}`);
+        console.log(`Price data fetched: ${JSON.stringify(priceData)} at ${new Date().toISOString()}`);
         
         const newPrice = priceData.minPriceNumber;
 
         if (priceData.error) {
-            console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}] Failed to fetch price data.`);
+            console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}] Failed to fetch price data at ${new Date().toISOString()}`);
             return product;
         }
 
-        console.log(`Updating product in database: ${product.id}`);
+        console.log(`Updating product in database: ${product.id} at ${new Date().toISOString()}`);
         const updatedProduct = await productModel.update({
             where: { id: product.id },
             data: { price: newPrice },
         });
         
-        console.log(`Product ID: ${product.id} updated successfully.`);
+        console.log(`Product ID: ${product.id} updated successfully at ${new Date().toISOString()}`);
 
         return updatedProduct;
     } catch (error) {
-        console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}]`, error);
+        console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}] at ${new Date().toISOString()}`, error);
         return product;
     }
 }
+
 
 
 

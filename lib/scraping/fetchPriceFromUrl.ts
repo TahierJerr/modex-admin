@@ -12,19 +12,19 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
 
     let retries = 3;
     while (retries > 0) {
-        console.log(`Attempting to fetch price data from ${url}, retries left: ${retries}`);
+        console.log(`Attempting to fetch price data from ${url}, retries left: ${retries} at ${new Date().toISOString()}`);
         try {
             const fetchStartTime = Date.now();
             const { data } = await axios.get(url);
             const fetchEndTime = Date.now();
-            console.log(`Data fetched successfully from ${url} in ${fetchEndTime - fetchStartTime} ms`);
+            console.log(`Data fetched successfully from ${url} in ${fetchEndTime - fetchStartTime} ms at ${new Date().toISOString()}`);
 
             const $ = cheerio.load(data);
             const { productPrice, productUrl } = extractPriceData($);
             if (!productPrice) {
                 throw new Error("Price not found.");
             }
-
+            
             const productUri = extractUri($);
             const productName = extractName($);
             const { minPriceNumber, avgPriceNumber, minPrice, avgPrice } = formatPrices(productPrice);
@@ -40,7 +40,10 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
                 };
             }
 
+            console.log(`Fetching chart data from URI: ${productUri} at ${new Date().toISOString()}`);
             const productGraphData: ProductGraphData[] = await fetchChartData(productUri);
+            console.log(`Chart data fetched: ${JSON.stringify(productGraphData)} at ${new Date().toISOString()}`);
+            
             return {
                 productName,
                 minPriceNumber,
@@ -53,7 +56,7 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
         } catch (error: any) {
             retries--;
             console.error('[TRACK_PRICE]', error);
-
+            
             if (retries === 0 || error?.response?.status === 429) {
                 if (fallbackData) {
                     fallbackData.error = true;
