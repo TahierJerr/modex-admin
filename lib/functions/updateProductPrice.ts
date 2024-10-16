@@ -9,6 +9,12 @@ export async function updateProductPrice(product: any, productModel: any) {
     if (!product.priceTrackUrl) {
         return product;
     }
+
+    const today: Date = new Date();
+
+    if (!isSameDate(product.updatedAt, today)) {
+        return product;
+    }
     
     try {
         const fallbackData = {
@@ -44,45 +50,23 @@ export async function updateProductPrice(product: any, productModel: any) {
         return product;
     }
 }
-// adding comment
 
-const productModels = {
-    processor: prismadb.processor,
-    graphics: prismadb.graphics,
-    motherboard: prismadb.motherboard,
-    memory: prismadb.memory,
-    storage: prismadb.storage,
-    power: prismadb.power,
-    pccase: prismadb.pccase,
-    cooler: prismadb.cooler,
-};
 // create cron job
-export async function updateProductsPrices() {
+export async function updateGraphicsCardPrices() {
     // get all products with their productModel and put it in an array
-    const products = (await Promise.all(
-        Object.entries(productModels).map(async ([modelName, productModel]: [string, any]) => {
-            
-            const modelProducts = await productModel.findMany();
-
-            return modelProducts.map((product: any) => ({
-                ...product,
-                productModel
-            }));
-        })
-    )).flat();
-
-    const parseDate = (dateString: string): Date => new Date(dateString);
+    const products = await prismadb.graphics.findMany({
+        select: {
+            id: true,
+            name: true,
+            price: true,
+            priceTrackUrl: true,
+            updatedAt: true,
+        },
+    });
 
     const today: Date = new Date();
 
-    const productsToUpdate = products.filter((product) => !isSameDate(parseDate(product.updatedAt), today));
-
-    if (productsToUpdate.length > 0) {
-        const isProductUpdatedToday: boolean = isSameDate(parseDate(productsToUpdate[0].updatedAt), today);
-        console.log(`UpdatedAt: ${productsToUpdate[0].updatedAt}, isToday: ${isProductUpdatedToday}`);
-    } else {
-        console.log('No products to update today.');
-    }
+    const productsToUpdate = products.filter((product) => !isSameDate(product.updatedAt, today));
 
     if (productsToUpdate.length === 0) {
         return products;

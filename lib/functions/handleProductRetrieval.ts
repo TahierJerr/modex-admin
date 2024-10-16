@@ -1,6 +1,6 @@
 export const maxDuration = 60;
 
-import { updateProductPrice, updateProductsPrices } from '@/lib/functions/updateProductPrice';
+import { updateProductPrice } from '@/lib/functions/updateProductPrice';
 import { getProduct, getProducts } from "../services/productService";
 
 export async function handleProductRetrieval(productModel: any, productId?: string) {
