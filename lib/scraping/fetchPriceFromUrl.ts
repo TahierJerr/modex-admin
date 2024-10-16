@@ -4,12 +4,6 @@ import { ProductGraphData } from "@/types";
 import { fetchChartData } from "./fetchChartData";
 import { extractName, extractPriceData, extractUri } from "./functions/tweakers/extractData";
 import { formatPrices } from "./functions/formatPrices";
-import Bottleneck from 'bottleneck';
-
-const limiter = new Bottleneck({
-    minTime: 1,
-    maxConcurrent: 1
-});
 
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
     if (!url.startsWith("https://tweakers.net")) {
@@ -20,7 +14,7 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
 
     while (retries > 0) {
         try {
-            const { data } = await limiter.schedule(() => axios.get(url));
+            const { data } = await axios.get(url);
 
             const $ = cheerio.load(data);
 
@@ -71,7 +65,7 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
                 }
             }
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 2000));
         }
     }
 

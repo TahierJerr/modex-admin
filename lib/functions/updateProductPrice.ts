@@ -57,33 +57,26 @@ export async function updateProductPrice(product: any, productModel: any) {
 
 // create cron job
 export async function updateGraphicsCardPrices(params: string) {
+    console.log("Starting updateGraphicsCardPrices with params:", params);
 
     const products = await prismadb.graphics.findMany({
-        where: {
-            storeId: params,
-        },
-        select: {
-            id: true,
-            name: true,
-            price: true,
-            priceTrackUrl: true,
-            updatedAt: true,
-        },
+        where: { storeId: params },
+        select: { id: true, name: true, price: true, priceTrackUrl: true, updatedAt: true },
     });
+    console.log("Retrieved products:", products);
 
+    const today = new Date();
     const todayString = today.toISOString().split('T')[0];
+    console.log("Today's date:", todayString);
 
-const productsToUpdate = products.filter((product) => {
-    const productDate = new Date(product.updatedAt).toISOString().split('T')[0];
-    return productDate !== todayString;
-});
-
-
-    // log date of product and today
-    console.log('Product Date:', products[0].updatedAt);
-    console.log('Today:', today);
+    const productsToUpdate = products.filter((product) => {
+        const productDate = new Date(product.updatedAt).toISOString().split('T')[0];
+        return productDate !== todayString;
+    });
+    console.log("Products to update:", productsToUpdate);
 
     if (productsToUpdate.length === 0) {
+        console.log("No products to update today.");
         return { updatedProducts: [], notUpdatedProducts: [] };
     }
 
@@ -92,19 +85,22 @@ const productsToUpdate = products.filter((product) => {
         acc[batchIndex] = [...(acc[batchIndex] || []), product];
         return acc;
     }, [] as any[][]);
+    console.log("Batched products:", batchedProducts);
 
-    const delayBetweenBatches = 3000;
+    const delayBetweenBatches = 100;
     const updatedProducts: any[] = [];
     const notUpdatedProducts: any[] = [];
-
-    const timeout = 59000; // 59 seconds
+    const timeout = 57000; // 59 seconds
     const startTime = Date.now();
+    console.log("Start time:", startTime);
 
     for (const [batchIndex, batch] of batchedProducts.entries()) {
         const remainingTime = timeout - (Date.now() - startTime);
+        console.log(`Batch ${batchIndex + 1}: Remaining time:`, remainingTime);
 
         if (remainingTime <= 0) {
             notUpdatedProducts.push(...batch);
+            console.log(`Batch ${batchIndex + 1} not updated due to timeout:`, batch);
             break;
         }
 
@@ -113,6 +109,7 @@ const productsToUpdate = products.filter((product) => {
                 Promise.all(batch.map(async (product: any) => {
                     try {
                         const result = await updateProductPrice(product, product.productModel);
+                        console.log(`[${new Date().toISOString()}] Product ID: ${product.id} updated successfully.`);
                         return result;
                     } catch (error) {
                         console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
@@ -126,6 +123,9 @@ const productsToUpdate = products.filter((product) => {
             if (Array.isArray(batchResults)) {
                 updatedProducts.push(...batchResults.filter(Boolean));
             }
+
+            console.log(`Batch ${batchIndex + 1} completed:`, batch);
+
         } catch (batchError) {
             console.error(`[${new Date().toISOString()}] [BATCH_ERROR for batch ${batchIndex + 1}]`, batchError);
             notUpdatedProducts.push(...batch);
@@ -137,5 +137,5 @@ const productsToUpdate = products.filter((product) => {
     console.log("Updated Products:", updatedProducts);
     console.log("Products Not Updated On Time:", notUpdatedProducts);
 
-    return updatedProducts;
+    return { updatedProducts, notUpdatedProducts };
 }
