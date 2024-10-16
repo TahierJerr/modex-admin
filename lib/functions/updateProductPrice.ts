@@ -45,6 +45,7 @@ export async function updateProductPrice(product: any, productModel: any) {
     }
 }
 
+
 const productModels = {
     processor: prismadb.processor,
     graphics: prismadb.graphics,
