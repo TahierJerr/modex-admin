@@ -6,7 +6,7 @@
     },
     "crons": [
         {
-            "path": "https://www.modex-admin.nl/api/clrgi1xkm0000gawknqwc2rl4/updatePrices",
+            "path": "api/clrgi1xkm0000gawknqwc2rl4/updatePrices",
             "schedule": "0 8,20 * * *"
         }
     ]
