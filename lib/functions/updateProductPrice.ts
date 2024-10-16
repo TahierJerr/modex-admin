@@ -90,12 +90,13 @@ export async function updateGraphicsCardPrices(params: string) {
     const delayBetweenBatches = 100;
     const updatedProducts: any[] = [];
     const notUpdatedProducts: any[] = [];
-    const timeout = 57000; // 59 seconds
+    const timeout = 55000; // 55 seconds to give some buffer
     const startTime = Date.now();
     console.log("Start time:", startTime);
 
     for (const [batchIndex, batch] of batchedProducts.entries()) {
-        const remainingTime = timeout - (Date.now() - startTime);
+        const batchStartTime = Date.now();
+        const remainingTime = timeout - (batchStartTime - startTime);
         console.log(`Batch ${batchIndex + 1}: Remaining time:`, remainingTime);
 
         if (remainingTime <= 0) {
@@ -107,9 +108,11 @@ export async function updateGraphicsCardPrices(params: string) {
         try {
             const batchResults = await Promise.race<Promise<any>[] | Promise<any>>([
                 Promise.all(batch.map(async (product: any) => {
+                    const productStartTime = Date.now();
                     try {
                         const result = await updateProductPrice(product, product.productModel);
-                        console.log(`[${new Date().toISOString()}] Product ID: ${product.id} updated successfully.`);
+                        const productEndTime = Date.now();
+                        console.log(`[${new Date().toISOString()}] Product ID: ${product.id} updated successfully in ${productEndTime - productStartTime} ms.`);
                         return result;
                     } catch (error) {
                         console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
@@ -124,7 +127,8 @@ export async function updateGraphicsCardPrices(params: string) {
                 updatedProducts.push(...batchResults.filter(Boolean));
             }
 
-            console.log(`Batch ${batchIndex + 1} completed:`, batch);
+            const batchEndTime = Date.now();
+            console.log(`Batch ${batchIndex + 1} completed in ${batchEndTime - batchStartTime} ms:`, batch);
 
         } catch (batchError) {
             console.error(`[${new Date().toISOString()}] [BATCH_ERROR for batch ${batchIndex + 1}]`, batchError);
