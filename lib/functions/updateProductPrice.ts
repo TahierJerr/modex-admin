@@ -70,62 +70,53 @@ export async function updateGraphicsCardPrices(params: string) {
         return { updatedProducts: [], notUpdatedProducts: [] };
     }
 
-    const batchedProducts = productsToUpdate.reduce((acc, product, index) => {
-        const batchIndex = Math.floor(index / 5);
-        acc[batchIndex] = [...(acc[batchIndex] || []), product];
-        return acc;
-    }, [] as any[][]);
-    console.log("Batched products:", batchedProducts);
-
+    let updatedProducts: any[] = [];
+    let notUpdatedProducts: any[] = [];
     const delayBetweenBatches = 100;
-    const updatedProducts: any[] = [];
-    const notUpdatedProducts: any[] = [];
     const timeout = 55000; // 55 seconds to give some buffer
     const startTime = Date.now();
-    console.log("Start time:", startTime);
 
-    for (const [batchIndex, batch] of batchedProducts.entries()) {
-        const batchStartTime = Date.now();
-        const remainingTime = timeout - (batchStartTime - startTime);
-        console.log(`Batch ${batchIndex + 1}: Remaining time:`, remainingTime);
-
-        if (remainingTime <= 0) {
-            notUpdatedProducts.push(...batch);
-            console.log(`Batch ${batchIndex + 1} not updated due to timeout:`, batch);
-            break;
-        }
-
+    const processProduct = async (product: any) => {
         try {
-            const batchResults = await Promise.race<Promise<any>[] | Promise<any>>([
-                Promise.all(batch.map(async (product: any) => {
-                    const productStartTime = Date.now();
-                    try {
-                        const result = await updateProductPrice(product, product.productModel);
-                        const productEndTime = Date.now();
-                        console.log(`[${new Date().toISOString()}] Product ID: ${product.id} updated successfully in ${productEndTime - productStartTime} ms.`);
-                        return result;
-                    } catch (error) {
-                        console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
-                        notUpdatedProducts.push(product);
-                        return null;
-                    }
-                })),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), remainingTime))
-            ]);
-
-            if (Array.isArray(batchResults)) {
-                updatedProducts.push(...batchResults.filter(Boolean));
+            const productStartTime = Date.now();
+            const productRemainingTime = timeout - (Date.now() - startTime);
+                
+            if (productRemainingTime <= 0) {
+                notUpdatedProducts.push(product);
+                console.log(`Product ID: ${product.id} not updated due to timeout.`);
+                return;
             }
 
-            const batchEndTime = Date.now();
-            console.log(`Batch ${batchIndex + 1} completed in ${batchEndTime - batchStartTime} ms:`, batch);
-
-        } catch (batchError) {
-            console.error(`[${new Date().toISOString()}] [BATCH_ERROR for batch ${batchIndex + 1}]`, batchError);
-            notUpdatedProducts.push(...batch);
+            const result = await Promise.race([
+                updateProductPrice(product, product.productModel),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Product Timeout")), productRemainingTime))
+            ]);
+                    
+            const productEndTime = Date.now();
+            console.log(`[${new Date().toISOString()}] Product ID: ${product.id} updated successfully in ${productEndTime - productStartTime} ms.`);
+            updatedProducts.push(result);
+        } catch (error) {
+            console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
+            notUpdatedProducts.push(product);
         }
+    };
 
-        await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+    for (let i = 0; i < productsToUpdate.length; i++) {
+        await processProduct(productsToUpdate[i]);
+
+        if ((i + 1) % 5 === 0) {
+            const batchRemainingTime = timeout - (Date.now() - startTime);
+            console.log(`Remaining time after batch ${Math.floor(i / 5) + 1}: ${batchRemainingTime}`);
+
+            if (batchRemainingTime <= 0) {
+                console.log("Timeout reached, committing updates and stopping.");
+                break;
+            }
+            
+            console.log(`Committing updates for products:`, updatedProducts);
+            updatedProducts = []; // Reset after committing
+            await new Promise(resolve => setTimeout(resolve, 3000)); // Rest for 3 seconds before continuing
+        }
     }
 
     console.log("Updated Products:", updatedProducts);
