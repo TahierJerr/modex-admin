@@ -64,7 +64,7 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
 
             if (retries === 0 || error?.response?.status === 429) {
                 if (fallbackData) {
-                    fallbackData.error = true; // Push error boolean true to fallbackData
+                    fallbackData.error = true;
                     return fallbackData;
                 } else {
                     throw new Error('Failed to track price and no fallback data available.');

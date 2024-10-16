@@ -8,7 +8,6 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
         if (productId) {
             const product = await getProduct(productId, productModel);
 
-            // Log the product to check if it's valid
             if (!product || Object.keys(product).length === 0) {
                 console.error("No product found for ID:", productId);
                 return {};
@@ -19,14 +18,11 @@ export async function handleProductRetrieval(productModel: any, productId?: stri
         } else {
             const products = await getProducts(productModel);
 
-            // Validate products before updating
             const validatedProducts = await Promise.all(
                 products.filter((product: any) => product && Object.keys(product).length > 0)
             );
 
-            const updatedProducts = await updateProductsPrices(validatedProducts, productModel);
-
-            return updatedProducts;
+            return validatedProducts;
         }
     } catch (error) {
         console.error("[PRODUCT_RETRIEVAL_ERROR]", error);
