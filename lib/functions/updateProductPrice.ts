@@ -53,7 +53,6 @@ export async function updateProductPrice(product: any, productModel: any) {
 
 // create cron job
 export async function updateGraphicsCardPrices() {
-    // get all products with their productModel and put it in an array
     const products = await prismadb.graphics.findMany({
         select: {
             id: true,
@@ -65,11 +64,10 @@ export async function updateGraphicsCardPrices() {
     });
 
     const today: Date = new Date();
-
     const productsToUpdate = products.filter((product) => !isSameDate(product.updatedAt, today));
 
     if (productsToUpdate.length === 0) {
-        return products;
+        return { updatedProducts: [], notUpdatedProducts: [] };
     }
 
     const batchedProducts = productsToUpdate.reduce((acc, product, index) => {
@@ -80,26 +78,47 @@ export async function updateGraphicsCardPrices() {
 
     const delayBetweenBatches = 3000;
     const updatedProducts: any[] = [];
+    const notUpdatedProducts: any[] = [];
+
+    const timeout = 59000; // 59 seconds
+    const startTime = Date.now();
 
     for (const [batchIndex, batch] of batchedProducts.entries()) {
-        try {
-            const batchResults = await Promise.all(batch.map(async (product: any) => {
-                try {
-                    const result = await updateProductPrice(product, product.productModel);
-                    return result;
-                } catch (error) {
-                    console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
-                    return product;
-                }
-            }));
+        const remainingTime = timeout - (Date.now() - startTime);
 
-            updatedProducts.push(...batchResults);
+        if (remainingTime <= 0) {
+            notUpdatedProducts.push(...batch);
+            break;
+        }
+
+        try {
+            const batchResults = await Promise.race<Promise<any>[] | Promise<any>>([
+                Promise.all(batch.map(async (product: any) => {
+                    try {
+                        const result = await updateProductPrice(product, product.productModel);
+                        return result;
+                    } catch (error) {
+                        console.error(`[${new Date().toISOString()}] [PRODUCT_UPDATE_ERROR for product ID: ${product.id}]`, error);
+                        notUpdatedProducts.push(product);
+                        return null;
+                    }
+                })),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), remainingTime))
+            ]);
+
+            if (Array.isArray(batchResults)) {
+                updatedProducts.push(...batchResults.filter(Boolean));
+            }
         } catch (batchError) {
             console.error(`[${new Date().toISOString()}] [BATCH_ERROR for batch ${batchIndex + 1}]`, batchError);
+            notUpdatedProducts.push(...batch);
         }
 
         await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
     }
+
+    console.log("Updated Products:", updatedProducts);
+    console.log("Products Not Updated On Time:", notUpdatedProducts);
 
     return updatedProducts;
 }
