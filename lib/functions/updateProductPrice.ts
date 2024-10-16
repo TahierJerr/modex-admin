@@ -44,7 +44,7 @@ export async function updateProductPrice(product: any, productModel: any) {
         return product;
     }
 }
-
+// adding comment
 
 const productModels = {
     processor: prismadb.processor,
