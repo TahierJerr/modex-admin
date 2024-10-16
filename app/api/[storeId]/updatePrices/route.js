@@ -3,13 +3,13 @@ export const maxDuration = 600;
 import { updateGraphicsCardPrices } from "@/lib/functions/updateProductPrice";
 import { NextResponse } from "next/server";
 
-export default async function handler(req: Request, { params }: { params: { storeId: string } }) {
+export default async function handler(req, { params }) {
     
     if (!params.storeId) {
         return new NextResponse("Store ID is required", { status: 400 });
     }
     try {
-        const productPrices = await updateGraphicsCardPrices();
+        const productPrices = await updateGraphicsCardPrices(params);
 
         if (!productPrices) {
             return new NextResponse("Failed to update prices", { status: 500 });

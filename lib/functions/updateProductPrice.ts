@@ -52,8 +52,12 @@ export async function updateProductPrice(product: any, productModel: any) {
 }
 
 // create cron job
-export async function updateGraphicsCardPrices() {
+export async function updateGraphicsCardPrices(params: string) {
+
     const products = await prismadb.graphics.findMany({
+        where: {
+            storeId: params,
+        },
         select: {
             id: true,
             name: true,
