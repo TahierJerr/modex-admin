@@ -70,6 +70,10 @@ export async function updateGraphicsCardPrices(params: string) {
     const today: Date = new Date();
     const productsToUpdate = products.filter((product) => !isSameDate(product.updatedAt, today));
 
+    // log date of product and today
+    console.log('Product Date:', products[0].updatedAt);
+    console.log('Today:', today);
+
     if (productsToUpdate.length === 0) {
         return { updatedProducts: [], notUpdatedProducts: [] };
     }

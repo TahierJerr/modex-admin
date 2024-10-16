@@ -3,7 +3,7 @@ export const maxDuration = 60;
 import { updateGraphicsCardPrices } from "@/lib/functions/updateProductPrice";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, { params }: { params: { storeId: string } }) {
+export async function GET(req: Request, { params }: { params: { storeId: string } }) {
     if (!params.storeId) {
         return new NextResponse("Store ID is required", { status: 400 });
     }
