@@ -24,34 +24,17 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             if (!productPrice) {
                 throw new Error("Price not found.");
             }
-            
-            const productUri = extractUri($);
+
             const productName = extractName($);
             const { minPriceNumber, avgPriceNumber, minPrice, avgPrice } = formatPrices(productPrice);
 
-            if (!productUri) {
-                return {
-                    productName,
-                    minPriceNumber,
-                    avgPriceNumber,
-                    minPrice,
-                    avgPrice,
-                    productUrl
-                };
-            }
-
-            console.log(`Fetching chart data from URI: ${productUri} at ${new Date().toISOString()}`);
-            const productGraphData: ProductGraphData[] = await fetchChartData(productUri);
-            console.log(`Chart data fetched: ${JSON.stringify(productGraphData)} at ${new Date().toISOString()}`);
-            
             return {
                 productName,
                 minPriceNumber,
                 avgPriceNumber,
                 minPrice,
                 avgPrice,
-                productUrl,
-                productGraphData
+                productUrl
             };
         } catch (error: any) {
             retries--;

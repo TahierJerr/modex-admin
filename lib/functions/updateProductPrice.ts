@@ -51,6 +51,7 @@ export async function updateProductPrice(product: any, productModel: any) {
 
 
 
+
 // create cron job
 export async function updateGraphicsCardPrices(params: string) {
     console.log("Starting updateGraphicsCardPrices with params:", params);
