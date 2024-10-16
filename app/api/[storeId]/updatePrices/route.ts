@@ -1,6 +1,6 @@
 export const maxDuration = 60;
 
-import { updateGraphicsCardPrices } from "@/lib/functions/graphics/updateGrapicsPrices";
+import { updateGraphicsCardPrices } from "@/lib/functions/updateProductPrice";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, { params }: { params: { storeId: string } }) {
