@@ -1,8 +1,6 @@
 import axios from "axios";
 import * as cheerio from 'cheerio';
-import { ProductGraphData } from "@/types";
-import { fetchChartData } from "./fetchChartData";
-import { extractName, extractPriceData, extractUri } from "./functions/tweakers/extractData";
+import { extractName, extractPriceData } from "./functions/tweakers/extractData";
 import { formatPrices } from "./functions/formatPrices";
 
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {

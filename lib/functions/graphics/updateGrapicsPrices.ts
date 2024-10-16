@@ -2,9 +2,10 @@ export const maxDuration = 60;
 
 import { fetchPriceFromUrl } from "@/lib/scraping/fetchPriceFromUrl";
 import ProductData from "@/types";
-import prismadb from "../prismadb";
+import prismadb from "@/lib/prismadb";
+import { Graphics } from "@prisma/client";
 
-export async function updateProductPrice(product: any, productModel: any) {
+export async function updateGraphicsCardPrice(product: Graphics) {
     if (!product.priceTrackUrl) {
         return product;
     }
@@ -34,7 +35,7 @@ export async function updateProductPrice(product: any, productModel: any) {
         }
 
         console.log(`Updating product in database: ${product.id} at ${new Date().toISOString()}`);
-        const updatedProduct = await productModel.update({
+        const updatedProduct = await prismadb.graphics.update({
             where: { id: product.id },
             data: { price: newPrice },
         });
@@ -91,7 +92,7 @@ export async function updateGraphicsCardPrices(params: string) {
             }
 
             const result = await Promise.race([
-                updateProductPrice(product, prismadb.graphics),
+                updateGraphicsCardPrice(product),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Product Timeout")), productRemainingTime))
             ]);
                     
