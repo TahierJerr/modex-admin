@@ -8,9 +8,9 @@ export async function updateProductPrice(product: any, productModel: any) {
     if (!product.priceTrackUrl) {
         return product;
     }
-    
+
     console.log(`Starting update for product ID: ${product.id}`);
-    
+
     try {
         const fallbackData = {
             productName: product.name || 'Unknown Product',
@@ -22,27 +22,32 @@ export async function updateProductPrice(product: any, productModel: any) {
             productGraphData: [],
         };
 
+        console.log(`Fetching price data from URL: ${product.priceTrackUrl}`);
         const priceData: ProductData = await fetchPriceFromUrl(product.priceTrackUrl, fallbackData);
-        const newPrice = priceData.minPriceNumber;
+        console.log(`Price data fetched: ${JSON.stringify(priceData)}`);
         
+        const newPrice = priceData.minPriceNumber;
+
         if (priceData.error) {
             console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}] Failed to fetch price data.`);
             return product;
         }
-        
+
+        console.log(`Updating product in database: ${product.id}`);
         const updatedProduct = await productModel.update({
             where: { id: product.id },
             data: { price: newPrice },
         });
         
         console.log(`Product ID: ${product.id} updated successfully.`);
-        
+
         return updatedProduct;
     } catch (error) {
         console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}]`, error);
         return product;
     }
 }
+
 
 
 // create cron job
@@ -72,7 +77,6 @@ export async function updateGraphicsCardPrices(params: string) {
 
     let updatedProducts: any[] = [];
     let notUpdatedProducts: any[] = [];
-    const delayBetweenBatches = 100;
     const timeout = 55000; // 55 seconds to give some buffer
     const startTime = Date.now();
 
@@ -88,7 +92,7 @@ export async function updateGraphicsCardPrices(params: string) {
             }
 
             const result = await Promise.race([
-                updateProductPrice(product, product.productModel),
+                updateProductPrice(product, prismadb.graphics),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Product Timeout")), productRemainingTime))
             ]);
                     
