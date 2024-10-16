@@ -128,7 +128,7 @@ export function MainNav({
                         <DropdownMenuContent>
                             <DropdownMenuLabel >{route.label}</DropdownMenuLabel>
                             {route.items.map((item) => (
-                                <Link key={item.href} href={item.href}>
+                                <Link key={item.href} href={item.href} prefetch={false}>
                                         <DropdownMenuItem className={item.active ? "text-black dark:text-white" : "text-muted-foreground"}>
                                             {item.label}
                                         </DropdownMenuItem>
@@ -137,7 +137,7 @@ export function MainNav({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
-                    <Link key={route.href} href={route.href} className={route.active ? "text-black dark:text-white" : "text-muted-foreground"}>
+                    <Link key={route.href} href={route.href} prefetch={false} className={route.active ? "text-black dark:text-white" : "text-muted-foreground"}>
                             {route.label}
                     </Link>
                 )
