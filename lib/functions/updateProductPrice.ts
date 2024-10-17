@@ -49,7 +49,6 @@ export async function updateProductPrice(product: any, productModel: any) {
 }
 
 
-// create cron job
 export async function updateGraphicsCardPrices(params: string) {
     console.log("Starting updateGraphicsCardPrices with params:", params);
 
@@ -76,7 +75,7 @@ export async function updateGraphicsCardPrices(params: string) {
 
     let updatedProducts: any[] = [];
     let notUpdatedProducts: any[] = [];
-    const timeout = 55000; // 55 seconds to give some buffer
+    const timeout = 57000;
     const startTime = Date.now();
 
     const processProduct = async (product: any) => {
@@ -117,8 +116,8 @@ export async function updateGraphicsCardPrices(params: string) {
             }
             
             console.log(`Committing updates for products:`, updatedProducts);
-            updatedProducts = []; // Reset after committing
-            await new Promise(resolve => setTimeout(resolve, 3000)); // Rest for 3 seconds before continuing
+            updatedProducts = [];
+            await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
 
