@@ -10,6 +10,9 @@ import { DataTable } from "@/components/ui/data-table";
 import { ApiList } from "@/components/ui/api-list";
 
 import { GraphicsColumn, columns } from "./columns";
+import axios from "axios";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 interface GraphicsClientProps {
     data: GraphicsColumn[];
@@ -18,8 +21,23 @@ interface GraphicsClientProps {
 export const GraphicsClient: React.FC<GraphicsClientProps> = ({
     data
 }) => {
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
     const params = useParams();
+
+    const handleRequest = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`/api/${params.storeId}/updatePrices?skipDateCheck=true`);
+            toast.success("Prices updated successfully");
+            router.refresh();
+        } catch (error) {
+            toast.error(`Failed to update prices
+            Error: ${error}`);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <>
@@ -28,10 +46,15 @@ export const GraphicsClient: React.FC<GraphicsClientProps> = ({
             title={`Graphics cards (${data.length})`}
             description="Manage graphics cards for your store"
             />
+            <div className="flex items-center gap-2">
+            <Button onClick={handleRequest} disabled={loading} className="flex items-center bg-primary-500 text-white hover:bg-primary-600">
+                {loading ? "Updating..." : "Update Prices"}
+            </Button>
             <Button onClick={() => router.push(`/${params.storeId}/graphics/new`)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add New
             </Button>
+            </div>
         </div>
         <Separator />
         <DataTable searchKey="name" columns={columns} data={data}/>
