@@ -50,7 +50,7 @@ export async function updateProductPrice(product: any, productModel: any) {
 }
 
 
-export async function updateGraphicsCardPrices(params: string) {
+export async function updateGraphicsCardPrices(params: string, skipDateCheck: boolean = false) {
     console.log("Starting updateGraphicsCardPrices with params:", params);
 
     const products = await prismadb.graphics.findMany({
@@ -63,7 +63,7 @@ export async function updateGraphicsCardPrices(params: string) {
     const todayString = today.toISOString().split('T')[0];
     console.log("Today's date:", todayString);
 
-    const productsToUpdate = products.filter((product) => {
+    const productsToUpdate = skipDateCheck ? products : products.filter((product) => {
         const productDate = new Date(product.updatedAt).toISOString().split('T')[0];
         return productDate !== todayString;
     });
