@@ -3,6 +3,10 @@
     {
         "path": "/api/clrgi1xkm0000gawknqwc2rl4/updatePrices",
         "schedule": "0 2 * * *"
+    },
+    {
+        "path": "/api/clrgi1xkm0000gawknqwc2rl4/updatePrices",
+        "schedule": "0 6 * * *"
     }
 ]
 }

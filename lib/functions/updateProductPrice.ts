@@ -117,7 +117,7 @@ export async function updateGraphicsCardPrices(params: string) {
             
             console.log(`Committing updates for products:`, updatedProducts);
             updatedProducts = [];
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, 8000));
         }
     }
 
