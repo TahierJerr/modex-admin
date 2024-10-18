@@ -82,3 +82,21 @@ body,
     @apply bg-background text-foreground;
   }
 }
+
+.loader {
+  border: 8px solid #e0e0e0; /* Light grey background */
+  border-top: 8px solid #000000; /* Blue color */
+  border-radius: 50%;
+  width: 40px; /* Width of the loader */
+  height: 40px; /* Height of the loader */
+  animation: spin 1s linear infinite; /* Spin animation */
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}

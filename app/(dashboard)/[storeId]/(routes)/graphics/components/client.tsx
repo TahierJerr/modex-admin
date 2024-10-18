@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, RefreshCcwIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { GraphicsColumn, columns } from "./columns";
 import axios from "axios";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Loading from "@/components/ui/loading";
 
 interface GraphicsClientProps {
     data: GraphicsColumn[];
@@ -47,8 +48,8 @@ export const GraphicsClient: React.FC<GraphicsClientProps> = ({
             description="Manage graphics cards for your store"
             />
             <div className="flex items-center gap-2">
-            <Button onClick={handleRequest} disabled={loading} className="flex items-center bg-primary-500 text-white hover:bg-primary-600">
-                {loading ? "Updating..." : "Update Prices"}
+            <Button onClick={handleRequest} disabled={loading} className="flex items-center gap-2 bg-blue-600 text-white hover:bg-primary-600">
+                {loading ? `${<Loading />} Updating...` : `${<RefreshCcwIcon size={20} />} Update Prices`}
             </Button>
             <Button onClick={() => router.push(`/${params.storeId}/graphics/new`)}>
                 <Plus className="mr-2 h-4 w-4" />
