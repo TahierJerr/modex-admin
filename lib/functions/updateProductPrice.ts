@@ -27,6 +27,7 @@ export async function updateProductPrice(product: any, productModel: any) {
         console.log(`Price data fetched: ${JSON.stringify(priceData)} at ${new Date().toISOString()}`);
         
         const newPrice = priceData.minPriceNumber;
+        const storeUrl = priceData.productUrl;
 
         if (priceData.error) {
             console.error(`[PRICE_FETCH_ERROR_PRODUCT for product ID: ${product.id}] Failed to fetch price data at ${new Date().toISOString()}`);
@@ -36,7 +37,7 @@ export async function updateProductPrice(product: any, productModel: any) {
         console.log(`Updating product in database: ${product.id} at ${new Date().toISOString()}`);
         const updatedProduct = await productModel.update({
             where: { id: product.id },
-            data: { price: newPrice },
+            data: { price: newPrice, productUrl: storeUrl },
         });
         
         console.log(`Product ID: ${product.id} updated successfully at ${new Date().toISOString()}`);
