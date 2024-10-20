@@ -42,11 +42,10 @@ export async function POST(
                 product_data: {
                     name: computer.name,
                 },
-                unit_amount: computer.price.toNumber() * 100,
+                unit_amount: Math.round(parseFloat(computer.price.toFixed(2)) * 100),
                 tax_behavior: 'inclusive',
-                
             }
-        })
+        });
     });
 
     const order = await prismadb.order.create({
@@ -84,7 +83,7 @@ export async function POST(
             terms_of_service: 'required',
         },
         shipping_address_collection: {
-            allowed_countries: ['NL', 'BE'],
+            allowed_countries: ['NL', 'BE', 'DE'],
         },
         phone_number_collection: {
             enabled: true
