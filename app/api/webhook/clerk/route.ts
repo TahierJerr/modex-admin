@@ -1,7 +1,8 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
-import { WebhookEvent } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { WebhookEvent } from '@clerk/nextjs/dist/types/server';
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
 
     // If there are no headers, error out
     if (!svix_id || !svix_timestamp || !svix_signature) {
-        return new Response('Error occurred -- no svix headers', {
+        return new NextResponse('Error occurred -- no svix headers', {
             status: 400,
         });
     }
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
         }) as WebhookEvent;
     } catch (err) {
         console.error('Error verifying webhook:', err);
-        return new Response('Error occurred', {
+        return new NextResponse('Error occurred', {
             status: 400,
         });
     }
@@ -90,10 +91,10 @@ export async function POST(req: Request) {
                 break;
         }
 
-        return new Response('Event handled', { status: 200 });
+        return new NextResponse('Event handled', { status: 200 });
     } catch (err) {
         console.error('Error handling event:', err);
-        return new Response('Error occurred while handling the event', {
+        return new NextResponse('Error occurred while handling the event', {
             status: 500,
         });
     }
