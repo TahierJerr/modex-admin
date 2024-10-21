@@ -36,11 +36,12 @@ export async function POST(req: Request, { params }: { params: { storeId: string
         }
     });
 
-    computers.forEach(computer => {
+    // Ensure all computers exist
+    for (const computer of computers) {
         if (!computer) {
             return new NextResponse("Product not found", { status: 404 });
         }
-    });
+    }
 
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = computers.map(computer => ({
         quantity: 1,
