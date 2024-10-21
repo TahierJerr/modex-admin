@@ -57,7 +57,7 @@ export async function POST(req: Request) {
                         email: evt.data.email_addresses[0].email_address,
                         firstName: evt.data.first_name ?? '',
                         lastName: evt.data.last_name ?? '',
-                        phone: evt.data.phone_numbers[0].phone_number ?? '',
+                        phone: '',
                         storeId: 'clrgi1xkm0000gawknqwc2rl4',
                         address: '',
                         postalCode: '',
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
                         email: evt.data.email_addresses[0].email_address,
                         firstName: evt.data.first_name ?? '',
                         lastName: evt.data.last_name ?? '',
-                        phone: evt.data.phone_numbers[0].phone_number ?? '',
+                        phone: '',
                     },
                 });
                 break;
