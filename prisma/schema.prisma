@@ -8,6 +8,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+
+
 model Store {
   id String @id @default(cuid())
   name String
@@ -28,8 +30,30 @@ model Store {
   colors Color[] @relation("StoreToColor")
   computers Computer[] @relation("StoreToComputer")
   orders Order[] @relation("StoreToOrder")
+  users User[] @relation("StoreToUser")
+  
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  firstName String
+  lastName  String
+  address   String
+  postalCode String
+  country   String
+  phone     String
+  newsletter Boolean
+  store     Store @relation("StoreToUser", fields: [storeId], references: [id])
+  storeId   String
+  orders    Order[]   @relation("UserToOrder")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([storeId])
 }
 
 model Billboard {
@@ -333,19 +357,34 @@ model ImageComputer {
 }
 
 model Order {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToOrder", fields: [storeId], references: [id])
-  orderItems OrderItem[]
-  isPaid Boolean @default(false)
-  phone String @default("")
-  address String @default("")
-  email String @default("")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String       @id @default(uuid())
+  storeId               String
+  store                 Store        @relation("StoreToOrder", fields: [storeId], references: [id])
+  userId                String
+  user                  User         @relation("UserToOrder", fields: [userId], references: [id])
+  orderItems            OrderItem[]
+  phone                 String       @default("")
+  address               String       @default("")
+  postalCode            String       @default("")
+  country               String       @default("")
+  email                 String       @default("")
+  orderStatus           String       @default("Pending")
+  paymentMethod         String       @default("")
+  trackingNumber        String?
+  totalPrice            Decimal
+  discountCode          String?
+  estimatedDeliveryDate DateTime?
+  netProfit             Decimal?
+  isPaid                Boolean      @default(false)
 
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  
   @@index([storeId])
+  @@index([userId])
 }
+
+
 
 model OrderItem {
   id String @id @default(uuid())
