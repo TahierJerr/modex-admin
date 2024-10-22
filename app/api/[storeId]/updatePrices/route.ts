@@ -10,7 +10,7 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
 
     const url = new URL(req.url);
     const skipDateCheck = url.searchParams.get('skipDateCheck') === 'true' ? true : false;
-    const productModel = url.searchParams.get('productModel');
+    const productModel = url.searchParams.get('productModel') || 'all';
 
     const updateModelPrices = async (model: string) => {
         switch (model) {

@@ -30,7 +30,7 @@ export const ComputerClient: React.FC<ComputerClientProps> = ({
         
         try {
             setLoading(true);
-            await axios.get(`/api/${params.storeId}/updatePrices?skipDateCheck=${skipDateCheck}&productModel=all`);
+            await axios.get(`/api/${params.storeId}/updatePrices?skipDateCheck=${skipDateCheck}`);
             toast.success("Prices updated successfully");
             router.refresh();
         } catch (error) {
