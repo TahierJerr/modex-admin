@@ -147,7 +147,7 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
             setLoading(false);
             setOpen(false);
         }
-    } 
+    }
 
     return (
         <>
@@ -260,8 +260,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {processors.map((processor) => (
-                                        <SelectItem key={processor.id} value={processor.id}>
-                                            {processor.name}
+                                        <SelectItem className="flex items-center justify-between" key={processor.id} value={processor.id}>
+                                            <span>
+                                                {processor.name}
+                                            </span>
+                                            <span>
+                                                {`€${processor.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -287,8 +292,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {memories.map((memory) => (
-                                        <SelectItem key={memory.id} value={memory.id}>
-                                            {memory.name}
+                                        <SelectItem className="flex items-center justify-between" key={memory.id} value={memory.id}>
+                                            <span>
+                                                {memory.name}
+                                            </span>
+                                            <span>
+                                                `{`€${memory.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -314,8 +324,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {graphics.map((graphics) => (
-                                        <SelectItem key={graphics.id} value={graphics.id}>
-                                            {graphics.name}
+                                        <SelectItem className="flex items-center justify-between" key={graphics.id} value={graphics.id}>
+                                            <span>
+                                                {graphics.name}
+                                            </span>
+                                            <span>
+                                                `{`€${graphics.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -341,8 +356,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {motherboards.map((motherboard) => (
-                                        <SelectItem key={motherboard.id} value={motherboard.id}>
-                                            {motherboard.name}
+                                        <SelectItem className="flex items-center justify-between" key={motherboard.id} value={motherboard.id}>
+                                            <span>
+                                                {motherboard.name}
+                                            </span>
+                                            <span>
+                                                `{`€${motherboard.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -368,8 +388,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {storages.map((storage) => (
-                                        <SelectItem key={storage.id} value={storage.id}>
-                                            {storage.name}
+                                        <SelectItem className="flex items-center justify-between" key={storage.id} value={storage.id}>
+                                            <span>
+                                                {storage.name}
+                                            </span>
+                                            <span>
+                                                `{`€${storage.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -395,8 +420,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {pccases.map((pccase) => (
-                                        <SelectItem key={pccase.id} value={pccase.id}>
-                                            {pccase.name}
+                                        <SelectItem className="flex items-center justify-between" key={pccase.id} value={pccase.id}>
+                                            <span>
+                                                {pccase.name}
+                                            </span>
+                                            <span>
+                                                `{`€${pccase.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -422,8 +452,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {coolers.map((cooler) => (
-                                        <SelectItem key={cooler.id} value={cooler.id}>
-                                            {cooler.name}
+                                        <SelectItem className="flex items-center justify-between" key={cooler.id} value={cooler.id}>
+                                            <span>
+                                                {cooler.name}
+                                            </span>
+                                            <span>
+                                                `{`€${cooler.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -449,8 +484,13 @@ export const ComputerForm: React.FC<ComputerFormProps> = ({
                                 </FormControl>
                                 <SelectContent>
                                     {powers.map((power) => (
-                                        <SelectItem key={power.id} value={power.id}>
-                                            {power.name}
+                                        <SelectItem className="flex items-center justify-between" key={power.id} value={power.id}>
+                                            <span>
+                                                {power.name}
+                                            </span>
+                                            <span>
+                                                `{`€${power.price}`}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
