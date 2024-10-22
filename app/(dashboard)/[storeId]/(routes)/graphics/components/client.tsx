@@ -26,12 +26,11 @@ export const GraphicsClient: React.FC<GraphicsClientProps> = ({
     const router = useRouter();
     const params = useParams();
     
-    const handleRequest = async (skipDateCheck?: boolean) => {
+    const handleRequest = async (skipDateCheck: boolean = false) => {
         
-        const skip = 'skipDateCheck=true';
         try {
             setLoading(true);
-            const response = await axios.get(`/api/${params.storeId}/updatePrices?skipDateCheck=true`);
+            await axios.get(`/api/${params.storeId}/updatePrices?skipDateCheck=${skipDateCheck}&productModel=graphics`);
             toast.success("Prices updated successfully");
             router.refresh();
         } catch (error) {
