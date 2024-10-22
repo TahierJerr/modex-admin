@@ -62,7 +62,7 @@ export const GraphicsClient: React.FC<GraphicsClientProps> = ({
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent>
-                    <div className="flex flex-col justify-center items-center gap-4 p-4">
+                    <div className="flex flex-col items-center gap-4 p-4">
                         <h3 className="text-lg font-semibold">Update Options</h3>
                         <Button onClick={() => handleRequest(true)} className="flex items-center gap-2 bg-blue-600 text-white hover:bg-primary-600">
                             {<CalendarXIcon size={20} />} Update without date check
