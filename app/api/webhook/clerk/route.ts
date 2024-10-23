@@ -74,16 +74,6 @@ export async function POST(req: Request) {
                     evt.data.first_name ?? '',
                     evt.data.last_name ?? ''
                 );
-                await resend.emails.send({
-                    from: 'MODEX <new-user@modexgaming.com>',
-                    to: 'info@modexgaming.com',
-                    subject: 'New User Created',
-                    react: ErrorTemplate({
-                        error: 'New User Created',
-                        errorCode: 200,
-                        notes: JSON.stringify(evt),
-                    }),
-                });
                 break;
             case 'user.updated':
                 if (!evt.data.id) {
