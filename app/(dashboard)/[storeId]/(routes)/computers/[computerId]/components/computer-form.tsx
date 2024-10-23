@@ -79,7 +79,6 @@ type ComputerFormValues = z.infer<typeof formSchema>;
         const params = useParams();
         const router = useRouter();
         
-        
         const [open, setOpen] = useState(false);
         const [loading, setLoading] = useState(false);
         
@@ -149,169 +148,151 @@ type ComputerFormValues = z.infer<typeof formSchema>;
             }
         }
         
-        const totalPrice = [
-        processors.find((processor) => processor.id === form.getValues().processorId)?.price || 0,
-        memories.find((memory) => memory.id === form.getValues().memoryId)?.price || 0,
-        storages.find((storage) => storage.id === form.getValues().storageId)?.price || 0,
-        graphics.find((graphic) => graphic.id === form.getValues().graphicsId)?.price || 0,
-        motherboards.find((motherboard) => motherboard.id === form.getValues().motherboardId)?.price || 0,
-        powers.find((power) => power.id === form.getValues().powerId)?.price || 0,
-        pccases.find((pccase) => pccase.id === form.getValues().pccaseId)?.price || 0,
-        softwares.find((software) => software.id === form.getValues().softwareId)?.price || 0,
-        coolers.find((cooler) => cooler.id === form.getValues().coolerId)?.price || 0
-        ].reduce((total, price) => total + price, 0);
+        const calculateTotalPrice = () => {
+            return [
+                processors.find((processor) => processor.id === form.getValues().processorId)?.price || 0,
+                memories.find((memory) => memory.id === form.getValues().memoryId)?.price || 0,
+                storages.find((storage) => storage.id === form.getValues().storageId)?.price || 0,
+                graphics.find((graphic) => graphic.id === form.getValues().graphicsId)?.price || 0,
+                motherboards.find((motherboard) => motherboard.id === form.getValues().motherboardId)?.price || 0,
+                powers.find((power) => power.id === form.getValues().powerId)?.price || 0,
+                pccases.find((pccase) => pccase.id === form.getValues().pccaseId)?.price || 0,
+                softwares.find((software) => software.id === form.getValues().softwareId)?.price || 0,
+                coolers.find((cooler) => cooler.id === form.getValues().coolerId)?.price || 0
+            ].reduce((total, price) => total + price, 0).toFixed(2);
+        };
         
-        // Effect to check price validation
-        useEffect(() => {
-            const priceValue = form.getValues().price;
-            if (priceValue < totalPrice) {
-                form.setError("price", {
-                    type: "manual",
-                    message: `Price is lower than total cost (€${totalPrice})`,
-                });
-            } else {
-                form.clearErrors("price");
-            }
-        }, [form.getValues().price, totalPrice]);
+        const [totalPrice, setTotalPrice] = useState(calculateTotalPrice());
         
-        return (
-        <>
-        <AlertModal 
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onDelete}
-        loading={loading}
-        />
-        <div className="flex items-center justify-between">
-            <Heading
-            title={title}
-            description={description}
+            // Effect to recalculate total price when form values change
+            useEffect(() => {
+                const updateTotalPrice = () => {
+                    const newTotalPrice = calculateTotalPrice();
+                    setTotalPrice(newTotalPrice);
+
+                    const priceValue = parseFloat(String(form.getValues().price)) || 0; // Ensure priceValue is a number
+                    if (priceValue < parseFloat(newTotalPrice)) {
+                        form.setError("price", {
+                            type: "manual",
+                            message: `Price is lower than total cost (€${newTotalPrice})`,
+                        });
+                    } else {
+                        form.clearErrors("price");
+                    }
+                };
+        
+                // Update total price on select change
+                const subscription = form.watch(updateTotalPrice); // Watch for changes in the form values
+        
+                return () => subscription.unsubscribe(); // Clean up subscription on unmount
+            }, [form]);
+            
+            return (
+            <>
+            <AlertModal 
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            onConfirm={onDelete}
+            loading={loading}
             />
-            {initialData && (
-                <Button
-                disabled={loading}
-                variant="destructive"
-                size="icon"
-                onClick={() => setOpen(true)}
-                >
-                <Trash className="h-4 w-4" />
-            </Button>
-            )}
-        </div>
-        <Separator />
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-                <FormField
-                control={form.control}
-                name="images"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Images</FormLabel>
-                    <FormControl>
-                        <ImageUpload value={field.value.map((image) => image.url)} disabled={loading} onChange={(url) => field.onChange( [...field.value, { url }])} onRemove={(url) => field.onChange([...field.value.filter((current) => current.url !== url)])} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                    />
-                    <span>
-                        Total Cost: € {totalPrice}
-                    </span>
-                    <div className="grid grid-cols-3 gap-8">
-                        <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <Input disabled={loading} placeholder="Computer name" {...field}/>
+            <div className="flex items-center justify-between">
+                <Heading
+                title={title}
+                description={description}
+                />
+                {initialData && (
+                    <Button
+                    disabled={loading}
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => setOpen(true)}
+                    >
+                    <Trash className="h-4 w-4" />
+                </Button>
+                )}
+            </div>
+            <Separator />
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+                    <FormField
+                    control={form.control}
+                    name="images"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Images</FormLabel>
+                        <FormControl>
+                            <ImageUpload value={field.value.map((image) => image.url)} disabled={loading} onChange={(url) => field.onChange( [...field.value, { url }])} onRemove={(url) => field.onChange([...field.value.filter((current) => current.url !== url)])} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                         )}
                         />
-                        <FormField
-                        control={form.control}
-                        name="price"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Price</FormLabel>
-                            <FormControl>
-                                <Input 
-                                type="number" 
-                                disabled={loading} 
-                                placeholder="999.99" 
-                                {...field} 
-                                onChange={(e) => {
-                                    field.onChange(e); // Call the original onChange
-                                    const value = parseFloat(e.target.value);
-                                    if (value < totalPrice) {
-                                        form.setError("price", {
-                                            type: "manual",
-                                            message: `Price is lower than total cost (€${totalPrice})`,
-                                        });
-                                    } else {
-                                        form.clearErrors("price");
-                                    }
-                                }} 
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="categoryId"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Category</FormLabel>
-                            <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                        <span className="text-lg font-bold text-gray-700 my-4">
+                            Total Price: € {totalPrice}
+                        </span>
+                        <div className="grid grid-cols-3 gap-8">
+                            <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue 
-                                        defaultValue={field.value} 
-                                        placeholder="Select a category"
-                                        />
-                                    </SelectTrigger>
+                                    <Input disabled={loading} placeholder="Computer name" {...field}/>
                                 </FormControl>
-                                <SelectContent>
-                                    {categories.map((category) => (
-                                        <SelectItem key={category.id} value={category.id}>
-                                            {category.name}
-                                        </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
                                 <FormMessage />
                             </FormItem>
                             )}
                             />
                             <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Price</FormLabel>
+                            <FormControl>
+                                <Input 
+                                    type="number" 
+                                    disabled={loading} 
+                                    placeholder="999.99" 
+                                    {...field} 
+                                    onChange={(e) => {
+                                        const value = parseFloat(e.target.value); // Convert input value to number
+                                        field.onChange(value); // Call the original onChange with the number value
+                                        if (value < parseFloat(totalPrice)) {
+                                            form.setError("price", {
+                                                type: "manual",
+                                                message: `Price is lower than total cost (€${totalPrice})`,
+                                            });
+                                        } else {
+                                            form.clearErrors("price");
+                                        }
+                                    }} 
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                            <FormField
                             control={form.control}
-                            name="processorId"
+                            name="categoryId"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Processor</FormLabel>
+                                <FormLabel>Category</FormLabel>
                                 <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue 
                                             defaultValue={field.value} 
-                                            placeholder="Select a processor"
+                                            placeholder="Select a category"
                                             />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {processors.map((processor) => (
-                                            <SelectItem className="flex items-center justify-between" key={processor.id} value={processor.id}>
-                                                <span>
-                                                    {processor.name}
-                                                </span>
-                                                <span>
-                                                    {`€${processor.price}`}
-                                                </span>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.id}>
+                                                {category.name}
                                             </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -322,27 +303,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                 />
                                 <FormField
                                 control={form.control}
-                                name="memoryId"
+                                name="processorId"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>RAM</FormLabel>
+                                    <FormLabel>Processor</FormLabel>
                                     <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue 
                                                 defaultValue={field.value} 
-                                                placeholder="Select a memory"
+                                                placeholder="Select a processor"
                                                 />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {memories.map((memory) => (
-                                                <SelectItem className="flex items-center justify-between" key={memory.id} value={memory.id}>
+                                            {processors.map((processor) => (
+                                                <SelectItem className="flex items-center justify-between" key={processor.id} value={processor.id}>
                                                     <span>
-                                                        {memory.name}
+                                                        {processor.name}
                                                     </span>
                                                     <span>
-                                                        `{`€${memory.price}`}
+                                                        {`€${processor.price}`}
                                                     </span>
                                                 </SelectItem>
                                                 ))}
@@ -354,27 +335,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                     />
                                     <FormField
                                     control={form.control}
-                                    name="graphicsId"
+                                    name="memoryId"
                                     render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Graphics card</FormLabel>
+                                        <FormLabel>RAM</FormLabel>
                                         <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue 
                                                     defaultValue={field.value} 
-                                                    placeholder="Select a graphic card"
+                                                    placeholder="Select a memory"
                                                     />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {graphics.map((graphics) => (
-                                                    <SelectItem className="flex items-center justify-between" key={graphics.id} value={graphics.id}>
+                                                {memories.map((memory) => (
+                                                    <SelectItem className="flex items-center justify-between" key={memory.id} value={memory.id}>
                                                         <span>
-                                                            {graphics.name}
+                                                            {memory.name}
                                                         </span>
                                                         <span>
-                                                            `{`€${graphics.price}`}
+                                                            `{`€${memory.price}`}
                                                         </span>
                                                     </SelectItem>
                                                     ))}
@@ -386,27 +367,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                         />
                                         <FormField
                                         control={form.control}
-                                        name="motherboardId"
+                                        name="graphicsId"
                                         render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Motherboard</FormLabel>
+                                            <FormLabel>Graphics card</FormLabel>
                                             <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue 
                                                         defaultValue={field.value} 
-                                                        placeholder="Select a motherboard"
+                                                        placeholder="Select a graphic card"
                                                         />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {motherboards.map((motherboard) => (
-                                                        <SelectItem className="flex items-center justify-between" key={motherboard.id} value={motherboard.id}>
+                                                    {graphics.map((graphics) => (
+                                                        <SelectItem className="flex items-center justify-between" key={graphics.id} value={graphics.id}>
                                                             <span>
-                                                                {motherboard.name}
+                                                                {graphics.name}
                                                             </span>
                                                             <span>
-                                                                `{`€${motherboard.price}`}
+                                                                `{`€${graphics.price}`}
                                                             </span>
                                                         </SelectItem>
                                                         ))}
@@ -418,27 +399,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                             />
                                             <FormField
                                             control={form.control}
-                                            name="storageId"
+                                            name="motherboardId"
                                             render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Storage</FormLabel>
+                                                <FormLabel>Motherboard</FormLabel>
                                                 <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue 
                                                             defaultValue={field.value} 
-                                                            placeholder="Select a storage"
+                                                            placeholder="Select a motherboard"
                                                             />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {storages.map((storage) => (
-                                                            <SelectItem className="flex items-center justify-between" key={storage.id} value={storage.id}>
+                                                        {motherboards.map((motherboard) => (
+                                                            <SelectItem className="flex items-center justify-between" key={motherboard.id} value={motherboard.id}>
                                                                 <span>
-                                                                    {storage.name}
+                                                                    {motherboard.name}
                                                                 </span>
                                                                 <span>
-                                                                    `{`€${storage.price}`}
+                                                                    `{`€${motherboard.price}`}
                                                                 </span>
                                                             </SelectItem>
                                                             ))}
@@ -450,27 +431,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                 />
                                                 <FormField
                                                 control={form.control}
-                                                name="pccaseId"
+                                                name="storageId"
                                                 render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>PC Case</FormLabel>
+                                                    <FormLabel>Storage</FormLabel>
                                                     <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue 
                                                                 defaultValue={field.value} 
-                                                                placeholder="Select a PC Case"
+                                                                placeholder="Select a storage"
                                                                 />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            {pccases.map((pccase) => (
-                                                                <SelectItem className="flex items-center justify-between" key={pccase.id} value={pccase.id}>
+                                                            {storages.map((storage) => (
+                                                                <SelectItem className="flex items-center justify-between" key={storage.id} value={storage.id}>
                                                                     <span>
-                                                                        {pccase.name}
+                                                                        {storage.name}
                                                                     </span>
                                                                     <span>
-                                                                        `{`€${pccase.price}`}
+                                                                        `{`€${storage.price}`}
                                                                     </span>
                                                                 </SelectItem>
                                                                 ))}
@@ -482,27 +463,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                     />
                                                     <FormField
                                                     control={form.control}
-                                                    name="coolerId"
+                                                    name="pccaseId"
                                                     render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>CPU Cooler</FormLabel>
+                                                        <FormLabel>PC Case</FormLabel>
                                                         <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                             <FormControl>
                                                                 <SelectTrigger>
                                                                     <SelectValue 
                                                                     defaultValue={field.value} 
-                                                                    placeholder="Select a CPU Cooler"
+                                                                    placeholder="Select a PC Case"
                                                                     />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                {coolers.map((cooler) => (
-                                                                    <SelectItem className="flex items-center justify-between" key={cooler.id} value={cooler.id}>
+                                                                {pccases.map((pccase) => (
+                                                                    <SelectItem className="flex items-center justify-between" key={pccase.id} value={pccase.id}>
                                                                         <span>
-                                                                            {cooler.name}
+                                                                            {pccase.name}
                                                                         </span>
                                                                         <span>
-                                                                            `{`€${cooler.price}`}
+                                                                            `{`€${pccase.price}`}
                                                                         </span>
                                                                     </SelectItem>
                                                                     ))}
@@ -514,27 +495,27 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                         />
                                                         <FormField
                                                         control={form.control}
-                                                        name="powerId"
+                                                        name="coolerId"
                                                         render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>PSU</FormLabel>
+                                                            <FormLabel>CPU Cooler</FormLabel>
                                                             <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                                 <FormControl>
                                                                     <SelectTrigger>
                                                                         <SelectValue 
                                                                         defaultValue={field.value} 
-                                                                        placeholder="Select a PSU"
+                                                                        placeholder="Select a CPU Cooler"
                                                                         />
                                                                     </SelectTrigger>
                                                                 </FormControl>
                                                                 <SelectContent>
-                                                                    {powers.map((power) => (
-                                                                        <SelectItem className="flex items-center justify-between" key={power.id} value={power.id}>
+                                                                    {coolers.map((cooler) => (
+                                                                        <SelectItem className="flex items-center justify-between" key={cooler.id} value={cooler.id}>
                                                                             <span>
-                                                                                {power.name}
+                                                                                {cooler.name}
                                                                             </span>
                                                                             <span>
-                                                                                `{`€${power.price}`}
+                                                                                `{`€${cooler.price}`}
                                                                             </span>
                                                                         </SelectItem>
                                                                         ))}
@@ -546,23 +527,28 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                             />
                                                             <FormField
                                                             control={form.control}
-                                                            name="colorId"
+                                                            name="powerId"
                                                             render={({ field }) => (
                                                             <FormItem>
-                                                                <FormLabel>PC Color</FormLabel>
+                                                                <FormLabel>PSU</FormLabel>
                                                                 <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                                     <FormControl>
                                                                         <SelectTrigger>
                                                                             <SelectValue 
                                                                             defaultValue={field.value} 
-                                                                            placeholder="Select a color"
+                                                                            placeholder="Select a PSU"
                                                                             />
                                                                         </SelectTrigger>
                                                                     </FormControl>
                                                                     <SelectContent>
-                                                                        {colors.map((color) => (
-                                                                            <SelectItem key={color.id} value={color.id}>
-                                                                                {color.name}
+                                                                        {powers.map((power) => (
+                                                                            <SelectItem className="flex items-center justify-between" key={power.id} value={power.id}>
+                                                                                <span>
+                                                                                    {power.name}
+                                                                                </span>
+                                                                                <span>
+                                                                                    `{`€${power.price}`}
+                                                                                </span>
                                                                             </SelectItem>
                                                                             ))}
                                                                         </SelectContent>
@@ -573,23 +559,23 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                 />
                                                                 <FormField
                                                                 control={form.control}
-                                                                name="softwareId"
+                                                                name="colorId"
                                                                 render={({ field }) => (
                                                                 <FormItem>
-                                                                    <FormLabel>Operating System</FormLabel>
+                                                                    <FormLabel>PC Color</FormLabel>
                                                                     <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                                         <FormControl>
                                                                             <SelectTrigger>
                                                                                 <SelectValue 
                                                                                 defaultValue={field.value} 
-                                                                                placeholder="Select an operating system"
+                                                                                placeholder="Select a color"
                                                                                 />
                                                                             </SelectTrigger>
                                                                         </FormControl>
                                                                         <SelectContent>
-                                                                            {softwares.map((software) => (
-                                                                                <SelectItem key={software.id} value={software.id}>
-                                                                                    {software.name}
+                                                                            {colors.map((color) => (
+                                                                                <SelectItem key={color.id} value={color.id}>
+                                                                                    {color.name}
                                                                                 </SelectItem>
                                                                                 ))}
                                                                             </SelectContent>
@@ -600,23 +586,23 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                     />
                                                                     <FormField
                                                                     control={form.control}
-                                                                    name="warrantyId"
+                                                                    name="softwareId"
                                                                     render={({ field }) => (
                                                                     <FormItem>
-                                                                        <FormLabel>Warranty</FormLabel>
+                                                                        <FormLabel>Operating System</FormLabel>
                                                                         <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                                                             <FormControl>
                                                                                 <SelectTrigger>
                                                                                     <SelectValue 
                                                                                     defaultValue={field.value} 
-                                                                                    placeholder="Select a category"
+                                                                                    placeholder="Select an operating system"
                                                                                     />
                                                                                 </SelectTrigger>
                                                                             </FormControl>
                                                                             <SelectContent>
-                                                                                {warranties.map((warranty) => (
-                                                                                    <SelectItem key={warranty.id} value={warranty.id}>
-                                                                                        {warranty.name}
+                                                                                {softwares.map((software) => (
+                                                                                    <SelectItem key={software.id} value={software.id}>
+                                                                                        {software.name}
                                                                                     </SelectItem>
                                                                                     ))}
                                                                                 </SelectContent>
@@ -627,68 +613,95 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                         />
                                                                         <FormField
                                                                         control={form.control}
-                                                                        name="deliveryTime"
+                                                                        name="warrantyId"
                                                                         render={({ field }) => (
                                                                         <FormItem>
-                                                                            <FormLabel>Delivery Days</FormLabel>
-                                                                            <FormControl>
-                                                                                <Input disabled={loading} placeholder="Delivery Days" {...field}/>
-                                                                            </FormControl>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                        )}
-                                                                        />
-                                                                        <FormField
-                                                                        control={form.control}
-                                                                        name="isFeatured"
-                                                                        render={({ field }) => (
-                                                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                                                            <FormControl>
-                                                                                <Checkbox 
-                                                                                checked={field.value}
-                                                                                // @ts-ignore
-                                                                                onCheckedChange={field.onChange}
-                                                                                />
-                                                                            </FormControl>
-                                                                            <div className="space-y-1 leading-none">
-                                                                                <FormLabel>
-                                                                                    Featured
-                                                                                </FormLabel>
-                                                                                <FormDescription>
-                                                                                    This computer will appear on the homepage.
-                                                                                </FormDescription>
-                                                                            </div>
-                                                                        </FormItem>
-                                                                        )}
-                                                                        />
-                                                                        <FormField
-                                                                        control={form.control}
-                                                                        name="isArchived"
-                                                                        render={({ field }) => (
-                                                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                                                            <FormControl>
-                                                                                <Checkbox 
-                                                                                checked={field.value}
-                                                                                // @ts-ignore
-                                                                                onCheckedChange={field.onChange}
-                                                                                />
-                                                                            </FormControl>
-                                                                            <div className="space-y-1 leading-none">
-                                                                                <FormLabel>
-                                                                                    Archived
-                                                                                </FormLabel>
-                                                                                <FormDescription>
-                                                                                    This computer will not appear anywhere in the store.
-                                                                                </FormDescription>
-                                                                            </div>
-                                                                        </FormItem>
-                                                                        )}
-                                                                        />
-                                                                    </div>
-                                                                    <Button disabled={loading} className="ml-auto" type="submit">{action}</Button>
-                                                                </form>
-                                                            </Form>
-                                                            </>
-                                                            )
-                                                        }
-                                                        
+                                                                            <FormLabel>Warranty</FormLabel>
+                                                                            <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                                                                <FormControl>
+                                                                                    <SelectTrigger>
+                                                                                        <SelectValue 
+                                                                                        defaultValue={field.value} 
+                                                                                        placeholder="Select a category"
+                                                                                        />
+                                                                                    </SelectTrigger>
+                                                                                </FormControl>
+                                                                                <SelectContent>
+                                                                                    {warranties.map((warranty) => (
+                                                                                        <SelectItem key={warranty.id} value={warranty.id}>
+                                                                                            {warranty.name}
+                                                                                        </SelectItem>
+                                                                                        ))}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                                <FormMessage />
+                                                                            </FormItem>
+                                                                            )}
+                                                                            />
+                                                                            <FormField
+                                                                            control={form.control}
+                                                                            name="deliveryTime"
+                                                                            render={({ field }) => (
+                                                                            <FormItem>
+                                                                                <FormLabel>Delivery Days</FormLabel>
+                                                                                <FormControl>
+                                                                                    <Input disabled={loading} placeholder="Delivery Days" {...field}/>
+                                                                                </FormControl>
+                                                                                <FormMessage />
+                                                                            </FormItem>
+                                                                            )}
+                                                                            />
+                                                                            <FormField
+                                                                            control={form.control}
+                                                                            name="isFeatured"
+                                                                            render={({ field }) => (
+                                                                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                                                <FormControl>
+                                                                                    <Checkbox 
+                                                                                    checked={field.value}
+                                                                                    // @ts-ignore
+                                                                                    onCheckedChange={field.onChange}
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <div className="space-y-1 leading-none">
+                                                                                    <FormLabel>
+                                                                                        Featured
+                                                                                    </FormLabel>
+                                                                                    <FormDescription>
+                                                                                        This computer will appear on the homepage.
+                                                                                    </FormDescription>
+                                                                                </div>
+                                                                            </FormItem>
+                                                                            )}
+                                                                            />
+                                                                            <FormField
+                                                                            control={form.control}
+                                                                            name="isArchived"
+                                                                            render={({ field }) => (
+                                                                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                                                <FormControl>
+                                                                                    <Checkbox 
+                                                                                    checked={field.value}
+                                                                                    // @ts-ignore
+                                                                                    onCheckedChange={field.onChange}
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <div className="space-y-1 leading-none">
+                                                                                    <FormLabel>
+                                                                                        Archived
+                                                                                    </FormLabel>
+                                                                                    <FormDescription>
+                                                                                        This computer will not appear anywhere in the store.
+                                                                                    </FormDescription>
+                                                                                </div>
+                                                                            </FormItem>
+                                                                            )}
+                                                                            />
+                                                                        </div>
+                                                                        <Button disabled={loading} className="ml-auto" type="submit">{action}</Button>
+                                                                    </form>
+                                                                </Form>
+                                                                </>
+                                                                )
+                                                            }
+                                                            
