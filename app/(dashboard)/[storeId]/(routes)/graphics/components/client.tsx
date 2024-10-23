@@ -67,7 +67,7 @@ export const GraphicsClient: React.FC<GraphicsClientProps> = ({
                         <Button onClick={() => handleRequest(true)} className="flex items-center gap-2 bg-blue-600 text-white hover:bg-primary-600">
                             {<CalendarXIcon size={20} />} Update without date check
                         </Button>
-                        <Button onClick={() => handleRequest()} className="flex items-center gap-2 bg-blue-600 text-white hover:bg-primary-600">
+                        <Button onClick={() => handleRequest(false)} className="flex items-center gap-2 bg-blue-600 text-white hover:bg-primary-600">
                             {<CalendarCheckIcon size={20} />} Update with date check
                         </Button>
                     </div>
