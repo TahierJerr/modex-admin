@@ -4,11 +4,24 @@ import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { WebhookEvent } from '@clerk/nextjs/dist/types/server';
 import createUser from '@/lib/auth/user/createUser';
+import { Resend } from 'resend';
+import { ErrorTemplate } from '@/components/emails/errorEmail';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
     
     if (!WEBHOOK_SECRET) {
+        await resend.emails.send({
+            from: 'MODEX <errors@modexgaming.com>',
+            to: 'info@modexgaming.com',
+            subject: 'Error occurred -- no webhook secret',
+            react: ErrorTemplate({
+                error: 'Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local',
+                errorCode: 400,
+            }),
+        });
         throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local');
     }
 
@@ -38,6 +51,15 @@ export async function POST(req: Request) {
         }) as WebhookEvent;
     } catch (err) {
         console.error('Error verifying webhook:', err);
+        await resend.emails.send({
+            from: 'MODEX <errors@modexgaming.com>',
+            to: 'info@modexgaming.com',
+            subject: 'Error verifying webhook',
+            react: ErrorTemplate({
+                error: JSON.stringify(err),
+                errorCode: 400,
+            }),
+        });
         return new NextResponse('Error occurred', {
             status: 400,
         });
@@ -89,6 +111,17 @@ export async function POST(req: Request) {
         return new NextResponse('Event handled', { status: 200 });
     } catch (err) {
         console.error('Error handling event:', err);
+        await resend.emails.send({
+            from: 'MODEX <errors@modexgaming.com>',
+            to: 'info@modexgaming.com',
+            subject: 'Error handling event',
+            react: ErrorTemplate({
+                error: JSON.stringify(err),
+                errorCode: 500,
+            }),
+        });
+
+
         return new NextResponse('Error occurred while handling the event', {
             status: 500,
         });

@@ -1,7 +1,11 @@
 export const maxDuration = 60;
+import { ErrorTemplate } from "@/components/emails/errorEmail";
 import { updatePrices } from "@/lib/functions/updateProductPrice";
 import prismadb from "@/lib/prismadb";
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function GET(req: Request, { params }: { params: { storeId: string } }) {
     if (!params.storeId) {
@@ -42,6 +46,16 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
                     cooler: await updatePrices(params.storeId, skipDateCheck, prismadb.cooler),
                 };
             default:
+                await resend.emails.send({
+                    from: 'MODEX <errors@modexgaming.com>',
+                    to: 'info@modexgaming.com',
+                    subject: 'Invalid product model',
+                    react: ErrorTemplate({
+                        error: 'Invalid product model',
+                        errorCode: 400,
+                        notes: JSON.stringify({ model }),
+                    }),
+                });
                 throw new Error("Invalid product model");
         }
     };
@@ -50,6 +64,15 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
         const productPrices = await updateModelPrices(productModel || 'all');
 
         if (!productPrices) {
+            await resend.emails.send({
+                from: 'MODEX <errors@modexgaming.com>',
+                to: 'info@modexgaming.com',
+                subject: 'Failed to update prices',
+                react: ErrorTemplate({
+                    error: 'Failed to update prices',
+                    errorCode: 500,
+                }),
+            });
             return new NextResponse("Failed to update prices", { status: 500 });
         }
 

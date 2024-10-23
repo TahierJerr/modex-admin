@@ -2,7 +2,7 @@ import { Graphics } from "@prisma/client";
 
 export function extractPriceData(graphics: Graphics, $: any) {
     const searchQuery = graphics.name.replace(/\s/g, '+');
-    const url = `https://www.marktplaats.nl/l/computers-en-software/videokaarten/#q:${searchQuery}|searchInTitleAndDescription:true`
+    const url = `https://www.marktplaats.nl/l/computers-en-software/videokaarten/#q:${searchQuery}|searchInTitleAndDescription:false`;
 
 
     const div = $("div.cardsCollection");
