@@ -7,7 +7,7 @@ import createUser from '@/lib/auth/user/createUser';
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-
+    
     if (!WEBHOOK_SECRET) {
         throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local');
     }
@@ -25,16 +25,13 @@ export async function POST(req: Request) {
         });
     }
 
-    // Get the body
-    const payload = await req.json();
-    const body = JSON.stringify(payload);
+    const payload = await req.text();
+    const body = payload;
 
-    // Create a new Svix instance with your secret
     const wh = new Webhook(WEBHOOK_SECRET);
 
     let evt: WebhookEvent;
 
-    // Verify the payload with the headers
     try {
         evt = wh.verify(body, {
             'svix-id': svix_id,
@@ -48,7 +45,6 @@ export async function POST(req: Request) {
         });
     }
 
-    // Handle the event using switch
     try {
         switch (evt.type) {
             case 'user.created':
@@ -63,7 +59,6 @@ export async function POST(req: Request) {
                 if (!evt.data.id) {
                     throw new Error('No user ID found');
                 }
-
                 if (!evt.data.email_addresses || evt.data.email_addresses.length === 0) {
                     throw new Error('No email addresses found');
                 }
@@ -83,7 +78,6 @@ export async function POST(req: Request) {
                 if (!evt.data.id) {
                     throw new Error('No user ID found');
                 }
-
                 await prismadb.user.delete({
                     where: {
                         id: evt.data.id,
@@ -94,7 +88,6 @@ export async function POST(req: Request) {
                 console.warn(`Unhandled event type: ${evt.type}`);
                 break;
         }
-
         return new NextResponse('Event handled', { status: 200 });
     } catch (err) {
         console.error('Error handling event:', err);
