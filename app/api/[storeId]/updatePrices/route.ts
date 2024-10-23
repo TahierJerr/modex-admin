@@ -32,14 +32,14 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
                 return await updatePrices(params.storeId, skipDateCheck, prismadb.cooler);
             case 'all':
                 return {
-                    graphics: await updatePrices(params.storeId, skipDateCheck, 'graphics'),
-                    processor: await updatePrices(params.storeId, skipDateCheck, 'processor'),
-                    motherboard: await updatePrices(params.storeId, skipDateCheck, 'motherboard'),
-                    memory: await updatePrices(params.storeId, skipDateCheck, 'memory'),
-                    storage: await updatePrices(params.storeId, skipDateCheck, 'storage'),
-                    power: await updatePrices(params.storeId, skipDateCheck, 'power'),
-                    pccase: await updatePrices(params.storeId, skipDateCheck, 'pccase'),
-                    cooler: await updatePrices(params.storeId, skipDateCheck, 'cooler'),
+                    graphics: await updatePrices(params.storeId, skipDateCheck, prismadb.graphics),
+                    processor: await updatePrices(params.storeId, skipDateCheck, prismadb.processor),
+                    motherboard: await updatePrices(params.storeId, skipDateCheck, prismadb.motherboard),
+                    memory: await updatePrices(params.storeId, skipDateCheck, prismadb.memory),
+                    storage: await updatePrices(params.storeId, skipDateCheck, prismadb.storage),
+                    power: await updatePrices(params.storeId, skipDateCheck, prismadb.power),
+                    pccase: await updatePrices(params.storeId, skipDateCheck, prismadb.pccase),
+                    cooler: await updatePrices(params.storeId, skipDateCheck, prismadb.cooler),
                 };
             default:
                 throw new Error("Invalid product model");
