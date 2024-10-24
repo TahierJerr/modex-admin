@@ -2,8 +2,25 @@ import axios from "axios";
 import * as cheerio from 'cheerio';
 import { extractName, extractPriceData } from "./functions/tweakers/extractData";
 import { formatPrices } from "./functions/formatPrices";
+import { Resend } from "resend";
+import { ErrorTemplate } from "@/components/emails/errorEmail";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
+    if (!url) {
+        await resend.emails.send({
+            from: 'MODEX <errors@modexgaming.com',
+            to: 'info@modexgaming.com',
+            subject: 'URL is required',
+            react: ErrorTemplate({
+                error: 'URL is required',
+                errorCode: 400,
+            }),
+        })
+        throw new Error("URL is required.");
+    }
+
     if (!url.startsWith("https://tweakers.net")) {
         return fallbackData;
     }
@@ -20,6 +37,15 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
             const $ = cheerio.load(data);
             const { productPrice, productUrl } = extractPriceData($);
             if (!productPrice) {
+                await resend.emails.send({
+                    from: 'MODEX <errors@modexgaming.com',
+                    to: 'info@modexgaming.com',
+                    subject: 'Price not found',
+                    react: ErrorTemplate({
+                        error: 'Price not found',
+                        errorCode: 400,
+                    }),
+                });
                 throw new Error("Price not found.");
             }
 
@@ -43,6 +69,15 @@ export async function fetchPriceFromUrl(url: string, fallbackData: any = null) {
                     fallbackData.error = true;
                     return fallbackData;
                 } else {
+                    await resend.emails.send({
+                        from: 'MODEX <errors@modexgaming.com',
+                        to: 'info@modexgaming.com',
+                        subject: 'Failed to track price',
+                        react: ErrorTemplate({
+                            error: JSON.stringify(error),
+                            errorCode: 400,
+                        }),
+                    });
                     throw new Error('Failed to track price and no fallback data available.');
                 }
             }
