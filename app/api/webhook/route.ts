@@ -94,7 +94,7 @@ export async function POST(req: Request) {
         
         const { data, error } = await resend.emails.send({
             from: 'MODEX <invoice@modexgaming.com>',
-            to: order.email,
+            to: [order.email, 'info@modexgaming.com'],
             subject: 'Order Confirmation',
             react: ConfirmationEmail({
                 firstName: user?.firstName || '',
