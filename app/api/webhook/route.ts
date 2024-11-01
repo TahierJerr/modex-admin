@@ -55,29 +55,37 @@ export async function POST(req: Request) {
                 phone: session?.customer_details?.phone || '',
                 orderStatus: 'Processed',
                 paymentMethod: session?.payment_method_types?.[0] || '',
+                email: session?.customer_details?.email || '',
             },
             include: {
                 orderItems: true,
             }
         });
 
-        await prismadb.user.update({
-            where: {
-                id: order.userId,
-            },
-            data: {
-                address: `${addressComponents.adres}, ${addressComponents.city}`,
-                postalCode: addressComponents.postalcode ?? undefined,
-                country: addressComponents.country ?? undefined,
-                phone: session?.customer_details?.phone || '',
-            }
-        });
+        let user = null;
 
-        const user = await prismadb.user.findUnique({
-            where: {
-                id: order.userId,
-            },
-        });
+        // check if order is bought by a user
+        if (order.userId) {
+            await prismadb.user.update({
+                where: {
+                    id: order.userId,
+                },
+                data: {
+                    address: `${addressComponents.adres}, ${addressComponents.city}`,
+                    postalCode: addressComponents.postalcode ?? undefined,
+                    country: addressComponents.country ?? undefined,
+                    phone: session?.customer_details?.phone || '',
+                }
+            });
+    
+            user = await prismadb.user.findUnique({
+                where: {
+                    id: order.userId,
+                },
+            });
+        }
+
+        
         
         const computers = await prismadb.computer.findMany({
             where: {

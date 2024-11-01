@@ -360,8 +360,8 @@ model Order {
   id                    String       @id @default(uuid())
   storeId               String
   store                 Store        @relation("StoreToOrder", fields: [storeId], references: [id])
-  userId                String
-  user                  User         @relation("UserToOrder", fields: [userId], references: [id])
+  userId                String?
+  user                  User?        @relation("UserToOrder", fields: [userId], references: [id])
   orderItems            OrderItem[]
   phone                 String       @default("")
   address               String       @default("")

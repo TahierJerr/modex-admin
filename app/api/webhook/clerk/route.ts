@@ -93,6 +93,23 @@ export async function POST(req: Request) {
                         phone: '',
                     },
                 });
+
+                const orders = await prismadb.order.findMany({
+                    where: {
+                        email: evt.data.email_addresses[0].email_address,
+                    },
+                });
+
+                if (orders.length > 0) {
+                    await prismadb.order.updateMany({
+                        where: {
+                            email: evt.data.email_addresses[0].email_address,
+                        },
+                        data: {
+                            userId: evt.data.id,
+                        },
+                    });
+                }
                 break;
             case 'user.deleted':
                 if (!evt.data.id) {

@@ -18,10 +18,6 @@ export async function POST(req: Request, { params }: { params: { storeId: string
     const url = new URL(req.url);
     const userId = url.searchParams.get('userId');
 
-    if (!userId) {
-        return new NextResponse("User ID is required", { status: 400 });
-    }
-
     const { computerIds } = await req.json();
 
     if (!computerIds || computerIds.length === 0) {
@@ -57,20 +53,24 @@ export async function POST(req: Request, { params }: { params: { storeId: string
 
     const totalPrice = computers.reduce((acc, computer) => acc + parseFloat(computer.price.toFixed(2)), 0);
 
-    const user = await prismadb.user.findUnique({
-        where: {
-            id: userId
-        }
-    });
+    let user = null;
 
-    if (!user) {
-        return new NextResponse("User not found", { status: 404 });
+    if (userId) {
+        user = await prismadb.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+
+        if (!user) {
+            return new NextResponse("User not found", { status: 404 });
+        }
     }
 
     const order = await prismadb.order.create({
         data: {
             storeId: params.storeId,
-            userId: userId,
+            userId: userId ?? undefined,
             isPaid: false,
             orderItems: {
                 create: computerIds.map((computerId: string) => ({
@@ -81,11 +81,11 @@ export async function POST(req: Request, { params }: { params: { storeId: string
                     }
                 }))
             },
-            phone: user.phone || "",
+            phone: user?.phone || "",
             address: "",
             postalCode: "",
             country: "",
-            email: user.email,
+            email: user?.email || "",
             orderStatus: "Pending",
             paymentMethod: "",
             totalPrice: totalPrice,
