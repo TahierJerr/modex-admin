@@ -103,6 +103,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
 
     const session = await stripe.checkout.sessions.create({
         line_items,
+        customer_email: user?.email,
         mode: 'payment',
         billing_address_collection: 'required',
         consent_collection: {
