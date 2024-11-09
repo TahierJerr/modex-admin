@@ -17,7 +17,6 @@ export async function OPTIONS() {
 export async function POST(req: Request, { params }: { params: { storeId: string } }) {
     const url = new URL(req.url);
     const userId = url.searchParams.get('userId');
-
     const { computerIds } = await req.json();
 
     if (!computerIds || computerIds.length === 0) {
@@ -33,10 +32,8 @@ export async function POST(req: Request, { params }: { params: { storeId: string
     });
 
     // Ensure all computers exist
-    for (const computer of computers) {
-        if (!computer) {
-            return new NextResponse("Product not found", { status: 404 });
-        }
+    if (computers.length !== computerIds.length) {
+        return new NextResponse("Some products not found", { status: 404 });
     }
 
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = computers.map(computer => ({
@@ -54,38 +51,27 @@ export async function POST(req: Request, { params }: { params: { storeId: string
     const totalPrice = computers.reduce((acc, computer) => acc + parseFloat(computer.price.toFixed(2)), 0);
 
     let user = null;
-
     if (userId) {
         user = await prismadb.user.findUnique({
-            where: {
-                id: userId
-            }
+            where: { id: userId }
         });
-
-        if (!user) {
-            return new NextResponse("User not found", { status: 404 });
-        }
     }
 
     const order = await prismadb.order.create({
         data: {
             storeId: params.storeId,
-            userId: userId ?? undefined,
+            userId: userId ?? undefined,  // Only associate userId if it exists
             isPaid: false,
             orderItems: {
                 create: computerIds.map((computerId: string) => ({
-                    computer: {
-                        connect: {
-                            id: computerId
-                        }
-                    }
+                    computer: { connect: { id: computerId } }
                 }))
             },
-            phone: user?.phone || "",
+            phone: user?.phone || "",  // Use default empty string if no user
             address: "",
             postalCode: "",
             country: "",
-            email: user?.email,
+            email: user?.email || "",  // Use default empty string if no user
             orderStatus: "Pending",
             paymentMethod: "",
             totalPrice: totalPrice,
@@ -93,7 +79,6 @@ export async function POST(req: Request, { params }: { params: { storeId: string
     });
 
     const origin = req.headers.get("origin");
-
     if (!origin) {
         return new NextResponse("Origin header is required", { status: 400 });
     }
@@ -103,27 +88,17 @@ export async function POST(req: Request, { params }: { params: { storeId: string
 
     const session = await stripe.checkout.sessions.create({
         line_items,
-        customer_email: user?.email,
+        customer_email: user?.email,  // Only use email if user exists
         mode: 'payment',
         billing_address_collection: 'required',
-        consent_collection: {
-            terms_of_service: 'required',
-        },
-        shipping_address_collection: {
-            allowed_countries: ['NL', 'BE', 'DE'],
-        },
-        phone_number_collection: {
-            enabled: true
-        },
+        consent_collection: { terms_of_service: 'required' },
+        shipping_address_collection: { allowed_countries: ['NL', 'BE', 'DE'] },
+        phone_number_collection: { enabled: true },
         customer_creation: "always",
         success_url,
         cancel_url,
-        metadata: {
-            orderId: order.id
-        }
+        metadata: { orderId: order.id }
     });
 
-    return NextResponse.json({ url: session.url }, {
-        headers: corsHeaders
-    });
+    return NextResponse.json({ url: session.url }, { headers: corsHeaders });
 }
