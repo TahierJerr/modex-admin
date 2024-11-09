@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
         let user = null;
 
-        // check if order is bought by a user
+        // If userId exists in the order, try to update the user details
         if (order.userId) {
             await prismadb.user.update({
                 where: {
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
                     phone: session?.customer_details?.phone || '',
                 }
             });
-    
+
             user = await prismadb.user.findUnique({
                 where: {
                     id: order.userId,
@@ -85,8 +85,6 @@ export async function POST(req: Request) {
             });
         }
 
-        
-        
         const computers = await prismadb.computer.findMany({
             where: {
                 id: {
@@ -100,15 +98,16 @@ export async function POST(req: Request) {
             return total.plus(price);
         }, new Decimal(0));
         
+        // Send the order confirmation email
         const { data, error } = await resend.emails.send({
             from: 'MODEX <invoice@modexgaming.com>',
             to: [order.email, 'info@modexgaming.com'],
             subject: 'Order Confirmation',
             react: ConfirmationEmail({
-                firstName: user?.firstName || '',
+                firstName: user?.firstName || '',  // Use default if no user
                 address: order.address,
                 orderId: order.id,
-                products: computers, // Use the fetched computers
+                products: computers,  // Use the fetched computers
                 totalPrice: totalPrice.toNumber(), // Convert totalPrice to a number
             }),
         });
