@@ -2,10 +2,11 @@
 
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { usePathname, useParams } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MenuSquareIcon } from "lucide-react";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export function MainNav({
     className,
@@ -13,6 +14,7 @@ export function MainNav({
 }: React.HTMLAttributes<HTMLElement>) {
     const pathname = usePathname();
     const params = useParams();
+    const [menuOpen, setMenuOpen] = useState(false);
     
     const routes = [
         {
@@ -117,31 +119,50 @@ export function MainNav({
             active: pathname === `/${params.storeId}/settings`,
         },
     ];
+
     return (
         <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
-            {routes.map((route) => (
-                route.items ? (
-                    <DropdownMenu key={route.label}>
-                        <DropdownMenuTrigger className="flex items-center text-muted-foreground">
-                            {route.label} <ChevronDown className="h-4 w-4 ml-1" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuLabel >{route.label}</DropdownMenuLabel>
-                            {route.items.map((item) => (
-                                <Link key={item.href} href={item.href} prefetch={false}>
+            {/* Mobile Menu Button */}
+            <button
+                className="lg:hidden p-2 text-muted-foreground"
+                onClick={() => setMenuOpen(!menuOpen)}
+            >
+                <MenuSquareIcon className="h-6 w-6" />
+            </button>
+            
+            {/* Main Navigation Links */}
+            <div className={cn("flex-col lg:flex lg:flex-row lg:items-center space-y-4 lg:space-y-0", {
+                "hidden lg:flex": !menuOpen, // Toggle on mobile
+            })}>
+                {routes.map((route) =>
+                    route.items ? (
+                        <DropdownMenu key={route.label}>
+                            <DropdownMenuTrigger className="flex items-center text-muted-foreground">
+                                {route.label} <ChevronDown className="h-4 w-4 ml-1" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuLabel>{route.label}</DropdownMenuLabel>
+                                {route.items.map((item) => (
+                                    <Link key={item.href} href={item.href} prefetch={false}>
                                         <DropdownMenuItem className={item.active ? "text-black dark:text-white" : "text-muted-foreground"}>
                                             {item.label}
                                         </DropdownMenuItem>
-                                </Link>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                ) : (
-                    <Link key={route.href} href={route.href} prefetch={false} className={route.active ? "text-black dark:text-white" : "text-muted-foreground"}>
+                                    </Link>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Link
+                            key={route.href}
+                            href={route.href}
+                            prefetch={false}
+                            className={route.active ? "text-black dark:text-white" : "text-muted-foreground"}
+                        >
                             {route.label}
-                    </Link>
-                )
-            ))}
+                        </Link>
+                    )
+                )}
+            </div>
         </nav>
     );    
 }
