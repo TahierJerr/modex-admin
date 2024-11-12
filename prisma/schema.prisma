@@ -41,11 +41,12 @@ model User {
   email     String    @unique
   firstName String
   lastName  String
-  address   String
-  postalCode String
-  country   String
-  phone     String
-  newsletter Boolean
+  address   String   @default("")
+  city      String   @default("")
+  postalCode String  @default("")
+  country   String   @default("")
+  phone     String   @default("")
+  newsletter Boolean  @default(false)
   store     Store @relation("StoreToUser", fields: [storeId], references: [id])
   storeId   String
   orders    Order[]   @relation("UserToOrder")

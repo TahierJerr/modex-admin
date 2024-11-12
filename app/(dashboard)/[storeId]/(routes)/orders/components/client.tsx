@@ -5,7 +5,7 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { useState } from "react";
@@ -54,6 +54,11 @@ export const OrderClient: React.FC<OrderClientProps> = ({
             title={`Orders (${data.length})`}
             description="Manage orders for your store"
             />
+            <div className="flex items-center gap-2">
+                <Button disabled onClick={() => router.push(`/${params.storeId}/memory/new`)}>
+                    <Plus className="mr-2 w-4 h-4" />
+                    Add Manual Order (Coming Soon)
+                </Button>
             {data.length > 0 && (
                 <Button disabled={loading}
                 variant="destructive"
@@ -62,6 +67,8 @@ export const OrderClient: React.FC<OrderClientProps> = ({
                     Delete unpaid orders
                 </Button>
             )}
+            </div>
+            
         </div>
         <Separator />
         <DataTable searchKey="label" columns={columns} data={data}/>
