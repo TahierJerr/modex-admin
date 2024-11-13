@@ -59,6 +59,9 @@ export async function updateProduct(productId: string, productData: any, product
             updatedData.productUrl = existingProduct.productUrl;
         }
 
+        console.log('Data to be updated in product:', updatedData);
+
+        // Perform the update
         const product = await productModel.update({
             where: {
                 id: productId,
@@ -66,6 +69,8 @@ export async function updateProduct(productId: string, productData: any, product
             data: updatedData,
         });
 
+        console.log('Updated product data:', product);
+        
         return product;
     } catch (error) {
         console.error("Error updating product:", error);

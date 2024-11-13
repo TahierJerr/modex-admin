@@ -22,7 +22,7 @@ export async function handleProductModification<ProductDataType extends ProductD
         const existingProduct = await checkIfProductExistsForModification(productModel, params.productId);
 
         if (!existingProduct) {
-            return new NextResponse("Product not found", { status: 404 });
+            return NextResponse.json({ message: "Product not found" }, { status: 404 });
         }
 
         const productData = await validateAndProcessRequest({
@@ -33,14 +33,14 @@ export async function handleProductModification<ProductDataType extends ProductD
 
         const updatedProduct = await updateProduct(params.productId, productData, productModel, existingProduct);
         
-        return updatedProduct;
+        return NextResponse.json(updatedProduct);
     } catch (error) {
         console.error(`[${productType}_MODIFICATION]`, error);
         
         if (error === "Unauthorized") {
-            return new Error(`Unauthorized ${error}`);
+            return NextResponse.json({ message: `Unauthorized ${error}` }, { status: 403 });
         } else {
-            return new Error(`Internal error ${error}`);
+            return NextResponse.json({ message: `Internal error: ${error}` }, { status: 500 });
         }
     }
 }

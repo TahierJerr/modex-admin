@@ -43,7 +43,6 @@ export async function PATCH (
         const updatedProcessor = await handleProductModification(req, { storeId: params.storeId, productId: params.processorId }, processorSchema, "PROCESSOR", prismadb.processor, (data) => data);
 
         return NextResponse.json(updatedProcessor);
-
     } catch (error) {
         console.log('[PROCESSOR_PATCH]', error);
         return new NextResponse("Internal error", { status: 500 });
