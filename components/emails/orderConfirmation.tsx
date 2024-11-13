@@ -18,6 +18,7 @@ export const ConfirmationEmail: React.FC<Readonly<ConfirmationEmailProps>> = ({
 }) => (
     <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', maxWidth: '600px', margin: 'auto', border: '1px solid #000', borderRadius: '8px', backgroundColor: '#fff', color: '#000' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="https://vtskkfdezssgqtdhmzhq.supabase.co/storage/v1/object/public/Brand/brandmark-design-1024x0.png" alt="MODEX Logo" style={{ width: '150px' }} />
             <h1>Order Confirmation</h1>
         </div>
