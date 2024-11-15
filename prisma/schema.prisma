@@ -366,6 +366,7 @@ model Order {
   orderItems            OrderItem[]
   phone                 String       @default("")
   address               String       @default("")
+  city                  String       @default("")
   postalCode            String       @default("")
   country               String       @default("")
   email                 String       @default("")

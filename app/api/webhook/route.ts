@@ -10,6 +10,23 @@ import { ErrorTemplate } from "@/components/emails/errorEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+async function updateUserDetails(order: any, addressComponents: any, phone: string) {
+    if (order.userId) {
+        await prismadb.user.update({
+            where: { id: order.userId },
+            data: {
+                address: addressComponents.adres,
+                city: addressComponents.city,
+                postalCode: addressComponents.postalcode,
+                country: addressComponents.country,
+                phone: phone || '',
+            },
+        });
+        return await prismadb.user.findUnique({ where: { id: order.userId } });
+    }
+    return null;
+}
+
 export async function POST(req: Request) {
     const body = await req.text();
     const signature = headers().get("Stripe-Signature") as string;
@@ -19,7 +36,7 @@ export async function POST(req: Request) {
     try {
         event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
     } catch (error: any) {
-        console.error(error);
+        console.error("Webhook signature verification failed", error);
         await resend.emails.send({
             from: 'MODEX <errors@modexgaming.com>',
             to: 'info@modexgaming.com',
@@ -42,78 +59,53 @@ export async function POST(req: Request) {
         country: address?.country,
     };
 
+    if (!addressComponents.adres || !addressComponents.city || !addressComponents.country || !addressComponents.postalcode || !session?.customer_email) {
+        return new NextResponse("Invalid address", { status: 400 });
+    }
+
     if (event.type === "checkout.session.completed") {
         const order = await prismadb.order.update({
-            where: {
-                id: session?.metadata?.orderId,
-            },
+            where: { id: session?.metadata?.orderId },
             data: {
                 isPaid: true,
-                address: `${addressComponents.adres}, ${addressComponents.city}`,
-                postalCode: addressComponents.postalcode ?? undefined,
-                country: addressComponents.country ?? undefined,
+                address: addressComponents.adres,
+                postalCode: addressComponents.postalcode,
+                country: addressComponents.country,
+                city: addressComponents.city,
                 phone: session?.customer_details?.phone || '',
                 orderStatus: 'Processed',
                 paymentMethod: session?.payment_method_types?.[0] || '',
-                email: session?.customer_details?.email || '',
+                email: session?.customer_email
             },
-            include: {
-                orderItems: true,
-            }
+            include: { orderItems: true },
         });
 
-        let user = null;
-
-        // If userId exists in the order, try to update the user details
-        if (order.userId) {
-            await prismadb.user.update({
-                where: {
-                    id: order.userId,
-                },
-                data: {
-                    address: `${addressComponents.adres}, ${addressComponents.city}`,
-                    postalCode: addressComponents.postalcode ?? undefined,
-                    country: addressComponents.country ?? undefined,
-                    phone: session?.customer_details?.phone || '',
-                }
-            });
-
-            user = await prismadb.user.findUnique({
-                where: {
-                    id: order.userId,
-                },
-            });
-        }
+        const user = await updateUserDetails(order, addressComponents, session?.customer_details?.phone || '');
 
         const computers = await prismadb.computer.findMany({
-            where: {
-                id: {
-                    in: order.orderItems.map((item) => item.computerId),
-                },
-            },
+            where: { id: { in: order.orderItems.map((item) => item.computerId) } },
         });
 
         const totalPrice = computers.reduce((total, computer) => {
             const price = new Decimal(computer.price);
             return total.plus(price);
         }, new Decimal(0));
-        
-        // Send the order confirmation email
-        const { data, error } = await resend.emails.send({
+
+        const { error } = await resend.emails.send({
             from: 'MODEX <invoice@modexgaming.com>',
             to: [order.email, 'info@modexgaming.com'],
             subject: 'Order Confirmation',
             react: ConfirmationEmail({
-                firstName: user?.firstName || '',  // Use default if no user
+                firstName: user?.firstName || '',
                 address: order.address,
                 orderId: order.id,
-                products: computers,  // Use the fetched computers
-                totalPrice: totalPrice.toNumber(), // Convert totalPrice to a number
+                products: computers,
+                totalPrice: totalPrice.toNumber(),
             }),
         });
 
         if (error) {
-            console.error(error);
+            console.error("Error sending order confirmation email", error);
             await resend.emails.send({
                 from: 'MODEX <errors@modexgaming.com>',
                 to: 'info@modexgaming.com',

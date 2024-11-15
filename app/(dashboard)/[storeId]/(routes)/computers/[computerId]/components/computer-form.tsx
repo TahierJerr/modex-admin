@@ -180,9 +180,15 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                         form.clearErrors("price");
                     }
                 };
-        
+
+
                 // Update total price on select change
                 const subscription = form.watch(updateTotalPrice); // Watch for changes in the form values
+
+                // add fixed price of 40 to total price
+                const fixedPrice = 40;
+                setTotalPrice((prev) => (parseFloat(prev) + fixedPrice).toFixed(2));
+
         
                 return () => subscription.unsubscribe(); // Clean up subscription on unmount
             }, [form]);
@@ -200,6 +206,14 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                 title={title}
                 description={description}
                 />
+                <div className="flex items-center space-x-2">
+                <span className="text-lg font-bold text-red-400">
+                        Total Cost: € {totalPrice}
+                    </span>
+                    <span className="text-lg font-bold text-green-700">
+                        Profit: € {parseFloat(String(form.getValues().price)) - parseFloat(totalPrice)}
+                </span>
+                </div>
                 {initialData && (
                     <Button
                     disabled={loading}
@@ -227,9 +241,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                         </FormItem>
                         )}
                         />
-                        <span className="text-lg font-bold text-gray-700 my-4">
-                            Total Price: € {totalPrice}
-                        </span>
+                        
                         <div className="grid grid-cols-3 gap-8">
                             <FormField
                             control={form.control}
