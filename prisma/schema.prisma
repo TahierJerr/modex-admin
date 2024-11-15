@@ -31,9 +31,12 @@ model Store {
   computers Computer[] @relation("StoreToComputer")
   orders Order[] @relation("StoreToOrder")
   users User[] @relation("StoreToUser")
+  notifications Notifications[] @relation("StoreToNotifications")
   
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
+
+  Notifications Notifications[]
 }
 
 model User {
@@ -398,4 +401,17 @@ model OrderItem {
   @@index([orderId])
   @@index([computerId])
 
+}
+
+model Notifications {
+  id String @id @default(uuid())
+  storeId String
+  store Store @relation(fields: [storeId], references: [id])
+  message String
+  isRead Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  Store Store[] @relation("StoreToNotifications")
 }
