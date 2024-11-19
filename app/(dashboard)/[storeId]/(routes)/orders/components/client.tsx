@@ -59,7 +59,7 @@ export const OrderClient: React.FC<OrderClientProps> = ({
                     <Plus className="mr-2 w-4 h-4" />
                     Add Manual Order (Coming Soon)
                 </Button>
-            {data.length > 0 && (
+            {data.some(order => !order.isPaid && new Date(order.createdAt) < new Date(Date.now() - 86400000)) && (
                 <Button disabled={loading}
                 variant="destructive"
                 onClick={() => setOpen(true)}>
