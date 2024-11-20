@@ -72,7 +72,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
             postalCode: "",
             country: "",
             email: user?.email || "",  // Use default empty string if no user
-            orderStatus: "Pending",
+            orderStatus: "PENDING",
             paymentMethod: "",
             totalPrice: totalPrice,
         }

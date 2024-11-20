@@ -5,7 +5,7 @@ import { CreditCardIcon, Euro, } from "lucide-react";
 import { formatter } from "@/lib/utils";
 import { getTotalRevenue } from "@/actions/get-total-revenue";
 import { getSales } from "@/actions/get-total-sales";
-import { Overview } from "@/components/overview";
+import Overview from "@/components/overview";
 import { getGraphRevenue } from "@/actions/get-graph-revenue";
 
 interface DashboardPageProps {
@@ -52,14 +52,7 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({
                         </CardContent>
                     </Card>
                 </div>
-                <Card className="col-span-4">
-                    <CardHeader>
-                        <CardTitle>Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        <Overview data={graphRevenue} />
-                    </CardContent>
-                </Card>
+                <Overview data={graphRevenue} />
             </div>
         </div>
     );

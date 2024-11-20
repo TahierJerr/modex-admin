@@ -32,11 +32,13 @@ model Store {
   orders Order[] @relation("StoreToOrder")
   users User[] @relation("StoreToUser")
   notifications Notifications[] @relation("StoreToNotifications")
+  customPCs CustomPC[] @relation("StoreToCustomPC")
   
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
-  Notifications Notifications[]
+  @@index([userId])
+
 }
 
 model User {
@@ -53,6 +55,7 @@ model User {
   store     Store @relation("StoreToUser", fields: [storeId], references: [id])
   storeId   String
   orders    Order[]   @relation("UserToOrder")
+  customPCs CustomPC[] @relation("UserToCustomPC")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -360,6 +363,15 @@ model ImageComputer {
 
 }
 
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
+  RETURNED
+}
+
 model Order {
   id                    String       @id @default(uuid())
   storeId               String
@@ -373,18 +385,25 @@ model Order {
   postalCode            String       @default("")
   country               String       @default("")
   email                 String       @default("")
-  orderStatus           String       @default("Pending")
+  orderStatus           OrderStatus?  @default(PENDING)
   paymentMethod         String       @default("")
   trackingNumber        String?
   totalPrice            Decimal
   discountCode          String?
   estimatedDeliveryDate DateTime?
+  deliveryDate          DateTime?
+  deliveryMethod        String?
+  tax                   Decimal?
+  netCost               Decimal?
   netProfit             Decimal?
   isPaid                Boolean      @default(false)
+  rating                Int?
+  feedback              String?
 
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
   
+  @@index([orderStatus])
   @@index([storeId])
   @@index([userId])
 }
@@ -406,12 +425,23 @@ model OrderItem {
 model Notifications {
   id String @id @default(uuid())
   storeId String
-  store Store @relation(fields: [storeId], references: [id])
+  store Store @relation("StoreToNotifications", fields: [storeId], references: [id])
   message String
   isRead Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
-  Store Store[] @relation("StoreToNotifications")
+}
+
+model CustomPC {
+  id String @id @default(uuid())
+  storeId String
+  store Store @relation("StoreToCustomPC", fields: [storeId], references: [id])
+  userId String
+  user User @relation("UserToCustomPC", fields: [userId], references: [id])
+  name String
+
+  @@index([storeId])
+  @@index([userId])
 }

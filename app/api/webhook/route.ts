@@ -73,7 +73,7 @@ export async function POST(req: Request) {
                 country: addressComponents.country,
                 city: addressComponents.city,
                 phone: session?.customer_details?.phone || '',
-                orderStatus: 'Processed',
+                orderStatus: 'PROCESSING',
                 paymentMethod: session?.payment_method_types?.[0] || '',
                 email: session?.customer_email
             },
