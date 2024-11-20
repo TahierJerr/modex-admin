@@ -109,6 +109,7 @@ export async function POST(req: Request) {
                             userId: evt.data.id,
                         },
                     });
+                    console.log('Updated orders with new user ID for user:', evt.data.id);
                 }
                 break;
             case 'user.deleted':
