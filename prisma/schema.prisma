@@ -385,7 +385,7 @@ model Order {
   postalCode            String       @default("")
   country               String       @default("")
   email                 String       @default("")
-  orderStatus           OrderStatus?  @default(PENDING)
+  orderStatus           OrderStatus  @default(PENDING)
   paymentMethod         String       @default("")
   trackingNumber        String?
   totalPrice            Decimal
