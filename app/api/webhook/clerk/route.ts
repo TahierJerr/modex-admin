@@ -94,6 +94,8 @@ export async function POST(req: Request) {
                     },
                 });
 
+                console.log('User email:', evt.data.email_addresses[0].email_address);
+
                 const orders = await prismadb.order.findMany({
                     where: {
                         email: evt.data.email_addresses[0].email_address,
