@@ -170,7 +170,7 @@ export async function updateProcessorPrices(params: string, skipDateCheck: boole
 
     let updatedProducts: any[] = [];
     let notUpdatedProducts: any[] = [];
-    const timeout = 57000;
+    const timeout = 28000;
     const startTime = Date.now();
 
     const processProduct = async (product: any) => {
