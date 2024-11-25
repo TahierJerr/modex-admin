@@ -32,7 +32,6 @@ model Store {
   orders Order[] @relation("StoreToOrder")
   users User[] @relation("StoreToUser")
   notifications Notifications[] @relation("StoreToNotifications")
-  customPCs CustomPC[] @relation("StoreToCustomPC")
   
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -55,8 +54,8 @@ model User {
   store     Store @relation("StoreToUser", fields: [storeId], references: [id])
   storeId   String
   orders    Order[]   @relation("UserToOrder")
-  customPCs CustomPC[] @relation("UserToCustomPC")
-
+  computers Computer[] @relation("UserToCustomPC")
+  
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -333,6 +332,9 @@ model Computer {
   color Color @relation(fields: [colorId], references: [id])
   images ImageComputer[]
   orderItems OrderItem[]
+  isCustom Boolean @default(false)
+  userId String?
+  user User? @relation("UserToCustomPC", fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -432,16 +434,4 @@ model Notifications {
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
-}
-
-model CustomPC {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToCustomPC", fields: [storeId], references: [id])
-  userId String
-  user User @relation("UserToCustomPC", fields: [userId], references: [id])
-  name String
-
-  @@index([storeId])
-  @@index([userId])
 }

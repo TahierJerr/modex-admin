@@ -13,7 +13,8 @@ const ComputersPage = async ({
 }) => {
     const computers = await prismadb.computer.findMany({
         where: {
-            storeId: params.storeId
+            storeId: params.storeId,
+            isCustom: false
         },
         include: {
             category: true,
