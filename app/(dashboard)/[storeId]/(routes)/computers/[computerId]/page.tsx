@@ -12,6 +12,7 @@ const ComputerPage = async ({
     const computers = await prismadb.computer.findUnique({
         where: {
             id: params.computerId,
+            isCustom: false,
         },
         include: {
             images: true
