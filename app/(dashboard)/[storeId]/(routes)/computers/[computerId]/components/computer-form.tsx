@@ -754,83 +754,89 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                             control={form.control}
                                                                             name="computerUserId"
                                                                             render={({ field }) => (
-                                                                            <FormItem className="flex flex-col">
-                                                                                <FormLabel>Customer</FormLabel>
-                                                                                <Popover open={selectOpen} onOpenChange={setSelectOpen}>
-                                                                                    <PopoverTrigger asChild>
-                                                                                        <FormControl>
-                                                                                            <Button
-                                                                                                variant="outline"
-                                                                                                role="combobox"
-                                                                                                aria-expanded={selectOpen}
-                                                                                                className={cn(
-                                                                                                    "w-full justify-between",
-                                                                                                    !field.value && "text-muted-foreground"
-                                                                                                )}
-                                                                                                disabled={loading}
-                                                                                            >
-                                                                                                {field.value
-                                                                                                    ? users.find((user) => user.id === field.value)
-                                                                                                        ? `${users.find((user) => user.id === field.value)?.firstName} ${users.find((user) => user.id === field.value)?.lastName}`
-                                                                                                        : "No User"
-                                                                                                    : "Select a customer"}
-                                                                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                                                            </Button>
-                                                                                        </FormControl>
-                                                                                    </PopoverTrigger>
-                                                                                    <PopoverContent className="w-[300px] p-0">
-                                                                                        <Command>
-                                                                                            <CommandInput
-                                                                                                placeholder="Search for a customer..."
-                                                                                                onValueChange={(value) => {
-                                                                                                    setSearchTerm(value);
-                                                                                                    if (value === "") {
-                                                                                                        form.setValue("computerUserId", "");
-                                                                                                    }
-                                                                                                }}
-                                                                                                disabled={loading}
-                                                                                            />
-                                                                                            <CommandEmpty>No customer found.</CommandEmpty>
-                                                                                            <CommandGroup>
-                                                                                                <CommandItem
-                                                                                                    onSelect={() => {
-                                                                                                        form.setValue("computerUserId", "no-user");
-                                                                                                        setSelectOpen(false);
-                                                                                                    }}
+                                                                                <FormItem className="flex flex-col">
+                                                                                    <FormLabel>Customer</FormLabel>
+                                                                                    <Popover open={selectOpen} onOpenChange={setSelectOpen}>
+                                                                                        <PopoverTrigger asChild>
+                                                                                            <FormControl>
+                                                                                                <Button
+                                                                                                    variant="outline"
+                                                                                                    role="combobox"
+                                                                                                    aria-expanded={selectOpen}
+                                                                                                    className={cn(
+                                                                                                        "w-full justify-between",
+                                                                                                        !field.value && "text-muted-foreground"
+                                                                                                    )}
+                                                                                                    disabled={loading}
                                                                                                 >
-                                                                                                    <Check
-                                                                                                        className={cn(
-                                                                                                            "mr-2 h-4 w-4",
-                                                                                                            field.value === "no-user" ? "opacity-100" : "opacity-0"
-                                                                                                        )}
-                                                                                                    />
-                                                                                                    No User
-                                                                                                </CommandItem>
-                                                                                                {filteredUsers.map((user) => (
+                                                                                                    {field.value
+                                                                                                        ? users.find((user) => user.id === field.value)
+                                                                                                            ? `${users.find((user) => user.id === field.value)?.firstName} ${users.find((user) => user.id === field.value)?.lastName}`
+                                                                                                            : "No User"
+                                                                                                        : "Select a customer"}
+                                                                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                                                                </Button>
+                                                                                            </FormControl>
+                                                                                        </PopoverTrigger>
+                                                                                        <PopoverContent className="w-[300px] p-0">
+                                                                                            <Command>
+                                                                                                <CommandInput
+                                                                                                    placeholder="Search for a customer..."
+                                                                                                    onValueChange={(value) => {
+                                                                                                        setSearchTerm(value);
+                                                                                                        if (value === "") {
+                                                                                                            // Optional: Set the field value to an empty string or null, based on how you handle missing selections
+                                                                                                            form.setValue("computerUserId", "");
+                                                                                                        }
+                                                                                                    }}
+                                                                                                    disabled={loading}
+                                                                                                />
+                                                                                                <CommandEmpty>No customer found.</CommandEmpty>
+                                                                                                <CommandGroup>
                                                                                                     <CommandItem
-                                                                                                        key={user.id}
                                                                                                         onSelect={() => {
-                                                                                                            form.setValue("computerUserId", user.id);
+                                                                                                            form.setValue("computerUserId", "no-user");
                                                                                                             setSelectOpen(false);
                                                                                                         }}
                                                                                                     >
                                                                                                         <Check
                                                                                                             className={cn(
                                                                                                                 "mr-2 h-4 w-4",
-                                                                                                                field.value === user.id ? "opacity-100" : "opacity-0"
+                                                                                                                field.value === "no-user" ? "opacity-100" : "opacity-0"
                                                                                                             )}
                                                                                                         />
-                                                                                                        {user.firstName} {user.lastName} ({user.email})
+                                                                                                        No User
                                                                                                     </CommandItem>
-                                                                                                ))}
-                                                                                            </CommandGroup>
-                                                                                        </Command>
-                                                                                    </PopoverContent>
-                                                                                </Popover>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                        )}
-                                                                        />
+                                                                                                    {/* Dynamically filtered users */}
+                                                                                                    {filteredUsers.length > 0 ? (
+                                                                                                        filteredUsers.map((user) => (
+                                                                                                            <CommandItem
+                                                                                                                key={user.id}
+                                                                                                                onSelect={() => {
+                                                                                                                    form.setValue("computerUserId", user.id);
+                                                                                                                    setSelectOpen(false);
+                                                                                                                }}
+                                                                                                            >
+                                                                                                                <Check
+                                                                                                                    className={cn(
+                                                                                                                        "mr-2 h-4 w-4",
+                                                                                                                        field.value === user.id ? "opacity-100" : "opacity-0"
+                                                                                                                    )}
+                                                                                                                />
+                                                                                                                {user.firstName} {user.lastName} ({user.email})
+                                                                                                            </CommandItem>
+                                                                                                        ))
+                                                                                                    ) : (
+                                                                                                        <CommandItem disabled>No matching users found</CommandItem>
+                                                                                                    )}
+                                                                                                </CommandGroup>
+                                                                                            </Command>
+                                                                                        </PopoverContent>
+                                                                                    </Popover>
+                                                                                    <FormMessage />
+                                                                                </FormItem>
+                                                                            )}
+                                                                        />                                                                        
                                                                         )}
                                                                     </div>
                                                                     <Button disabled={loading} className="ml-auto" type="submit">{action}</Button>
