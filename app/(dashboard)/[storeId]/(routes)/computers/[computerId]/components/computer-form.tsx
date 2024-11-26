@@ -755,7 +755,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                                                     <SelectItem value=''>No User</SelectItem>
                                                                                                     {users.map((user) => (
                                                                                                         <SelectItem key={user.id} value={user.id}>
-                                                                                                            {user.firstName} {user.lastName}
+                                                                                                            {user.firstName} {user.lastName} ({user.email})
                                                                                                         </SelectItem>
                                                                                                     ))}
                                                                                                 </SelectContent>
