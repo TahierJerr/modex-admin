@@ -145,6 +145,10 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                 setLoading(false);
             }
         }
+
+        const handleKeyDown = (event: React.KeyboardEvent) => {
+            event.stopPropagation();
+        };
         
         const onDelete = async () => {
             try {
@@ -772,6 +776,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                                                             placeholder="Search for a customer"
                                                                                                             value={searchTerm}
                                                                                                             onChange={(e) => setSearchTerm(e.target.value)}
+                                                                                                            onKeyDown={handleKeyDown}
                                                                                                         />
                                                                                                         <SelectItem value="no-user">No User</SelectItem>
                                                                                                         {filteredUsers.map((user) => (
