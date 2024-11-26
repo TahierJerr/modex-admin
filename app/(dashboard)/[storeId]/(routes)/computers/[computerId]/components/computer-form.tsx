@@ -87,6 +87,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
         const router = useRouter();
         
         const [open, setOpen] = useState(false);
+        const [selectOpen, setSelectOpen] = useState(false)
         const [loading, setLoading] = useState(false);
         const [searchTerm, setSearchTerm] = useState("");
         
@@ -148,10 +149,6 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                 setLoading(false);
             }
         }
-        
-        const handleKeyDown = (event: React.KeyboardEvent) => {
-            event.stopPropagation();
-        };
         
         const onDelete = async () => {
             try {
@@ -759,13 +756,13 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                             render={({ field }) => (
                                                                             <FormItem className="flex flex-col">
                                                                                 <FormLabel>Customer</FormLabel>
-                                                                                <Popover open={open} onOpenChange={setOpen}>
+                                                                                <Popover open={selectOpen} onOpenChange={setSelectOpen}>
                                                                                     <PopoverTrigger asChild>
                                                                                         <FormControl>
                                                                                             <Button
                                                                                             variant="outline"
                                                                                             role="combobox"
-                                                                                            aria-expanded={open}
+                                                                                            aria-expanded={selectOpen}
                                                                                             className={cn(
                                                                                             "w-full justify-between",
                                                                                             !field.value && "text-muted-foreground"
@@ -793,7 +790,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                                                 <CommandItem
                                                                                                 onSelect={() => {
                                                                                                     form.setValue("computerUserId", "no-user")
-                                                                                                    setOpen(false)
+                                                                                                    setSelectOpen(false)
                                                                                                 }}
                                                                                                 >
                                                                                                 <Check
@@ -809,7 +806,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                                                 key={user.id}
                                                                                                 onSelect={() => {
                                                                                                     form.setValue("computerUserId", user.id)
-                                                                                                    setOpen(false)
+                                                                                                    setSelectOpen(false)
                                                                                                 }}
                                                                                                 >
                                                                                                 <Check
