@@ -61,6 +61,8 @@ const computerSchema = z.object({
     images: z.array(z.object({ url: z.string().min(1) })).min(1, { message: "Images are required" }),
     isFeatured: z.boolean().optional(),
     isArchived: z.boolean().optional(),
+    isCustom: z.boolean().optional(),
+    computerUserId: z.string().optional(),
     deliveryTime: z.string().min(1, { message: "Delivery days is required" }),
 });
 
@@ -87,18 +89,23 @@ export async function PATCH (
             return new NextResponse(validation.error.message, { status: 400 });
         }
 
-        const { name, price, categoryId, processorId, memoryId, graphicsId, motherboardId, storageId, pccaseId, coolerId, powerId, colorId, softwareId, warrantyId, images, isFeatured, isArchived, deliveryTime } = validation.data;
+        const { name, price, categoryId, processorId, memoryId, graphicsId, motherboardId, storageId, pccaseId, coolerId, powerId, colorId, softwareId, warrantyId, images, isFeatured, isArchived, deliveryTime, isCustom, computerUserId } = validation.data;
 
         const storeByUserId = await prismadb.store.findFirst({
             where : {
                 id: params.storeId,
-                userId
             }
         });
 
         if (!storeByUserId) {
             return new NextResponse("Unauthorized", { status: 403 });
         }
+
+        const computerUser = await prismadb.user.findUnique({
+            where: {
+                id: computerUserId
+            }
+        });
 
         await prismadb.computer.update({
             where: {
@@ -126,6 +133,8 @@ export async function PATCH (
                 deliveryTime,
                 isFeatured,
                 isArchived,
+                isCustom,
+                userId: computerUserId
             }
         });
 

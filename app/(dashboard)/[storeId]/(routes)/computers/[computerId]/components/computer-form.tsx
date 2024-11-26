@@ -3,7 +3,7 @@
 import * as z from "zod";
 import axios from "axios";
 import { useForm } from "react-hook-form";
-import { ImageComputer, Computer, Category, Processor, Memory, Storage, Graphics, Motherboard, Power, Pccase, Software, Color, Warranty, Cooler } from "@prisma/client"
+import { ImageComputer, Computer, Category, Processor, Memory, Storage, Graphics, Motherboard, Power, Pccase, Software, Color, Warranty, Cooler, User } from "@prisma/client"
 import { Trash } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
@@ -39,6 +39,8 @@ const formSchema = z.object({
     deliveryTime: z.string().min(1),
     isFeatured: z.boolean().default(false).optional(),
     isArchived: z.boolean().default(false).optional(),
+    isCustom: z.boolean().default(false).optional(),
+    computerUserId: z.string().optional(),
 });
 
 type ComputerFormValues = z.infer<typeof formSchema>;
@@ -59,6 +61,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
         colors: Color[];
         warranties: Warranty[];
         coolers: Cooler[];
+        users: User[]
     }
     
     export const ComputerForm: React.FC<ComputerFormProps> = ({
@@ -75,6 +78,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
         colors,
         warranties,
         coolers,
+        users
     }) => {
         const params = useParams();
         const router = useRouter();
@@ -112,6 +116,8 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                 deliveryTime: '',
                 isFeatured: false,
                 isArchived: false,
+                isCustom: false,
+                computerUserId: '',
             }
         });
         
@@ -211,7 +217,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                         Total Cost: € {totalPrice}
                     </span>
                     <span className="text-lg font-bold text-green-700">
-                        Profit: € {parseFloat(String(form.getValues().price)) - parseFloat(totalPrice)}
+                        Profit: € {(parseFloat(String(form.getValues().price)) - parseFloat(totalPrice)).toFixed(2)}
                 </span>
                 </div>
                 {initialData && (
@@ -709,6 +715,58 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                             </FormItem>
                                                                             )}
                                                                             />
+                                                                            <FormField
+                                                                            control={form.control}
+                                                                            name="isCustom"
+                                                                            render={({ field }) => (
+                                                                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                                                <FormControl>
+                                                                                    <Checkbox 
+                                                                                    checked={field.value}
+                                                                                    // @ts-ignore
+                                                                                    onCheckedChange={field.onChange}
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <div className="space-y-1 leading-none">
+                                                                                    <FormLabel>
+                                                                                        Custom
+                                                                                    </FormLabel>
+                                                                                    <FormDescription>
+                                                                                        This computer is custom made.
+                                                                                    </FormDescription>
+                                                                                </div>
+                                                                            </FormItem>
+                                                                            )}
+                                                                            />
+                                                                            { form.getValues().isCustom && ( 
+                                                                            <FormField
+                                                                            control={form.control}
+                                                                            name="computerUserId"
+                                                                            render={({ field }) => (
+                                                                            <FormItem>
+                                                                                <FormLabel>Customer</FormLabel>
+                                                                                <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                                                                    <FormControl>
+                                                                                        <SelectTrigger>
+                                                                                            <SelectValue 
+                                                                                            defaultValue={field.value} 
+                                                                                            placeholder="Select a customer"
+                                                                                            />
+                                                                                        </SelectTrigger>
+                                                                                    </FormControl>
+                                                                                    <SelectContent>
+                                                                                        {users.map((user) => (
+                                                                                            <SelectItem key={user.id} value={user.id}>
+                                                                                                {user.firstName} {user.lastName}
+                                                                                            </SelectItem>
+                                                                                            ))}
+                                                                                        </SelectContent>
+                                                                                    </Select>
+                                                                                    <FormMessage />
+                                                                                </FormItem>
+                                                                                )}
+                                                                                />   
+                                                                            )}
                                                                         </div>
                                                                         <Button disabled={loading} className="ml-auto" type="submit">{action}</Button>
                                                                     </form>
