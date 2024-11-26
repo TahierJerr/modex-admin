@@ -85,6 +85,13 @@ type ComputerFormValues = z.infer<typeof formSchema>;
         
         const [open, setOpen] = useState(false);
         const [loading, setLoading] = useState(false);
+        const [searchTerm, setSearchTerm] = useState("");
+
+        const filteredUsers = users.filter((user) =>
+            `${user.firstName} ${user.lastName} (${user.email})`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        );
         
         const title = initialData ? "Edit computer" : "Create computer";
         const description = initialData ? "Edit a computer" : "Add a new computer";
@@ -743,25 +750,39 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                                     control={form.control}
                                                                                     name="computerUserId"
                                                                                     render={({ field }) => (
-                                                                                        <FormItem>
-                                                                                            <FormLabel>Customer</FormLabel>
-                                                                                            <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                                                                                                <FormControl>
-                                                                                                    <SelectTrigger>
-                                                                                                        <SelectValue defaultValue={field.value} placeholder="Select a customer" />
-                                                                                                    </SelectTrigger>
-                                                                                                </FormControl>
-                                                                                                <SelectContent>
-                                                                                                    <SelectItem value={field.value || "no-user"}>No User</SelectItem>
-                                                                                                    {users.map((user) => (
-                                                                                                        <SelectItem key={user.id} value={user.id}>
-                                                                                                            {user.firstName} {user.lastName} ({user.email})
-                                                                                                        </SelectItem>
-                                                                                                    ))}
-                                                                                                </SelectContent>
-                                                                                            </Select>
-                                                                                            <FormMessage />
-                                                                                        </FormItem>
+                                                                                            <FormItem>
+                                                                                                <FormLabel>Customer</FormLabel>
+                                                                                                <Select
+                                                                                                    disabled={loading}
+                                                                                                    onValueChange={field.onChange}
+                                                                                                    value={field.value}
+                                                                                                    defaultValue={field.value}
+                                                                                                >
+                                                                                                    <FormControl>
+                                                                                                        <SelectTrigger>
+                                                                                                            <SelectValue
+                                                                                                                defaultValue={field.value}
+                                                                                                                placeholder="Select a customer"
+                                                                                                            />
+                                                                                                        </SelectTrigger>
+                                                                                                    </FormControl>
+                                                                                                    <SelectContent>
+                                                                                                        <Input
+                                                                                                            disabled={loading}
+                                                                                                            placeholder="Search for a customer"
+                                                                                                            value={searchTerm}
+                                                                                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                                                                                        />
+                                                                                                        <SelectItem value="no-user">No User</SelectItem>
+                                                                                                        {filteredUsers.map((user) => (
+                                                                                                            <SelectItem key={user.id} value={user.id}>
+                                                                                                                {user.firstName} {user.lastName} ({user.email})
+                                                                                                            </SelectItem>
+                                                                                                        ))}
+                                                                                                    </SelectContent>
+                                                                                                </Select>
+                                                                                                <FormMessage />
+                                                                                            </FormItem>
                                                                                     )}
                                                                                 />
                                                                             )}
