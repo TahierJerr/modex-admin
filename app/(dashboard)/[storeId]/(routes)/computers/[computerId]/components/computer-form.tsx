@@ -738,34 +738,32 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                             </FormItem>
                                                                             )}
                                                                             />
-                                                                            { form.getValues().isCustom && ( 
-                                                                            <FormField
-                                                                            control={form.control}
-                                                                            name="computerUserId"
-                                                                            render={({ field }) => (
-                                                                            <FormItem>
-                                                                                <FormLabel>Customer</FormLabel>
-                                                                                <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                                                                                    <FormControl>
-                                                                                        <SelectTrigger>
-                                                                                            <SelectValue 
-                                                                                            defaultValue={field.value} 
-                                                                                            placeholder="Select a customer"
-                                                                                            />
-                                                                                        </SelectTrigger>
-                                                                                    </FormControl>
-                                                                                    <SelectContent>
-                                                                                        {users.map((user) => (
-                                                                                            <SelectItem key={user.id} value={user.id}>
-                                                                                                {user.firstName} {user.lastName}
-                                                                                            </SelectItem>
-                                                                                            ))}
-                                                                                        </SelectContent>
-                                                                                    </Select>
-                                                                                    <FormMessage />
-                                                                                </FormItem>
-                                                                                )}
-                                                                                />   
+                                                                            {form.getValues().isCustom && (
+                                                                                <FormField
+                                                                                    control={form.control}
+                                                                                    name="computerUserId"
+                                                                                    render={({ field }) => (
+                                                                                        <FormItem>
+                                                                                            <FormLabel>Customer</FormLabel>
+                                                                                            <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                                                                                <FormControl>
+                                                                                                    <SelectTrigger>
+                                                                                                        <SelectValue defaultValue={field.value} placeholder="Select a customer" />
+                                                                                                    </SelectTrigger>
+                                                                                                </FormControl>
+                                                                                                <SelectContent>
+                                                                                                    <SelectItem value=''>No User</SelectItem>
+                                                                                                    {users.map((user) => (
+                                                                                                        <SelectItem key={user.id} value={user.id}>
+                                                                                                            {user.firstName} {user.lastName}
+                                                                                                        </SelectItem>
+                                                                                                    ))}
+                                                                                                </SelectContent>
+                                                                                            </Select>
+                                                                                            <FormMessage />
+                                                                                        </FormItem>
+                                                                                    )}
+                                                                                />
                                                                             )}
                                                                         </div>
                                                                         <Button disabled={loading} className="ml-auto" type="submit">{action}</Button>
