@@ -752,7 +752,7 @@ type ComputerFormValues = z.infer<typeof formSchema>;
                                                                                                     </SelectTrigger>
                                                                                                 </FormControl>
                                                                                                 <SelectContent>
-                                                                                                    <SelectItem value=''>No User</SelectItem>
+                                                                                                    <SelectItem value={field.value || ""}>No User</SelectItem>
                                                                                                     {users.map((user) => (
                                                                                                         <SelectItem key={user.id} value={user.id}>
                                                                                                             {user.firstName} {user.lastName} ({user.email})
