@@ -101,11 +101,24 @@ export async function PATCH (
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
-        const computerUser = await prismadb.user.findUnique({
+        const computer = await prismadb.computer.update({
             where: {
-                id: computerUserId
+                id: params.computerId
+            },
+            data: {
+                images: {
+                    createMany: {
+                        data: [
+                            ...images.map((image: { url: string }) => image),
+                        ]
+                    }
+                }
             }
-        });
+        })
+
+        if (!computerUserId) {
+            return NextResponse.json(computer);
+        }
 
         await prismadb.computer.update({
             where: {
@@ -137,22 +150,6 @@ export async function PATCH (
                 userId: computerUserId
             }
         });
-
-        const computer = await prismadb.computer.update({
-            where: {
-                id: params.computerId
-            },
-            data: {
-                images: {
-                    createMany: {
-                        data: [
-                            ...images.map((image: { url: string }) => image),
-                        ]
-                    }
-                }
-            }
-        
-        })
 
         return NextResponse.json(computer);
 
