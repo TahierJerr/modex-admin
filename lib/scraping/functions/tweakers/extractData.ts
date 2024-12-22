@@ -14,6 +14,7 @@ export function extractPriceData($: any) {
         '6743',
         '6703',
         '8294',
+        '49'
     ];
 
     // Initialize a variable to hold the found price element
