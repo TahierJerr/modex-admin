@@ -106,25 +106,6 @@ export async function PATCH (
                 id: params.computerId
             },
             data: {
-                images: {
-                    createMany: {
-                        data: [
-                            ...images.map((image: { url: string }) => image),
-                        ]
-                    }
-                }
-            }
-        })
-
-        if (!computerUserId) {
-            return NextResponse.json(computer);
-        }
-
-        await prismadb.computer.update({
-            where: {
-                id: params.computerId,
-            },
-            data: {
                 name,
                 price,
                 categoryId,
@@ -141,13 +122,16 @@ export async function PATCH (
                 warrantyId,
                 storeId: params.storeId,
                 images: {
-                    deleteMany: {}
+                    deleteMany: {},
+                    createMany: {
+                        data: images.map((image: { url: string }) => image),
+                    },
                 },
                 deliveryTime,
                 isFeatured,
                 isArchived,
                 isCustom,
-                userId: computerUserId
+                userId: computerUserId || undefined,
             }
         });
 
@@ -158,6 +142,7 @@ export async function PATCH (
         return new NextResponse("Internal error", { status: 500 });
     }
 };
+
 
 export async function DELETE (
     req: Request,
