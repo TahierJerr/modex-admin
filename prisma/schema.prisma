@@ -8,58 +8,21 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
-
 model Store {
   id String @id @default(cuid())
   name String
   userId String
   billboards Billboard[] @relation("StoreToBillboard")
-  categories Category[] @relation("StoreToCategory")
-  processor Processor[] @relation("StoreToProcessor")
-  software Software[] @relation("StoreToSoftware")
-  graphics Graphics[] @relation("StoreToGraphics")
-  memory Memory[] @relation("StoreToMemory")
-  storage Storage[] @relation("StoreToStorage")
-  power Power[] @relation("StoreToPower")
-  case Pccase[] @relation("StoreToCase")
-  cooler Cooler[] @relation("StoreToCooler")
-  motherboard Motherboard[] @relation("StoreToMotherboard")
-  warranty Warranty[] @relation("StoreToWarranty")
-  answer Answer[] @relation("StoreToAnswer")
-  colors Color[] @relation("StoreToColor")
-  computers Computer[] @relation("StoreToComputer")
   orders Order[] @relation("StoreToOrder")
   users User[] @relation("StoreToUser")
   notifications Notifications[] @relation("StoreToNotifications")
-  
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+  products Product[] @relation("StoreToProduct")
+  categories Category[] @relation("StoreToCategory")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
-
-}
-
-model User {
-  id        String    @id
-  email     String    @unique
-  firstName String
-  lastName  String
-  address   String   @default("")
-  city      String   @default("")
-  postalCode String  @default("")
-  country   String   @default("")
-  phone     String   @default("")
-  newsletter Boolean  @default(false)
-  store     Store @relation("StoreToUser", fields: [storeId], references: [id])
-  storeId   String
-  orders    Order[]   @relation("UserToOrder")
-  computers Computer[] @relation("UserToCustomPC")
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([storeId])
 }
 
 model Billboard {
@@ -69,7 +32,8 @@ model Billboard {
   label String
   description String
   imageUrl String
-  categories Category[]
+  categories Category[] @relation("BillboardToCategory")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -80,289 +44,102 @@ model Category {
   id String @id @default(uuid())
   storeId String
   store Store @relation("StoreToCategory", fields: [storeId], references: [id])
-  billboardId String
-  billboard Billboard @relation(fields: [billboardId], references: [id])
-  computers Computer[] @relation("CategoryToComputer")
+
   name String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  description String?
+  imageUrl String?
 
-    @@index([storeId])
-    @@index([billboardId])
+  billboardId String?
+  billboard Billboard? @relation("BillboardToCategory", fields: [billboardId], references: [id])
 
-}
+  parentCategoryId String?
+  parentCategory Category? @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
+  subCategories Category[] @relation("CategoryToSubcategory")
 
-model Processor {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToProcessor", fields: [storeId], references: [id])
-  name String
-  brand String
-  series String
-  baseSpeed String
-  cores String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
+  products Product[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
+  @@index([parentCategoryId])
 }
 
-model Software {
+model Product {
   id String @id @default(uuid())
   storeId String
-  store Store @relation("StoreToSoftware", fields: [storeId], references: [id])
+  store Store @relation("StoreToProduct", fields: [storeId], references: [id])
+
   name String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  description String?
+  categoryId String?
+  category Category? @relation(fields: [categoryId], references: [id])
 
-  @@index([storeId])
-}
+  price Float?
+  priceTrackUrl String?
+  productUrl String?
 
-model Graphics {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToGraphics", fields: [storeId], references: [id])
-  name String
-  brand String
-  model String
-  memory String
-  memoryType String
-  maxClock String
-  performance Int?
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mainImage String
+  images ImageProduct[]
 
-  @@index([storeId])
-}
-
-model Memory {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToMemory", fields: [storeId], references: [id])
-  name String
-  model String
-  speed String
-  capacity String
-  type String
-  rgb String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Storage {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToStorage", fields: [storeId], references: [id])
-  name String
-  model String
-  capacity String
-  type String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Power {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToPower", fields: [storeId], references: [id])
-  name String
-  model String
-  wattage String
-  rating String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Pccase {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToCase", fields: [storeId], references: [id])
-  name String
-  model String
-  color String
-  motherboardSupport String
-  ports String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Cooler {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToCooler", fields: [storeId], references: [id])
-  name String
-  model String
-  type String
-  fanModel String
-  rgb String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Motherboard {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToMotherboard", fields: [storeId], references: [id])
-  name String
-  model String
-  formFactor String
-  wifi String
-  price Float?  // Optional price
-  priceTrackUrl String? // Optional price tracking URL
-  productUrl String? // Optional product URL
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-
-model Warranty {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToWarranty", fields: [storeId], references: [id])
-  name String
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Answer {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToAnswer", fields: [storeId], references: [id])
-  question String
-  answers String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Color {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToColor", fields: [storeId], references: [id])
-  name String
-  value String
-  computers Computer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([storeId])
-}
-
-model Computer {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToComputer", fields: [storeId], references: [id])
-  categoryId String
-  category Category @relation("CategoryToComputer", fields: [categoryId], references: [id])
-  name String
-  price Decimal
   isFeatured Boolean @default(false)
   isArchived Boolean @default(false)
-  deliveryTime String
-  processorId String
-  processor Processor @relation(fields: [processorId], references: [id])
-  graphicsId String
-  graphics Graphics @relation(fields: [graphicsId], references: [id])
-  memoryId String
-  memory Memory @relation(fields: [memoryId], references: [id])
-  storageId String
-  storage Storage @relation(fields: [storageId], references: [id])
-  powerId String
-  power Power @relation(fields: [powerId], references: [id])
-  pccaseId String
-  pccase Pccase @relation(fields: [pccaseId], references: [id])
-  coolerId String
-  cooler Cooler @relation(fields: [coolerId], references: [id])
-  motherboardId String
-  motherboard Motherboard @relation(fields: [motherboardId], references: [id])
-  warrantyId String
-  warranty Warranty @relation(fields: [warrantyId], references: [id])
-  softwareId String
-  software Software @relation(fields: [softwareId], references: [id])
-  colorId String
-  color Color @relation(fields: [colorId], references: [id])
-  images ImageComputer[]
+
+  parentProductId String?
+  parentProduct Product? @relation("ProductToSubProduct", fields: [parentProductId], references: [id])
+  subProducts Product[] @relation("ProductToSubProduct")
+
+  variants ProductVariant[]
+  specifications ProductSpecification[]
   orderItems OrderItem[]
-  isCustom Boolean @default(false)
-  userId String?
-  user User? @relation("UserToCustomPC", fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
   @@index([categoryId])
-  @@index([processorId])
-  @@index([graphicsId])
-  @@index([memoryId])
-  @@index([storageId])
-  @@index([powerId])
-  @@index([pccaseId])
-  @@index([coolerId])
-  @@index([motherboardId])
-  @@index([warrantyId])
-  @@index([softwareId])
-  @@index([colorId])
 }
 
-model ImageComputer {
+model ProductVariant {
   id String @id @default(uuid())
-  computerId String
-  computer Computer @relation(fields: [computerId], references: [id], onDelete: Cascade)
-  url String
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+
+  variantName String
+  price Float?
+  stock Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([computerId])
+  @@index([productId])
+}
 
+model ProductSpecification {
+  id String @id @default(uuid())
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+
+  key String
+  value String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model ImageProduct {
+  id String @id @default(uuid())
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+
+  url String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
 }
 
 enum OrderStatus {
@@ -404,24 +181,45 @@ model Order {
 
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
-  
+
   @@index([orderStatus])
   @@index([storeId])
   @@index([userId])
 }
 
-
-
 model OrderItem {
   id String @id @default(uuid())
   orderId String
   order Order @relation(fields: [orderId], references: [id])
-  computerId String
-  computer Computer @relation(fields: [computerId], references: [id])
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orderId])
-  @@index([computerId])
+  @@index([productId])
+}
 
+model User {
+  id        String    @id
+  email     String    @unique
+  firstName String
+  lastName  String
+  address   String   @default("")
+  city      String   @default("")
+  postalCode String  @default("")
+  country   String   @default("")
+  phone     String   @default("")
+  newsletter Boolean  @default(false)
+  store     Store @relation("StoreToUser", fields: [storeId], references: [id])
+  storeId   String
+  orders    Order[]   @relation("UserToOrder")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([storeId])
 }
 
 model Notifications {
