@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
 import prismadb from '@/lib/prismadb';
 import { z } from 'zod';
+import { auth } from '@clerk/nextjs/dist/types/server';
 
 const billboardSchema = z.object({
     label: z.string().min(1, { message: "Label is required" }),
@@ -14,7 +14,7 @@ export async function POST(
     { params }: { params: { storeId: string } }
 ) {
     try {
-        const { userId } = auth();
+        const { userId } = await auth();
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });

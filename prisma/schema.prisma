@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model Store {
@@ -76,7 +75,6 @@ model Product {
   category Category? @relation(fields: [categoryId], references: [id])
 
   price Float?
-  priceTrackUrl String?
   productUrl String?
 
   mainImage String
@@ -93,6 +91,8 @@ model Product {
   specifications ProductSpecification[]
   orderItems OrderItem[]
 
+  stock Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -105,7 +105,7 @@ model ProductVariant {
   productId String
   product Product @relation(fields: [productId], references: [id])
 
-  variantName String
+  variantName String?
   price Float?
   stock Int @default(0)
 
@@ -120,8 +120,8 @@ model ProductSpecification {
   productId String
   product Product @relation(fields: [productId], references: [id])
 
-  key String
-  value String
+  key String?
+  value String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -135,6 +135,7 @@ model ImageProduct {
   product Product @relation(fields: [productId], references: [id])
 
   url String
+  alt String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

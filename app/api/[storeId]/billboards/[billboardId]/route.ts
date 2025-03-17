@@ -1,8 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { z } from "zod";
 import { handleProductRemoval } from "@/lib/functions/handleProductRemoval";
+import { auth } from '@clerk/nextjs/dist/types/server';
 
 export async function GET (
     req: Request,
@@ -38,7 +38,7 @@ export async function PATCH (
     { params }: { params: { storeId: string, billboardId: string}}
 ) {
     try {
-        const { userId } = auth();
+        const { userId } = await auth();
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });

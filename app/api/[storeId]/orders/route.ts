@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server';
-import { auth } from "@clerk/nextjs/server";
-
+import { NextRequest, NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { auth } from '@clerk/nextjs/dist/types/server';
 
 export async function DELETE (
-    req: Request,
-    { params }: { params: { storeId: string}}
+    req: NextRequest,
+    { params }: { params: { storeId: string }}
 ) {
     try {
-        const { userId } = auth();
+        const { userId } = await auth();
 
         if (!userId) {
             return new NextResponse("Unauthenticated", { status: 401 });

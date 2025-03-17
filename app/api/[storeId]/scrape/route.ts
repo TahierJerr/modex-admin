@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchPriceFromUrl } from '@/lib/scraping/fetchPriceFromUrl';
-import ProductData, { ProductGraphData } from '@/types';
+import ProductData from '@/types';
 
 export async function GET(
     req: Request,

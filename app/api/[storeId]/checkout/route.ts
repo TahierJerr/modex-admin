@@ -17,38 +17,37 @@ export async function OPTIONS() {
 export async function POST(req: Request, { params }: { params: { storeId: string } }) {
     const url = new URL(req.url);
     const userId = url.searchParams.get('userId');
-    const { computerIds } = await req.json();
+    const { productIds } = await req.json();
 
-    if (!computerIds || computerIds.length === 0) {
+    if (!productIds || productIds.length === 0) {
         return new NextResponse("Product IDs are required", { status: 400 });
     }
 
-    const computers = await prismadb.computer.findMany({
+    const products = await prismadb.product.findMany({
         where: {
             id: {
-                in: computerIds
+                in: productIds
             }
         }
     });
 
-    // Ensure all computers exist
-    if (computers.length !== computerIds.length) {
+    if (products.length !== productIds.length) {
         return new NextResponse("Some products not found", { status: 404 });
     }
 
-    const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = computers.map(computer => ({
+    const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = products.map(product => ({
         quantity: 1,
         price_data: {
             currency: 'EUR',
             product_data: {
-                name: computer.name,
+                name: product.name,
             },
-            unit_amount: Math.round(parseFloat(computer.price.toFixed(2)) * 100),
+            unit_amount: Math.round(parseFloat((product.price ?? 0).toFixed(2)) * 100),
             tax_behavior: 'inclusive',
         }
     }));
 
-    const totalPrice = computers.reduce((acc, computer) => acc + parseFloat(computer.price.toFixed(2)), 0);
+    const totalPrice = products.reduce((acc, product) => acc + parseFloat((product.price ?? 0).toFixed(2)), 0);
 
     let user = null;
     if (userId) {
@@ -63,8 +62,8 @@ export async function POST(req: Request, { params }: { params: { storeId: string
             userId: userId ?? undefined,  // Only associate userId if it exists
             isPaid: false,
             orderItems: {
-                create: computerIds.map((computerId: string) => ({
-                    computer: { connect: { id: computerId } }
+                create: productIds.map((productId: string) => ({
+                    product: { connect: { id: productId } }
                 }))
             },
             phone: user?.phone || "",  // Use default empty string if no user
