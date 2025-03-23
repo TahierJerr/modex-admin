@@ -1,22 +1,23 @@
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Store {
-  id String @id @default(cuid())
-  name String
-  userId String
-  billboards Billboard[] @relation("StoreToBillboard")
-  orders Order[] @relation("StoreToOrder")
-  users User[] @relation("StoreToUser")
+  id            String          @id @default(cuid())
+  name          String
+  userId        String
+  billboards    Billboard[]     @relation("StoreToBillboard")
+  orders        Order[]         @relation("StoreToOrder")
+  users         User[]          @relation("StoreToUser")
   notifications Notifications[] @relation("StoreToNotifications")
-  products Product[] @relation("StoreToProduct")
-  categories Category[] @relation("StoreToCategory")
+  products      Product[]       @relation("StoreToProduct")
+  categories    Category[]      @relation("StoreToCategory")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -25,13 +26,13 @@ model Store {
 }
 
 model Billboard {
-  id      String @id @default(uuid())
-  storeId String
-  store   Store @relation("StoreToBillboard", fields: [storeId], references: [id])
-  label String
+  id          String     @id @default(uuid())
+  storeId     String
+  store       Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
+  label       String
   description String
-  imageUrl String
-  categories Category[] @relation("BillboardToCategory")
+  imageUrl    String
+  categories  Category[] @relation("BillboardToCategory")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,20 +41,20 @@ model Billboard {
 }
 
 model Category {
-  id String @id @default(uuid())
+  id      String @id @default(uuid())
   storeId String
-  store Store @relation("StoreToCategory", fields: [storeId], references: [id])
+  store   Store  @relation("StoreToCategory", fields: [storeId], references: [id])
 
-  name String
+  name        String
   description String?
-  imageUrl String?
+  imageUrl    String?
 
   billboardId String?
-  billboard Billboard? @relation("BillboardToCategory", fields: [billboardId], references: [id])
+  billboard   Billboard? @relation("BillboardToCategory", fields: [billboardId], references: [id])
 
   parentCategoryId String?
-  parentCategory Category? @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
-  subCategories Category[] @relation("CategoryToSubcategory")
+  parentCategory   Category?  @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
+  subCategories    Category[] @relation("CategoryToSubcategory")
 
   products Product[]
 
@@ -65,31 +66,31 @@ model Category {
 }
 
 model Product {
-  id String @id @default(uuid())
+  id      String @id @default(uuid())
   storeId String
-  store Store @relation("StoreToProduct", fields: [storeId], references: [id])
+  store   Store  @relation("StoreToProduct", fields: [storeId], references: [id])
 
-  name String
+  name        String
   description String?
-  categoryId String?
-  category Category? @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
 
-  price Float?
+  price      Float?
   productUrl String?
 
   mainImage String
-  images ImageProduct[]
+  images    ImageProduct[]
 
   isFeatured Boolean @default(false)
   isArchived Boolean @default(false)
 
   parentProductId String?
-  parentProduct Product? @relation("ProductToSubProduct", fields: [parentProductId], references: [id])
-  subProducts Product[] @relation("ProductToSubProduct")
+  parentProduct   Product?  @relation("ProductToSubProduct", fields: [parentProductId], references: [id])
+  subProducts     Product[] @relation("ProductToSubProduct")
 
-  variants ProductVariant[]
+  variants       ProductVariant[]
   specifications ProductSpecification[]
-  orderItems OrderItem[]
+  orderItems     OrderItem[]
 
   stock Int @default(0)
 
@@ -101,13 +102,13 @@ model Product {
 }
 
 model ProductVariant {
-  id String @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
-  product Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   variantName String?
-  price Float?
-  stock Int @default(0)
+  price       Float?
+  stock       Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -116,11 +117,11 @@ model ProductVariant {
 }
 
 model ProductSpecification {
-  id String @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
-  product Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
-  key String?
+  key   String?
   value String?
 
   createdAt DateTime @default(now())
@@ -130,9 +131,9 @@ model ProductSpecification {
 }
 
 model ImageProduct {
-  id String @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
-  product Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   url String
   alt String
@@ -153,20 +154,20 @@ enum OrderStatus {
 }
 
 model Order {
-  id                    String       @id @default(uuid())
+  id                    String      @id @default(uuid())
   storeId               String
-  store                 Store        @relation("StoreToOrder", fields: [storeId], references: [id])
+  store                 Store       @relation("StoreToOrder", fields: [storeId], references: [id])
   userId                String?
-  user                  User?        @relation("UserToOrder", fields: [userId], references: [id])
+  user                  User?       @relation("UserToOrder", fields: [userId], references: [id])
   orderItems            OrderItem[]
-  phone                 String       @default("")
-  address               String       @default("")
-  city                  String       @default("")
-  postalCode            String       @default("")
-  country               String       @default("")
-  email                 String       @default("")
-  orderStatus           OrderStatus  @default(PENDING)
-  paymentMethod         String       @default("")
+  phone                 String      @default("")
+  address               String      @default("")
+  city                  String      @default("")
+  postalCode            String      @default("")
+  country               String      @default("")
+  email                 String      @default("")
+  orderStatus           OrderStatus @default(PENDING)
+  paymentMethod         String      @default("")
   trackingNumber        String?
   totalPrice            Decimal
   discountCode          String?
@@ -176,12 +177,12 @@ model Order {
   tax                   Decimal?
   netCost               Decimal?
   netProfit             Decimal?
-  isPaid                Boolean      @default(false)
+  isPaid                Boolean     @default(false)
   rating                Int?
   feedback              String?
 
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orderStatus])
   @@index([storeId])
@@ -189,11 +190,11 @@ model Order {
 }
 
 model OrderItem {
-  id String @id @default(uuid())
-  orderId String
-  order Order @relation(fields: [orderId], references: [id])
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -203,34 +204,86 @@ model OrderItem {
 }
 
 model User {
-  id        String    @id
-  email     String    @unique
-  firstName String
-  lastName  String
-  address   String   @default("")
-  city      String   @default("")
+  id         String  @id
+  email      String  @unique
+  firstName  String
+  lastName   String
+  address    String  @default("")
+  city       String  @default("")
   postalCode String  @default("")
-  country   String   @default("")
-  phone     String   @default("")
-  newsletter Boolean  @default(false)
-  store     Store @relation("StoreToUser", fields: [storeId], references: [id])
-  storeId   String
-  orders    Order[]   @relation("UserToOrder")
+  country    String  @default("")
+  phone      String  @default("")
+  newsletter Boolean @default(false)
+  store      Store   @relation("StoreToUser", fields: [storeId], references: [id])
+  storeId    String
+  orders     Order[] @relation("UserToOrder")
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name          String
+  emailVerified Boolean
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
 
   @@index([storeId])
+  @@map("user")
 }
 
 model Notifications {
-  id String @id @default(uuid())
-  storeId String
-  store Store @relation("StoreToNotifications", fields: [storeId], references: [id])
-  message String
-  isRead Boolean @default(false)
+  id        String   @id @default(uuid())
+  storeId   String
+  store     Store    @relation("StoreToNotifications", fields: [storeId], references: [id])
+  message   String
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }
