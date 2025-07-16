@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     }
 
     const session = event.data.object as Stripe.Checkout.Session;
-    const address = session?.customer_details?.address;
+    const address = session?.shipping_details?.address || session?.customer_details?.address;
 
     const addressComponents = {
         adres: address?.line1,
@@ -59,7 +59,8 @@ export async function POST(req: Request) {
         country: address?.country,
     };
 
-    if (!addressComponents.adres || !addressComponents.city || !addressComponents.country || !addressComponents.postalcode || !session?.customer_email) {
+    const email = session?.customer_details?.email || session?.customer_email;
+    if (!addressComponents.adres || !addressComponents.city || !addressComponents.country || !addressComponents.postalcode || !email) {
         return new NextResponse("Invalid address", { status: 400 });
     }
 
@@ -72,15 +73,15 @@ export async function POST(req: Request) {
                 postalCode: addressComponents.postalcode,
                 country: addressComponents.country,
                 city: addressComponents.city,
-                phone: session?.customer_details?.phone || '',
+                phone: session?.shipping_details?.phone || session?.customer_details?.phone || '',
                 orderStatus: 'PROCESSING',
                 paymentMethod: session?.payment_method_types?.[0] || '',
-                email: session?.customer_email
+                email: email
             },
             include: { orderItems: true },
         });
 
-        const user = await updateUserDetails(order, addressComponents, session?.customer_details?.phone || '');
+        const user = await updateUserDetails(order, addressComponents, session?.shipping_details?.phone || session?.customer_details?.phone || '');
 
         const computers = await prismadb.computer.findMany({
             where: { id: { in: order.orderItems.map((item) => item.computerId) } },
